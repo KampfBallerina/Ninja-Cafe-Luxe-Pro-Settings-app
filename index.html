@@ -2,210 +2,529 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kaffee-Logbuch</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Kaffee">
-<meta name="theme-color" content="#2563eb">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#18202a" media="(prefers-color-scheme: dark)">
 <style>
-:root{--bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc}
-@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922}}
+/* Abstandsskala (4er-Raster): 4 Mini · 8 eng · 12 Liste · 16 Standard/Seitenrand/Karten · 24 Abschnitt · 32 Seitenende */
+:root{--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--r:12px;--r-s:8px;--h:44px;
+  --bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc;--danger:#b42318;--on-danger:#fff;color-scheme:light dark;
+  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922;--danger:#ff8a80;--on-danger:#1c1210;
+  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b98a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}}
 *{box-sizing:border-box}
-body{margin:0;font:16px/1.4 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
-header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--card)}
-header h1{font-size:1.15rem;margin:0 auto 0 0}
-nav{display:flex;flex-wrap:wrap;gap:6px;padding:16px;max-width:960px;margin:0 auto}
-main{padding:0 16px 40px;max-width:960px;margin:0 auto}
-button,.btn{font:inherit;font-size:.95rem;height:42px;padding:0 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-button.primary,nav button.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-fieldset{min-width:0;border:1px solid var(--line);border-radius:12px;margin:0 0 16px;padding:16px;display:grid;gap:14px 16px;background:var(--card)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:16px/1.4 system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-tap-highlight-color:transparent}
+button,summary,label,[tabindex]{touch-action:manipulation}
+h2,h3{line-height:1.25}
+[hidden]{display:none!important}
+
+/* Seitenraster: ein Seitenrand für Kopfzeile, Tabs und Inhalt */
+header,nav,main{padding-left:max(var(--s4),env(safe-area-inset-left));padding-right:max(var(--s4),env(safe-area-inset-right))}
+header{display:flex;align-items:center;gap:var(--s2);padding-top:var(--s3);padding-bottom:var(--s3);border-bottom:1px solid var(--line);background:var(--card)}
+header .logo{height:var(--h);width:auto;flex:none}
+header h1{flex:1;min-width:0;margin:0;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+nav{position:sticky;top:0;z-index:5;display:flex;background:var(--bg);border-bottom:1px solid var(--line)}
+nav button{flex:1;height:var(--h);border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted);font-weight:500}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+main{max-width:960px;margin:0 auto;padding-top:var(--s4);padding-bottom:calc(var(--s6) + env(safe-area-inset-bottom))}
+@media (min-width:700px){nav{justify-content:center}nav button{flex:none;padding:0 var(--s5)}}
+#formTitle{margin:0 0 var(--s4);font-size:1.25rem}
+h3{margin:var(--s5) 0 var(--s2);font-size:1.05rem}
+
+/* Bedienelemente: alle gleich hoch (44px = Apple-Mindestgröße für Tippflächen) */
+button{font:inherit;font-size:.95rem;height:var(--h);padding:0 var(--s4);border:1px solid var(--line);border-radius:var(--r-s);background:var(--card);color:var(--fg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.icon{width:var(--h);padding:0;flex:none}
+button.icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+input,select,textarea{font:inherit;font-weight:400;height:var(--h);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r-s);background:var(--field);color:var(--fg);width:100%}
+input:not([type=file]),textarea{-webkit-appearance:none;appearance:none}
+textarea{height:auto;padding:var(--s3);resize:vertical}
+/* Ein Pfeil für alle Auswahlfelder, rechts mit gleichem Abstand wie links (Browserpfeil sitzt zu nah am Rand) */
+select{-webkit-appearance:none;appearance:none;padding-right:calc(var(--s3) + 24px);background:var(--chev) right var(--s3) center/16px no-repeat var(--field)}
+input[list]::-webkit-calendar-picker-indicator{width:16px;height:16px;margin:0;padding:0;opacity:1;color:transparent;background:var(--chev) center/16px no-repeat;cursor:pointer}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.opt input:focus-visible+span,[tabindex]:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Formular */
+fieldset{min-width:0;margin:0 0 var(--s4);padding:var(--s4);display:grid;gap:var(--s4) var(--s3);border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+legend{padding:0 var(--s2);font-weight:600}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .span2{grid-column:span 2}
 .full{grid-column:1/-1}
-@media (max-width:700px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3 .field{grid-column:1/-1}}
-@media (max-width:600px){.g2{grid-template-columns:minmax(0,1fr)}}
-@media (max-width:360px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.span2{grid-column:auto}}
-legend{font-weight:600;padding:0 6px}
-label,.field{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:500;color:var(--muted)}
-input,select,textarea{font:inherit;font-weight:400;height:42px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--fg);width:100%}
-textarea{height:auto;padding:10px}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.pair{display:flex;gap:8px}
-.pair .btn{flex:none;color:var(--fg);font-weight:400}
-/* Auswahl-Knöpfe: gleiche Höhe wie Eingabefelder, füllen die Zeile */
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg.score{display:grid;grid-template-columns:repeat(10,minmax(0,1fr))}
-@media (max-width:540px){.seg.score{grid-template-columns:repeat(5,minmax(0,1fr))}}
-.opt{flex:1 0 auto;display:flex;flex-direction:row;position:relative}
+label,.field{display:flex;flex-direction:column;gap:var(--s1);min-width:0;font-size:.85rem;font-weight:500;color:var(--muted)}
+.pair{display:flex;gap:var(--s2)}
+.seg{display:flex;gap:var(--s2)}
+.opt{flex:1 1 0;display:flex;flex-direction:row;position:relative;min-width:0}
 .opt input{position:absolute;opacity:0;width:1px;height:1px}
-.opt span{flex:1;height:42px;padding:0 10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--fg);cursor:pointer;font-weight:400;font-size:.95rem;white-space:nowrap}
+.opt span{flex:1;height:var(--h);padding:0 var(--s1);display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:var(--r-s);background:var(--field);color:var(--fg);cursor:pointer;font-weight:400;font-size:.95rem;white-space:nowrap}
 .opt span:hover{border-color:var(--accent)}
 .opt input:checked+span{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-.opt input:focus-visible+span,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
-#toast.show{opacity:1}
-.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
-table{border-collapse:collapse;width:100%;font-size:.95rem}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-th{color:var(--muted);font-weight:600}
-tr[tabindex]{cursor:pointer}
+/* Schieberegler (Stil wie sap.m.Slider): Spur bei allen Reglern gleich lang (fester Rand --i);
+   die Skalenspalten sind so verschoben, dass ihre Mitten genau unter den Griffpositionen liegen */
+.slider{--t:24px;--i:40px;--c:calc((100% - 2 * var(--i)) / (var(--n) - 1));overflow-x:clip}
+.slider input{display:block;width:calc(100% - 2 * var(--i) + var(--t));height:var(--h);margin:0 calc(var(--i) - var(--t) / 2);padding:0;border:0;background:none;cursor:pointer}
+.slider input:focus{outline:0}
+.slider input::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent)) 0/var(--p) 100% no-repeat,var(--line)}
+.slider input::-moz-range-track{height:4px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent)) 0/var(--p) 100% no-repeat,var(--line)}
+.slider input::-webkit-slider-thumb{-webkit-appearance:none;width:var(--t);height:var(--t);margin-top:calc(2px - var(--t) / 2);border:2px solid var(--accent);border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgb(0 0 0/.25);transition:transform .1s}
+.slider input::-moz-range-thumb{box-sizing:border-box;width:var(--t);height:var(--t);border:2px solid var(--accent);border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgb(0 0 0/.25);transition:transform .1s}
+.slider input:active::-webkit-slider-thumb{transform:scale(1.15)}
+.slider input:active::-moz-range-thumb{transform:scale(1.15)}
+.slider input:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:2px}
+.slider input:focus-visible::-moz-range-thumb{outline:2px solid var(--accent);outline-offset:2px}
+.ticks{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));margin:calc(var(--s2) * -1) calc(var(--i) - var(--c) / 2) 0}
+.ticks span{display:flex;flex-direction:column;align-items:center;gap:var(--s1);padding-bottom:var(--s1);font-size:.8rem;font-weight:400;line-height:1.15;text-align:center;color:var(--muted);cursor:pointer;user-select:none}
+.ticks span::before{content:"";width:1px;height:6px;background:var(--line)}
+.ticks span.on{color:var(--accent);font-weight:600}
+.ticks span.on::before{background:var(--accent)}
+@media (prefers-reduced-motion:reduce){.slider input::-webkit-slider-thumb{transition:none}.slider input::-moz-range-thumb{transition:none}}
+.hint{padding:var(--s3) var(--s4);border-radius:var(--r-s);background:var(--hl)}
+.hint button{margin-top:var(--s3)}
+.row{display:flex;flex-wrap:wrap;gap:var(--s2)}
+#picBox{align-items:center}
+.pic{cursor:zoom-in;display:block;flex:none;width:var(--pic,96px);height:var(--pic,96px);border-radius:var(--r-s);object-fit:cover;background:var(--field)}
+.actions{position:sticky;bottom:0;z-index:5;padding:var(--s3) 0 calc(var(--s3) + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.actions button{flex:1}
+
+/* Karten, Kacheln, Listen */
+.card{padding:var(--s4);border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3);margin-bottom:var(--s3)}
+.tile b{display:block;font-size:1.75rem;line-height:1.2}
+.tile span,.fav small{color:var(--muted);font-size:.85rem}
+.fav{display:flex;align-items:center;gap:var(--s4);border-color:var(--accent);cursor:pointer}
+.fav h2{margin:var(--s1) 0 var(--s2);font-size:1.3rem}
+.fav .pic{--pic:96px}
+.chips{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.chips span{padding:var(--s1) var(--s3);border-radius:999px;background:var(--hl);font-size:.85rem}
+.bar{display:grid;grid-template-columns:24px minmax(0,1fr) minmax(60px,30%) 28px;align-items:center;gap:var(--s3);padding:var(--s2);border-radius:var(--r-s);cursor:pointer}
+.bar:hover{background:var(--hl)}
+.rank{color:var(--muted);text-align:right}
+.name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.name small{display:block;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.track{height:10px;border-radius:4px;background:var(--hl);overflow:hidden}
+.track span{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--accent)}
+/* Favoriten-Stern */
+.star{width:var(--h);height:var(--h);padding:0;border:0;background:none;color:var(--muted);flex:none}
+.star svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.star[aria-pressed=true]{color:var(--accent)}
+.star[aria-pressed=true] svg{fill:currentColor}
+th.favcell,td.favcell{width:1%;padding-right:var(--s2);text-align:right}
+td.favcell .star{margin:-12px -10px -12px var(--s2);vertical-align:middle}
+.fav-ic svg,.rank svg{width:16px;height:16px;fill:var(--accent);stroke:var(--accent);stroke-width:2;stroke-linejoin:round;vertical-align:-2px}
+.fav-ic{margin-left:var(--s2)}
+.dlghead{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);margin-bottom:var(--s3)}
+.dlghead h3{margin:0}
+.dlghead .star{margin-right:calc(-1 * var(--s2))}
+
+/* Suche und Filter */
+.searchbar{display:flex;gap:var(--s2);margin-bottom:var(--s4)}
+.searchbar input{flex:1;min-width:0}
+#fltBtn{position:relative}
+.badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:.75rem;font-weight:600}
+button.toggle[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.chipset{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.fgroup{margin-bottom:var(--s4)}
+.flabel{display:block;margin-bottom:var(--s2);color:var(--muted);font-size:.85rem;font-weight:500}
+#fltDlg[open]{display:flex;flex-direction:column;padding:0;overflow:hidden}
+#fltDlg h3{margin:0;padding:var(--s4) var(--s4) 0}
+.fltbody{flex:1;min-height:0;padding:var(--s3) var(--s4) 0;overflow:auto}
+.fltfoot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);padding:var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.empty button{margin-top:var(--s3)}
+
+/* Auswertung */
+.switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);margin-bottom:var(--s3)}
+#anBean{margin-bottom:var(--s4)}
+p.note{margin:var(--s3) 0 0;color:var(--muted);font-size:.8rem}
+.tg{display:grid;grid-template-columns:auto repeat(4,minmax(0,1fr));gap:var(--s2);align-items:center}
+.tgt{grid-column:2/-1;text-align:center}
+.tgt,.tga,.tgh{color:var(--muted);font-size:.75rem;font-weight:500}
+.tgh{text-align:center}
+.tgr{text-align:left}
+button.tcell,span.tcell{position:relative;overflow:hidden;height:auto;min-height:56px;padding:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:var(--r-s);background:var(--field);color:var(--fg)}
+.tcell b{font-size:1.1rem;line-height:1.2}
+.tcell small{color:var(--muted);font-size:.7rem}
+.tcell i{position:absolute;left:0;bottom:0;height:4px;background:var(--accent)}
+.tcell.top{border:2px solid var(--accent)}
+.tcell[aria-pressed=true]{background:var(--hl)}
+.tcell.empty{border-style:dashed;color:var(--muted);background:none}
+.tgtitle{margin:var(--s4) 0 var(--s2);font-size:.95rem}
+.trend{display:block;width:100%;max-width:640px;height:auto;margin:0 auto}
+.trend line{stroke:var(--line)}
+.trend text{fill:var(--muted);font-size:12px}
+.trend polyline{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.trend circle{fill:var(--accent);stroke:transparent;stroke-width:24px;pointer-events:all;cursor:pointer}
+
+.empty{padding:var(--s6) var(--s4);text-align:center;color:var(--muted)}
+.best{display:inline-block;margin-right:var(--s2);padding:0 var(--s2);border-radius:var(--s1);background:var(--accent);color:var(--on-accent);font-size:.7rem;font-weight:600;vertical-align:1px}
 .runs{display:block;color:var(--muted);font-size:.75rem}
 .count{display:block;color:var(--accent);font-weight:600;font-size:.8rem}
+
+/* Tabelle (PC) */
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{padding:var(--s2);text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
 td.bean,td.taste{white-space:normal;min-width:120px}
+tr[tabindex]{cursor:pointer}
 tr[tabindex]:hover{background:var(--hl)}
-details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
-summary{padding:12px;cursor:pointer}
-summary small{color:var(--muted);display:block}
+details{margin-bottom:var(--s3);border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+summary{padding:var(--s3) var(--s4);cursor:pointer}
+summary small{display:block;color:var(--muted)}
+summary .pic{--pic:56px;float:right;margin-left:var(--s3)}
+summary::after{content:"";display:block;clear:both} /* Karte umschließt das schwebende Bild auch bei kurzem Text */
 details .wrap{border:0;border-top:1px solid var(--line);border-radius:0}
-/* Handy: jede Zeile wird eine Karte statt seitlich zu scrollen */
+/* innerhalb einer Bohne ist der Bohnenname überflüssig */
+details th:nth-child(2),details td.bean{display:none}
+
+/* Detailfenster und Hinweis */
+dialog{width:calc(100% - 2*var(--s4));max-width:520px;max-height:90vh;max-height:90dvh;padding:var(--s4);overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card);color:var(--fg)}
+dialog:focus{outline:none}
+dialog::backdrop{background:rgb(0 0 0/.45)}
+dialog h3{margin:0 0 var(--s3);font-size:1.15rem}
+dialog .pic{width:100%;height:200px;margin-bottom:var(--s3);object-fit:contain}
+dialog .hint{margin-bottom:var(--s4)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:var(--s2) var(--s4);margin:0 0 var(--s4)}
+dt{color:var(--muted)}
+dd{margin:0}
+.dlgactions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2)}
+#toast{position:fixed;left:50%;bottom:calc(var(--s6) + var(--h) + env(safe-area-inset-bottom));transform:translateX(-50%);width:max-content;max-width:calc(100% - 2*var(--s4));padding:var(--s3) var(--s4);border-radius:var(--r);background:var(--fg);color:var(--bg);text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+#toast.err{background:var(--danger);color:var(--on-danger);font-weight:500}
+.err>span:first-child{color:var(--danger)}
+.err input:not([type=radio]),.err select,.err .opt span{border-color:var(--danger)}
+.errmsg{color:var(--danger);font-size:.8rem;font-weight:500}
+
+/* Bild vergrößert: Tippen irgendwo schließt */
+#zoom{width:fit-content;max-width:none;max-height:none;margin:auto;padding:0;overflow:visible;border:0;background:none}
+#zoom img{display:block;max-width:calc(100vw - 2*var(--s4));max-height:calc(100vh - 2*var(--s6));max-height:calc(100dvh - 2*var(--s6));border-radius:var(--r);background:var(--card);object-fit:contain}
+#zoom button{position:absolute;top:var(--s2);right:var(--s2);background:rgb(0 0 0/.55);border-color:transparent;color:#fff}
+#zoom::backdrop{background:rgb(0 0 0/.85)}
+
+.langs{display:grid;gap:var(--s2)}
+
+/* Tablet/Handy */
 @media (max-width:700px){
-  .wrap{overflow:visible;background:none;border:0}
-  details .wrap{padding:8px}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g4 .kind{grid-column:1/-1}
+  .g4 .shop{grid-column:auto}
+  .g3 .field{grid-column:1/-1}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* jede Tabellenzeile wird eine Karte statt seitlich zu scrollen (die Tabelle braucht ca. 900 px) */
+@media (max-width:940px){
+  .wrap{overflow:visible;border:0;background:none}
+  details .wrap{padding:var(--s3)}
   table,tbody{display:block}
   thead{display:none}
-  tr[tabindex]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
-  td{border:0;padding:0;white-space:normal}
-  td::before{content:attr(data-l);display:block;font-size:.75rem;color:var(--muted)}
+  tr[tabindex]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3);margin-bottom:var(--s3);padding:var(--s3) var(--s4);border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+  td{padding:0;border:0;white-space:normal}
+  td::before{content:attr(data-l);display:block;color:var(--muted);font-size:.75rem}
   td.bean{grid-column:span 2;order:-2;font-weight:600}
   td.score{order:-1;text-align:right}
   td.taste{grid-column:1/-1;order:1}
+  details td.score{grid-column:1/3;grid-row:1;text-align:left}
+  /* Stern oben rechts neben der Note; negative Ränder halten die 44px-Tippfläche, ohne die Zeile zu erhöhen */
+  details td.favcell{grid-column:3;grid-row:1}
+  details td.favcell .star{margin:-10px -10px -10px 0}
+  td.favcell{display:flex;align-items:center;justify-content:flex-end;width:auto;padding:0}
+  td.favcell::before{content:none}
+  td.favcell:empty{display:none}
 }
-dialog::backdrop{background:rgb(0 0 0/.45)}
-dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);max-width:520px;width:calc(100% - 32px);max-height:90vh;overflow:auto}
-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 12px}
-dt{color:var(--muted)}dd{margin:0}
-.hint{background:var(--hl);border-radius:8px;padding:8px 12px;margin-bottom:12px}
-.row{display:flex;flex-wrap:wrap;gap:8px}
-.pic{max-width:100%;max-height:160px;border-radius:8px;object-fit:contain}
-summary .pic{float:right;max-height:56px;margin-left:8px}
-h3{margin:20px 0 8px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
-.tile b{font-size:1.8rem;display:block}
-.tile span,.fav small{color:var(--muted);font-size:.85rem}
-.fav{display:flex;gap:16px;align-items:center;cursor:pointer;border-color:var(--accent)}
-.fav h2{margin:2px 0 8px}
-.fav .pic{max-width:120px;max-height:120px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips span{background:var(--hl);border-radius:999px;padding:2px 10px;font-size:.85rem}
-.bar{display:grid;grid-template-columns:24px minmax(0,1fr) minmax(60px,30%) 28px;gap:10px;align-items:center;padding:6px 4px;border-radius:8px;cursor:pointer}
-.bar:hover{background:var(--hl)}
-.rank{color:var(--muted);text-align:right}
-.name{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.name small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
-.track{height:10px;background:var(--hl);border-radius:4px;overflow:hidden}
-.track span{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
-.chart{width:100%;height:auto;display:block}
-.chart line{stroke:var(--line)}
-.chart text{fill:var(--muted);font-size:12px}
-.chart circle{fill:var(--accent);fill-opacity:.7;stroke:var(--card);stroke-width:2;cursor:pointer}
-.chart circle:hover{fill-opacity:1}
-.empty{color:var(--muted);padding:16px}
-nav{position:sticky;top:0;z-index:5;background:var(--bg)}
-.actions{position:sticky;bottom:0;z-index:5;padding:12px 0;background:linear-gradient(transparent,var(--bg) 35%)}
-/* innerhalb einer Bohne ist der Bohnenname überflüssig */
-details th:nth-child(2),details td.bean{display:none}
 @media (max-width:700px){
-  .actions button{flex:1}
-  details td.score{grid-column:1/-1;text-align:left}
-}
-@media (max-width:600px){
-  header h1 .sub{display:none}
-  .bar{grid-template-columns:24px minmax(0,1fr) 28px;row-gap:6px}
+  .bar{grid-template-columns:24px minmax(0,1fr) 28px;row-gap:var(--s2)}
   .bar .track{grid-column:2;grid-row:2}
   .bar b{grid-column:3;grid-row:1}
   .name{white-space:normal}
-  /* SVG wird verkleinert – Schrift und Punkte gegenrechnen, damit sie lesbar/tippbar bleiben */
-  .chart text{font-size:22px}
-  .chart circle{r:11px}
 }
-[hidden]{display:none!important}
+@media (max-width:600px){
+  header h1 .sub{display:none}
+  .g2{grid-template-columns:minmax(0,1fr)}
+  .fav .pic{--pic:64px}
+  /* Detailfenster als Sheet am unteren Rand: Daumen erreichen die Knöpfe */
+  dialog{width:100%;max-width:none;margin:auto 0 0;padding-bottom:calc(var(--s4) + env(safe-area-inset-bottom));border-bottom:0;border-radius:var(--r) var(--r) 0 0}
+}
+@media (max-width:360px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.span2{grid-column:auto}}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 </head>
 <body>
 <header>
-  <h1>☕ Kaffee-Logbuch<span class="sub"> · Ninja Luxe Pro</span></h1>
-  <button id="export" title="Alle Daten als JSON-Datei sichern">Export</button>
-  <button onclick="importFile.click()" title="JSON-Datei laden und mit vorhandenen Daten zusammenführen">Import</button>
+  <img class="logo" src="Logo_NoBackground.png" alt="">
+  <h1><span data-i18n="app.title">Kaffee-Logbuch</span><span class="sub"> · Ninja Luxe Pro</span></h1>
+  <button id="add" class="icon primary" data-i18n-title="btn.add">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button id="export" class="icon" data-i18n-title="btn.export">
+    <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button>
+  <button class="icon" onclick="importFile.click()" data-i18n-title="btn.import">
+    <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button>
+  <button id="langBtn" class="icon" aria-haspopup="dialog" data-i18n-title="btn.lang">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg></button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
 </header>
-<nav>
-  <button data-view="new" class="active">Neuer Bezug</button>
-  <button data-view="best">Dashboard</button>
-  <button data-view="beans">Meine Bohnen</button>
+<nav role="tablist">
+  <button role="tab" data-view="best" data-i18n="tab.dash">Dashboard</button>
+  <button role="tab" data-view="beans" data-i18n="tab.beans">Meine Bohnen</button>
 </nav>
 <main>
-  <section id="new">
-    <form id="form">
-      <fieldset class="g4"><legend>Bohne</legend>
-        <label>Marke *<input name="brand" list="brands" placeholder="z. B. Lavazza" required></label>
-        <label>Sorte<input name="variety" list="varieties" placeholder="z. B. Super Crema"></label>
-        <label>Bohnenart<select name="beanKind"><option value="">– wählen –</option><option>100 % Arabica</option><option>Arabica-Robusta-Blend</option><option>100 % Robusta</option></select></label>
-        <label>Bohnentyp<input name="beanType" list="types" placeholder="z. B. Espresso"></label>
-        <label class="span2">Kaufort<input name="shop" list="shops" placeholder="z. B. Rewe, Amazon, Rösterei"></label>
-        <div class="field span2">Bild<div class="pair">
-          <input id="imageLink" type="url" placeholder="Bildadresse einfügen" aria-label="Bild-Link">
-          <label class="btn" for="upload">Hochladen</label><input type="file" id="upload" accept="image/*" hidden>
+  <section id="new" hidden>
+    <h2 id="formTitle"></h2>
+    <form id="form" novalidate>
+      <fieldset class="g4"><legend data-i18n="lg.bean"></legend>
+        <label><span data-i18n="f.brand"></span><input name="brand" list="brands" data-i18n-ph="ph.brand" required></label>
+        <label><span data-i18n="f.variety"></span><input name="variety" list="varieties" data-i18n-ph="ph.variety"></label>
+        <label class="kind"><span data-i18n="f.kind"></span><select name="beanKind"><option value="" data-i18n="f.pick"></option><option>100 % Arabica</option><option>Arabica-Robusta-Blend</option><option>100 % Robusta</option></select></label>
+        <label><span data-i18n="f.type"></span><input name="beanType" list="types" data-i18n-ph="ph.type"></label>
+        <label class="span2 shop"><span data-i18n="f.shop"></span><input name="shop" list="shops" data-i18n-ph="ph.shop"></label>
+        <div class="field span2"><span data-i18n="f.image"></span><div class="pair">
+          <input id="imageLink" type="url" data-i18n-ph="ph.url" data-i18n-title="img.link">
+          <button type="button" class="icon" onclick="upload.click()" data-i18n-title="img.upload">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></button>
+          <input type="file" id="upload" accept="image/*" hidden>
         </div></div>
         <input name="image" type="hidden">
-        <div class="row full" id="picBox" style="align-items:center" hidden><img id="preview" class="pic" alt="Vorschau"><button type="button" id="noImg">Bild entfernen</button><small id="picNote">Bild dieser Bohne übernommen – zum Ändern neuen Link oder Upload wählen</small></div>
+        <div class="row full" id="picBox" hidden><img id="preview" class="pic" data-i18n-alt="img.preview" alt=""><button type="button" id="noImg" data-i18n="img.remove"></button><small id="picNote" data-i18n="img.inherited"></small></div>
         <div id="beanInfo" class="hint full" hidden></div>
       </fieldset>
-      <fieldset class="g3"><legend>Maschine</legend>
-        <div class="field">Einsatz *<div class="seg" id="seg-size"></div></div>
-        <div class="field">Stärkegrad *<div class="seg" id="seg-strength"></div></div>
-        <div class="field">Temperatur *<div class="seg" id="seg-temp"></div></div>
-        <label>Mahlgrad *<input name="grind" placeholder="1–25" type="number" min="1" max="25" inputmode="numeric" required></label>
-        <label>Dauer (s)<input name="time" type="number" min="0" step="1" inputmode="numeric"></label>
-        <label>Gewicht (g)<input name="weight" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      <fieldset class="g3"><legend data-i18n="lg.machine"></legend>
+        <div class="field"><span data-i18n="f.size"></span><div class="seg" id="seg-size"></div></div>
+        <div class="field"><span data-i18n="f.strength"></span><div class="seg" id="seg-strength"></div></div>
+        <div class="field"><span data-i18n="f.temp"></span><div class="seg" id="seg-temp"></div></div>
+        <label><span data-i18n="f.grind"></span><select name="grind" required></select></label>
+        <label><span data-i18n="f.time"></span><input name="time" type="number" min="0" step="1" inputmode="numeric"></label>
+        <label><span data-i18n="f.weight"></span><input name="weight" type="number" min="0" step="0.1" inputmode="decimal"></label>
       </fieldset>
-      <fieldset class="g2"><legend>Geschmack</legend>
-        <div class="field">Sauer *<div class="seg" id="seg-sour"></div></div>
-        <div class="field">Bitter *<div class="seg" id="seg-bitter"></div></div>
-        <div class="field full">Stärke *<div class="seg" id="seg-body"></div></div>
-        <div class="field full">Gesamtnote (1 = schlecht, 10 = perfekt) *<div class="seg score" id="seg-score"></div></div>
-        <label class="full">Notiz<textarea name="note" rows="2" placeholder="optional"></textarea></label>
+      <fieldset class="g2"><legend data-i18n="lg.taste"></legend>
+        <div class="field full"><span data-i18n="f.sour"></span><div class="slider" id="seg-sour"></div></div>
+        <div class="field full"><span data-i18n="f.bitter"></span><div class="slider" id="seg-bitter"></div></div>
+        <div class="field full"><span data-i18n="f.body"></span><div class="slider" id="seg-body"></div></div>
+        <div class="field full"><span data-i18n="f.score"></span><div class="slider" id="seg-score"></div></div>
+        <label class="full"><span data-i18n="f.note"></span><textarea name="note" rows="2" data-i18n-ph="ph.opt"></textarea></label>
       </fieldset>
       <div class="row actions">
-        <button class="primary" id="submit">Bezug speichern</button>
-        <button type="button" id="cancel" hidden>Bearbeiten abbrechen</button>
+        <button class="primary" id="submit"></button>
+        <button type="button" id="cancel" data-i18n="form.cancel" hidden></button>
       </div>
     </form>
   </section>
   <section id="best" hidden></section>
-  <section id="beans" hidden></section>
+  <section id="beans" hidden>
+    <div class="searchbar" id="searchbar">
+      <input id="q" type="search" autocomplete="off" enterkeyhint="search" data-i18n-ph="q.ph" data-i18n-title="q.label">
+      <button id="fltBtn" class="icon" aria-haspopup="dialog" data-i18n-title="flt.title">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span class="badge" id="fltBadge" hidden></span></button>
+      <button id="sortBtn" class="icon" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg></button>
+    </div>
+    <div id="beansList"></div>
+  </section>
 </main>
 <datalist id="brands"></datalist><datalist id="varieties"></datalist><datalist id="types"></datalist><datalist id="shops"></datalist>
 <dialog id="dlg"></dialog>
+<dialog id="zoom" data-i18n-title="img.zoom">
+  <img id="zoomImg" alt="">
+  <button class="icon" id="zoomClose" data-i18n-title="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</dialog>
+<dialog id="fltDlg" aria-labelledby="fltTitle"></dialog>
+<dialog id="sortDlg" aria-labelledby="sortTitle">
+  <h3 id="sortTitle" data-i18n="sort.title"></h3>
+  <div class="langs" id="sorts"></div>
+</dialog>
+<dialog id="langDlg" aria-labelledby="langTitle">
+  <h3 id="langTitle" data-i18n="lang.title"></h3>
+  <div class="langs" id="langs"></div>
+</dialog>
 <div id="toast" role="status"></div>
 <script>
 const KEY = 'ninja-kaffee-v1';
+const LANG_KEY = 'ninja-kaffee-lang';
 const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
-const SOUR = ['nicht sauer', 'leicht sauer', 'deutlich sauer', 'sehr sauer'];
-const BITTER = ['nicht bitter', 'leicht bitter', 'deutlich bitter', 'sehr bitter'];
-const BODY = ['zu schwach', 'leicht', 'genau richtig', 'kräftig', 'zu stark'];
-const TYPES = ['Espresso', 'Café Crema', 'Filterkaffee', 'Universal'];
 const NUMS = ['grind', 'time', 'weight', 'sour', 'bitter', 'body', 'score'];
+
+// Gespeichert werden Einsatz/Stärkegrad/Temperatur weiter als deutsche Werte (Single, Leicht, Hoch …),
+// damit alte Daten und Exporte kompatibel bleiben; übersetzt wird nur die Anzeige (t('v.…')).
+const I18N = {
+  de: {
+    'app.title': 'Caffeine Analytica',
+    'tab.dash': 'Dashboard', 'tab.beans': 'Meine Bohnen',
+    'btn.add': 'Neuer Shot', 'btn.export': 'Export: alle Daten als Datei sichern',
+    'btn.import': 'Import: Datei laden und mit vorhandenen Daten zusammenführen', 'btn.lang': 'Sprache',
+    'lang.title': 'Sprache wählen', 'close': 'Schließen',
+    'sort.title': 'Sortieren nach', 'sort.best': 'Beste Note', 'sort.avg': 'Ø Note', 'sort.recent': 'Zuletzt zubereitet',
+    'sort.name': 'Name (A–Z)', 'sort.count': 'Meiste Shots',
+    'form.new': 'Neuer Shot', 'form.edit': 'Shot bearbeiten', 'form.save': 'Shot speichern',
+    'form.saveEdit': 'Änderung speichern', 'form.cancel': 'Bearbeiten abbrechen',
+    'lg.bean': 'Bohne', 'lg.machine': 'Maschine', 'lg.taste': 'Geschmack',
+    'f.brand': 'Marke *', 'f.variety': 'Sorte', 'f.kind': 'Bohnenart', 'f.type': 'Bohnentyp', 'f.shop': 'Kaufort',
+    'f.image': 'Bild', 'f.pick': '– wählen –',
+    'ph.brand': 'z. B. Lavazza', 'ph.variety': 'z. B. Super Crema', 'ph.type': 'z. B. Espresso',
+    'ph.shop': 'z. B. Rewe, Amazon, Rösterei', 'ph.url': 'Bildadresse einfügen', 'ph.opt': 'optional',
+    'img.upload': 'Bild hochladen', 'img.remove': 'Bild entfernen', 'img.link': 'Bild-Link', 'img.preview': 'Vorschau',
+    'img.zoom': 'Bild vergrößert', 'img.inherited': 'Bild dieser Bohne – gilt für alle ihre Shots. Neuer Link oder Upload ersetzt es.',
+    'f.size': 'Einsatz *', 'f.strength': 'Stärkegrad *', 'f.temp': 'Temperatur *', 'f.grind': 'Mahlgrad *',
+    'f.time': 'Dauer (s)', 'f.weight': 'Gewicht (g)',
+    'f.sour': 'Sauer *', 'f.bitter': 'Bitter *', 'f.body': 'Stärke *',
+    'f.score': 'Gesamtnote (1 = schlecht, 10 = perfekt) *', 'f.note': 'Notiz',
+    'l.date': 'Datum', 'l.brand': 'Marke', 'l.variety': 'Sorte', 'l.kind': 'Bohnenart', 'l.type': 'Bohnentyp',
+    'l.shop': 'Kaufort', 'l.size': 'Einsatz', 'l.grind': 'Mahlgrad', 'l.strength': 'Stärkegrad', 'l.temp': 'Temperatur',
+    'l.time': 'Extraktionsdauer', 'l.weight': 'Extraktionsgewicht', 'l.ratio': 'Verhältnis', 'l.sour': 'Sauer',
+    'l.bitter': 'Bitter', 'l.body': 'Stärke (Geschmack)', 'l.score': 'Gesamtnote', 'l.runs': 'Zubereitet', 'l.note': 'Notiz',
+    'd.size': (s, g) => `${s} (~${g} g Mehl)`,
+    'h.score': 'Note', 'h.bean': 'Bohne', 'h.size': 'Einsatz', 'h.grind': 'Mahlgrad', 'h.strength': 'Stärkegrad',
+    'h.temp': 'Temp.', 'h.time': 'Zeit', 'h.weight': 'Gewicht', 'h.ratio': 'Verh.', 'h.taste': 'Geschmack', 'h.date': 'Datum',
+    'btn.edit': 'Bearbeiten', 'btn.template': 'Als Vorlage', 'btn.delete': 'Löschen',
+    'chip.best': 'Top', 'runs': n => `${n}× zubereitet`,
+    'n.shots': n => `${n} ${n === 1 ? 'Shot' : 'Shots'}`,
+    'tile.shots': 'Shots', 'tile.beans': 'Bohnen', 'tile.avg': 'Ø Note', 'tile.top': 'Bestnote',
+    'dash.fav': 'Bestbewertet', 'dash.favs': 'Meine Favoriten', 'dash.top10': 'Top 10',
+    'dash.perbean': 'Beste Einstellung je Bohne',
+    'c.grind': 'Mahlgrad', 'c.strength': 'Stärkegrad', 'c.temp': 'Temp.',
+    'ch.all': 'Alle Bohnen', 'ch.choose': 'Bohne wählen',
+    'an.title': 'Auswertung', 'an.taste': 'Geschmack', 'an.trend': 'Verlauf', 'an.sour': 'Sauer', 'an.bitter': 'Bitter',
+    'an.legend': 'Zahl = Ø Note, Balken = Höhe der Note. Tippe auf ein Feld, um die Shots zu sehen.',
+    'an.trendHint': 'Für den Verlauf braucht es mindestens 2 Shots.', 'an.last30': 'Gezeigt werden die letzten 30 Shots.',
+    'star.add': 'Als Favorit markieren', 'star.remove': 'Favorit entfernen', 'star.has': 'Enthält Favoriten',
+    'q.ph': 'Bohnen suchen …', 'q.label': 'Suche',
+    'flt.title': 'Filter', 'flt.fav': 'Nur Favoriten', 'flt.min': 'Mindestnote', 'flt.reset': 'Zurücksetzen', 'flt.apply': 'Anwenden',
+    'nores': 'Keine Treffer.', 'n.of': (a, b) => `${a} von ${b} Shots`,
+    'bean.top': n => `Top ${n}/10`,
+    'bi.count': n => `${n} ${n === 1 ? 'Shot' : 'Shots'} mit dieser Bohne`,
+    'bi.best': (sc, size, g, st, tp) => `Bester: Note ${sc}/10 · ${size} · Mahlgrad ${g} · Stärkegrad ${st} · Temp. ${tp}`,
+    'bi.last': (sc, g) => `Letzter: Note ${sc}/10 · Mahlgrad ${g}`,
+    'bi.tip': 'Tipp zum letzten Shot: ', 'bi.use': 'Beste Einstellung übernehmen',
+    'empty': 'Noch keine Shots – tippe oben auf +, um den ersten anzulegen.',
+    'toast.saved': 'Shot gespeichert', 'toast.edited': 'Änderung gespeichert',
+    'toast.updated': n => `Shot aktualisiert – ${n}× zubereitet`, 'toast.imported': n => `${t('n.shots', n)} importiert`,
+    'dup': (name, date, sc, n) => `Es gibt bereits einen identischen Shot für ${name} (${date}, Note ${sc}/10, ${n}× zubereitet).\n\n`
+      + 'OK = Vorhandenen Eintrag mit deinen neuen Angaben überschreiben und als weitere Zubereitung zählen.\nAbbrechen = Nichts speichern.',
+    'confirm.del': 'Diesen Shot wirklich löschen?',
+    'err.save': 'Speichern im Browser fehlgeschlagen – bitte sofort exportieren!',
+    'val.brand': 'Bitte eine Marke eingeben.', 'val.grind': 'Bitte einen Mahlgrad auswählen.',
+    'val.num': 'Bitte eine Zahl ab 0 eingeben.', 'val.pick': 'Bitte eine Auswahl treffen.',
+    'val.summary': n => n === 1 ? 'Ein Feld muss noch ausgefüllt werden.' : `${n} Felder müssen noch ausgefüllt werden.`,
+    'err.img': 'Bild konnte nicht gelesen werden.', 'err.import': 'Die Datei ist kein gültiger Kaffee-Logbuch-Export.',
+    'v.Single': 'Single', 'v.Double': 'Double', 'v.Quad': 'Quad', 'v.Leicht': 'Leicht', 'v.Mittel': 'Mittel',
+    'v.Stark': 'Stark', 'v.Niedrig': 'Niedrig', 'v.Hoch': 'Hoch',
+    sour: ['nicht sauer', 'leicht sauer', 'deutlich sauer', 'sehr sauer'], sourS: ['nicht', 'leicht', 'deutlich', 'sehr'],
+    bitter: ['nicht bitter', 'leicht bitter', 'deutlich bitter', 'sehr bitter'], bitterS: ['nicht', 'leicht', 'deutlich', 'sehr'],
+    body: ['zu schwach', 'leicht', 'genau richtig', 'kräftig', 'zu stark'],
+    types: ['Espresso', 'Café Crema', 'Filterkaffee', 'Universal'],
+    hints: {
+      sour: 'Eher sauer → feiner mahlen oder Temperatur höher.',
+      bitter: 'Eher bitter → gröber mahlen oder Temperatur niedriger.',
+      weak: 'Zu schwach → Stärkegrad höher oder feiner mahlen.',
+      strong: 'Zu stark → Stärkegrad niedriger oder gröber mahlen.',
+      fast: 'Sehr schneller Durchlauf (< 20 s) → feiner mahlen.',
+      slow: 'Sehr langsamer Durchlauf (> 35 s) → gröber mahlen.'
+    }
+  },
+  en: {
+    'app.title': 'Caffeine Analytica',
+    'tab.dash': 'Dashboard', 'tab.beans': 'My beans',
+    'btn.add': 'New shot', 'btn.export': 'Export: save all data as a file',
+    'btn.import': 'Import: load a file and merge it with existing data', 'btn.lang': 'Language',
+    'lang.title': 'Choose language', 'close': 'Close',
+    'sort.title': 'Sort by', 'sort.best': 'Top score', 'sort.avg': 'Ø score', 'sort.recent': 'Recently prepared',
+    'sort.name': 'Name (A–Z)', 'sort.count': 'Most shots',
+    'form.new': 'New shot', 'form.edit': 'Edit shot', 'form.save': 'Save shot',
+    'form.saveEdit': 'Save changes', 'form.cancel': 'Cancel editing',
+    'lg.bean': 'Bean', 'lg.machine': 'Machine', 'lg.taste': 'Taste',
+    'f.brand': 'Brand *', 'f.variety': 'Product', 'f.kind': 'Bean species', 'f.type': 'Bean type', 'f.shop': 'Bought at',
+    'f.image': 'Image', 'f.pick': '– select –',
+    'ph.brand': 'e.g. Lavazza', 'ph.variety': 'e.g. Super Crema', 'ph.type': 'e.g. Espresso',
+    'ph.shop': 'e.g. Amazon, roastery..', 'ph.url': 'Paste image URL', 'ph.opt': 'optional',
+    'img.upload': 'Upload image', 'img.remove': 'Remove image', 'img.link': 'Image link', 'img.preview': 'Preview',
+    'img.zoom': 'Enlarged image', 'img.inherited': 'This bean\'s image – used for all its shots. A new link or upload replaces it.',
+    'f.size': 'Shot size *', 'f.strength': 'Strength setting *', 'f.temp': 'Temperature *', 'f.grind': 'Grind size *',
+    'f.time': 'Time (s)', 'f.weight': 'Yield (g)',
+    'f.sour': 'Sour *', 'f.bitter': 'Bitter *', 'f.body': 'Strength *',
+    'f.score': 'Overall score (1 = poor, 10 = perfect) *', 'f.note': 'Note',
+    'l.date': 'Date', 'l.brand': 'Brand', 'l.variety': 'Product', 'l.kind': 'Bean species', 'l.type': 'Bean type',
+    'l.shop': 'Bought at', 'l.size': 'Shot size', 'l.grind': 'Grind size', 'l.strength': 'Strength setting', 'l.temp': 'Temperature',
+    'l.time': 'Extraction time', 'l.weight': 'Yield', 'l.ratio': 'Ratio', 'l.sour': 'Sour',
+    'l.bitter': 'Bitter', 'l.body': 'Strength (taste)', 'l.score': 'Overall score', 'l.runs': 'Prepared', 'l.note': 'Note',
+    'd.size': (s, g) => `${s} (~${g} g grounds)`,
+    'h.score': 'Score', 'h.bean': 'Bean', 'h.size': 'Size', 'h.grind': 'Grind', 'h.strength': 'Strength',
+    'h.temp': 'Temp.', 'h.time': 'Time', 'h.weight': 'Yield', 'h.ratio': 'Ratio', 'h.taste': 'Taste', 'h.date': 'Date',
+    'btn.edit': 'Edit', 'btn.template': 'Use as template', 'btn.delete': 'Delete',
+    'chip.best': 'Top', 'runs': n => `${n}× prepared`,
+    'n.shots': n => `${n} ${n === 1 ? 'shot' : 'shots'}`,
+    'tile.shots': 'Shots', 'tile.beans': 'Beans', 'tile.avg': 'Ø Score', 'tile.top': 'Top score',
+    'dash.fav': 'Top rated', 'dash.favs': 'My favorites', 'dash.top10': 'Top 10',
+    'dash.perbean': 'Best setting per bean',
+    'c.grind': 'Grind', 'c.strength': 'Strength', 'c.temp': 'Temp.',
+    'ch.all': 'All beans', 'ch.choose': 'Choose bean',
+    'an.title': 'Analysis', 'an.taste': 'Taste', 'an.trend': 'Progress', 'an.sour': 'Sour', 'an.bitter': 'Bitter',
+    'an.legend': 'Number = average score, bar = score. Tap a cell to see its shots.',
+    'an.trendHint': 'The progress chart needs at least 2 shots.', 'an.last30': 'Showing the last 30 shots.',
+    'star.add': 'Mark as favorite', 'star.remove': 'Remove favorite', 'star.has': 'Contains favorites',
+    'q.ph': 'Search beans …', 'q.label': 'Search',
+    'flt.title': 'Filter', 'flt.fav': 'Favorites only', 'flt.min': 'Minimum score', 'flt.reset': 'Reset', 'flt.apply': 'Apply',
+    'nores': 'No results.', 'n.of': (a, b) => `${a} of ${b} shots`,
+    'bean.top': n => `Top ${n}/10`,
+    'bi.count': n => `${n} ${n === 1 ? 'shot' : 'shots'} with this bean`,
+    'bi.best': (sc, size, g, st, tp) => `Best: score ${sc}/10 · ${size} · grind ${g} · strength ${st} · temp. ${tp}`,
+    'bi.last': (sc, g) => `Latest: score ${sc}/10 · grind ${g}`,
+    'bi.tip': 'Tip from the last shot: ', 'bi.use': 'Use best setting',
+    'empty': 'No shots yet – tap + at the top to add your first one.',
+    'toast.saved': 'Shot saved', 'toast.edited': 'Changes saved',
+    'toast.updated': n => `Shot updated – prepared ${n}×`, 'toast.imported': n => `${t('n.shots', n)} imported`,
+    'dup': (name, date, sc, n) => `An identical shot for ${name} already exists (${date}, score ${sc}/10, prepared ${n}×).\n\n`
+      + 'OK = Overwrite the existing entry with your new details and count it as another preparation.\nCancel = Save nothing.',
+    'confirm.del': 'Really delete this shot?',
+    'err.save': 'Saving in the browser failed – please export right away!',
+    'val.brand': 'Please enter a brand.', 'val.grind': 'Please select a grind size.',
+    'val.num': 'Please enter a number of 0 or more.', 'val.pick': 'Please make a selection.',
+    'val.summary': n => n === 1 ? 'One field still needs your input.' : `${n} fields still need your input.`,
+    'err.img': 'The image could not be read.', 'err.import': 'The file is not a valid Coffee Log export.',
+    'v.Single': 'Single', 'v.Double': 'Double', 'v.Quad': 'Quad', 'v.Leicht': 'Light', 'v.Mittel': 'Medium',
+    'v.Stark': 'Strong', 'v.Niedrig': 'Low', 'v.Hoch': 'High',
+    sour: ['not sour', 'slightly sour', 'distinctly sour', 'strongly sour'], sourS: ['none', 'slight', 'distinct', 'strong'],
+    bitter: ['not bitter', 'slightly bitter', 'distinctly bitter', 'strongly bitter'], bitterS: ['none', 'slight', 'distinct', 'strong'],
+    body: ['too weak', 'light', 'just right', 'strong', 'too strong'],
+    types: ['Espresso', 'Café Crema', 'Filter coffee', 'All-round'],
+    hints: {
+      sour: 'Tastes sour → grind finer or raise the temperature.',
+      bitter: 'Tastes bitter → grind coarser or lower the temperature.',
+      weak: 'Too weak → raise the strength setting or grind finer.',
+      strong: 'Too strong → lower the strength setting or grind coarser.',
+      fast: 'Very fast extraction (< 20 s) → grind finer.',
+      slow: 'Very slow extraction (> 35 s) → grind coarser.'
+    }
+  }
+};
+const LANGS = {de: 'Deutsch', en: 'English'};
+let lang = (() => {
+  try { const s = localStorage.getItem(LANG_KEY); if (s in LANGS) return s; } catch {}
+  return (navigator.language || 'de').toLowerCase().startsWith('de') ? 'de' : 'en';
+})();
+const t = (k, ...a) => { const v = I18N[lang][k] ?? I18N.de[k] ?? k; return typeof v === 'function' ? v(...a) : v; };
+const val = v => t('v.' + v); // Anzeige für gespeicherte Werte wie "Leicht" oder "Hoch"
+const SOUR = i => I18N[lang].sour[i], BITTER = i => I18N[lang].bitter[i], BODY = i => I18N[lang].body[i];
 
 const $ = id => document.getElementById(id);
 const form = $('form');
+const openDlg = d => { d.tabIndex = -1; d.showModal(); d.scrollTop = 0; d.focus({preventScroll: true}); };
 let shots = load(), editId = null;
 
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(shots)); }
-  catch { alert('Speichern im Browser fehlgeschlagen – bitte sofort exportieren!'); }
+  catch { alert(t('err.save')); }
   render();
 }
 const esc = v => String(v ?? '–').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
 const beanKey = s => (s.brand + '|' + (s.variety || '')).trim().toLowerCase();
 const beanName = s => s.brand + (s.variety ? ' ' + s.variety : '');
 const ratio = s => s.weight ? '1:' + (s.weight / DOSE[s.size]).toFixed(1) : '–';
-const fmtDate = d => new Date(d).toLocaleString('de-DE', {dateStyle: 'short', timeStyle: 'short'});
+const fmtDate = d => new Date(d).toLocaleString(lang === 'de' ? 'de-DE' : 'en-GB', {dateStyle: 'short', timeStyle: 'short'});
 // identisch = diese Felder stimmen überein (Text ohne Groß/klein, leer = nicht angegeben)
 const SAME = ['brand', 'variety', 'beanType', 'size', 'grind', 'strength', 'temp', 'time', 'weight'];
 const norm = v => v == null || v === '' ? null : typeof v === 'string' ? v.trim().toLowerCase() : v;
@@ -213,82 +532,172 @@ const isSame = (a, b) => SAME.every(k => norm(a[k]) === norm(b[k]));
 const splitShops = s => (s || '').split(',').map(t => t.trim()).filter(Boolean);
 const mergeShops = (a, b) => [...splitShops(a), ...splitShops(b)]
   .filter((t, i, all) => all.findIndex(o => o.toLowerCase() === t.toLowerCase()) === i).join(', ');
-const byScore =(a, b) => b.score - a.score || b.date.localeCompare(a.date);
+const byScore = (a, b) => b.score - a.score || b.date.localeCompare(a.date);
 
 function hints(s) {
-  const h = [];
-  if (s.sour >= 2) h.push('Eher sauer → feiner mahlen oder Temperatur höher.');
-  if (s.bitter >= 2) h.push('Eher bitter → gröber mahlen oder Temperatur niedriger.');
-  if (s.body === 0) h.push('Zu schwach → Stärkegrad höher oder feiner mahlen.');
-  if (s.body === 4) h.push('Zu stark → Stärkegrad niedriger oder gröber mahlen.');
-  if (s.time != null && s.time < 20) h.push('Sehr schneller Durchlauf (< 20 s) → feiner mahlen.');
-  if (s.time != null && s.time > 35) h.push('Sehr langsamer Durchlauf (> 35 s) → gröber mahlen.');
+  const h = [], x = I18N[lang].hints;
+  if (s.sour >= 2) h.push(x.sour);
+  if (s.bitter >= 2) h.push(x.bitter);
+  if (s.body === 0) h.push(x.weak);
+  if (s.body === 4) h.push(x.strong);
+  if (s.time != null && s.time < 20) h.push(x.fast);
+  if (s.time != null && s.time > 35) h.push(x.slow);
   return h;
 }
 
-// Auswahl-Knöpfe statt Dropdowns: an der Maschine mit einem Tipp bedienbar
-function seg(name, labels, byIndex, def) {
-  $('seg-' + name).innerHTML = labels.map((l, i) => `<label class="opt"><input type="radio" name="${name}" value="${byIndex ? i : l}" required${l === def ? ' checked' : ''}><span>${l}</span></label>`).join('');
+// Auswahl-Knöpfe statt Dropdowns: an der Maschine mit einem Tipp bedienbar.
+// Werte bleiben beim Sprachwechsel erhalten, nur die Beschriftung wird getauscht.
+const SEGS = {
+  size: {vals: ['Single', 'Double', 'Quad'], def: 'Double', label: val},
+  strength: {vals: ['Leicht', 'Mittel', 'Stark'], def: 'Mittel', label: val},
+  temp: {vals: ['Niedrig', 'Mittel', 'Hoch'], def: 'Mittel', label: val},
+};
+for (const [name, c] of Object.entries(SEGS))
+  $('seg-' + name).innerHTML = c.vals.map(v => `<label class="opt"><input type="radio" name="${name}" value="${v}" required${v === c.def ? ' checked' : ''}><span></span></label>`).join('');
+// Schieberegler für die Bewertungen; tick = kurze Skalenbeschriftung, label = Wert für Screenreader
+const SLIDERS = {
+  sour: {min: 0, max: 3, def: 0, label: SOUR, tick: i => I18N[lang].sourS[i]},
+  bitter: {min: 0, max: 3, def: 0, label: BITTER, tick: i => I18N[lang].bitterS[i]},
+  body: {min: 0, max: 4, def: 2, label: BODY, tick: BODY},
+  score: {min: 1, max: 10, def: 5, label: v => v + '/10', tick: v => v}
+};
+const steps = c => Array.from({length: c.max - c.min + 1}, (_, i) => c.min + i);
+for (const [name, c] of Object.entries(SLIDERS)) {
+  $('seg-' + name).style.setProperty('--n', c.max - c.min + 1);
+  $('seg-' + name).innerHTML = `<input type="range" name="${name}" min="${c.min}" max="${c.max}" step="1" value="${c.def}">
+    <div class="ticks" aria-hidden="true">${steps(c).map(v => `<span data-v="${v}"></span>`).join('')}</div>`;
 }
-seg('size', ['Single', 'Double', 'Quad'], false, 'Double');
-seg('strength', ['Leicht', 'Mittel', 'Stark'], false, 'Mittel');
-seg('temp', ['Niedrig', 'Mittel', 'Hoch'], false, 'Mittel');
-seg('sour', SOUR.map(t => t.split(' ')[0]), true);
-seg('bitter', BITTER.map(t => t.split(' ')[0]), true);
-seg('body', BODY, true);
-seg('score', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], false);
+// Tippen auf eine Skalenbeschriftung setzt den Wert direkt
+form.addEventListener('click', e => {
+  const v = e.target.closest('.ticks span')?.dataset.v;
+  if (v == null) return;
+  const inp = e.target.closest('.slider').querySelector('input');
+  inp.value = v;
+  inp.dispatchEvent(new Event('input', {bubbles: true}));
+});
+$('form').elements.grind.innerHTML = `<option value="" disabled selected data-i18n="f.pick"></option>` + Array.from({length: 25}, (_, i) => `<option>${i + 1}</option>`).join('');
+const labelSegs = () => {
+  for (const [name, c] of Object.entries(SEGS))
+    $('seg-' + name).querySelectorAll('.opt span').forEach((sp, i) => sp.textContent = c.label(c.vals[i]));
+  for (const [name, c] of Object.entries(SLIDERS)) {
+    const inp = form.elements[name], v = +inp.value;
+    inp.style.setProperty('--p', (v - c.min) / (c.max - c.min) * 100 + '%');
+    inp.setAttribute('aria-valuetext', c.label(v));
+    inp.setAttribute('aria-label', inp.closest('.field').firstElementChild.textContent.replace(' *', ''));
+    $('seg-' + name).querySelectorAll('.ticks span').forEach(sp => {
+      sp.textContent = c.tick(+sp.dataset.v);
+      sp.classList.toggle('on', +sp.dataset.v === v);
+    });
+  }
+};
 
-function toast(msg) {
+function toast(msg, isErr) {
   $('toast').textContent = msg;
+  $('toast').classList.toggle('err', !!isErr);
+  $('toast').setAttribute('role', isErr ? 'alert' : 'status');
   $('toast').classList.add('show');
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => $('toast').classList.remove('show'), 2500);
+  toast.t = setTimeout(() => $('toast').classList.remove('show'), isErr ? 5000 : 2500);
 }
+
+// Eigene Prüfung: Browser-Sprechblasen sind auf dem Handy oft unsichtbar (verdeckt, bei versteckten Auswahlknöpfen gar nicht da).
+// Jedes fehlerhafte Feld bekommt eine rote Meldung direkt darunter, dazu eine Zusammenfassung als Hinweis.
+const CHECKS = [
+  ['brand', d => (d.brand || '').trim(), 'val.brand'],
+  ['grind', d => /^\d+$/.test(d.grind ?? '') && +d.grind >= 1 && +d.grind <= 25, 'val.grind'],
+  ['time', d => (d.time ?? '') === '' || +d.time >= 0, 'val.num'],
+  ['weight', d => (d.weight ?? '') === '' || +d.weight >= 0, 'val.num'],
+  ['sour', d => d.sour != null, 'val.pick'], ['bitter', d => d.bitter != null, 'val.pick'],
+  ['body', d => d.body != null, 'val.pick'], ['score', d => d.score != null, 'val.pick']
+];
+const fieldBox = name => (form.elements[name].type ? form.elements[name] : $('seg-' + name)).closest('label,.field');
+function clearError(name) {
+  const box = form.elements[name] && fieldBox(name);
+  if (!box) return;
+  box.classList.remove('err');
+  box.querySelector('.errmsg')?.remove();
+}
+function validate(d) {
+  CHECKS.forEach(([n]) => clearError(n));
+  const bad = CHECKS.filter(([, ok]) => !ok(d));
+  if (!bad.length) return true;
+  for (const [n, , key] of bad) {
+    const box = fieldBox(n);
+    box.classList.add('err');
+    box.insertAdjacentHTML('beforeend', `<small class="errmsg">${t(key)}</small>`);
+  }
+  toast(t('val.summary', bad.length), true);
+  const first = fieldBox(bad[0][0]);
+  first.scrollIntoView({behavior: 'smooth', block: 'center'});
+  first.querySelector('input')?.focus({preventScroll: true});
+  return false;
+}
+form.addEventListener('input', e => { if (e.target.name) clearError(e.target.name); if (e.target.type === 'range') labelSegs(); });
+form.addEventListener('reset', () => setTimeout(labelSegs)); // nach dem Zurücksetzen der Werte
 
 form.onsubmit = e => {
   e.preventDefault();
   const d = Object.fromEntries(new FormData(form));
+  if (!validate(d)) return;
   for (const k of NUMS) d[k] = d[k] === '' ? null : +d[k];
   const old = shots.find(s => s.id === editId);
   const dup = shots.find(s => s !== old && isSame(s, d));
-  if (dup && !confirm(`Es gibt bereits einen identischen Eintrag für ${beanName(d)} (${fmtDate(dup.date)}, Note ${dup.score}/10, ${dup.runs || 1}× durchgeführt).\n\n`
-    + 'OK = vorhandenen Eintrag mit deinen neuen Angaben überschreiben und als weitere Durchführung zählen.\nAbbrechen = nichts speichern.')) return;
+  if (dup && !confirm(t('dup', beanName(d), fmtDate(dup.date), dup.score, dup.runs || 1))) return;
   const target = dup || old;
   d.id = target ? target.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   d.date = dup ? new Date().toISOString() : old ? old.date : new Date().toISOString();
   d.runs = dup ? (dup.runs || 1) + (old?.runs || 1) : old?.runs || 1;
+  if (dup?.fav || old?.fav) d.fav = true; // Favorit geht beim Bearbeiten oder Zusammenführen nicht verloren
   // leere neue Felder löschen nichts Vorhandenes
-  if (dup) { d.shop = mergeShops(dup.shop, d.shop); d.image ||= dup.image; d.beanKind ||= dup.beanKind; d.note ||= dup.note; }
+  if (dup) { d.shop = mergeShops(dup.shop, d.shop); d.beanKind ||= dup.beanKind; d.note ||= dup.note; }
   // beim Zusammenführen wandert der Eintrag ans Ende (neuester); ein bearbeiteter Doppelgänger geht darin auf
   shots = dup ? [...shots.filter(s => s !== old && s !== dup), d] : old ? shots.map(s => s === old ? d : s) : [...shots, d];
+  // Ein Bild je Bohne: neues Bild oder „Bild entfernen“ gilt für alle ihre Shots; sonst bleibt das vorhandene
+  // Bild erhalten, auch wenn der Shot, der es trug, ersetzt oder zu einer anderen Bohne umbenannt wurde
+  const sameBean = x => x !== d && beanKey(x) === beanKey(d);
+  if (d.image || imgRemoved) shots.forEach(x => { if (sameBean(x)) delete x.image; });
+  else {
+    let keep = dup?.image || old?.image;
+    if (old?.image && beanKey(old) !== beanKey(d)) {
+      const heir = shots.findLast(x => beanKey(x) === beanKey(old));
+      if (heir) { heir.image = old.image; keep = dup?.image; }
+    }
+    if (keep && !shots.some(x => sameBean(x) && x.image)) d.image = keep;
+  }
   const bean = {brand: d.brand, variety: d.variety, beanKind: d.beanKind, beanType: d.beanType, shop: d.shop};
   stopEdit();
   form.reset();
-  fill(bean); // nächster Versuch ist meist dieselbe Bohne
+  fill(bean); // nächster Shot ist meist dieselbe Bohne
   save();
-  toast(dup ? `Eintrag aktualisiert – ${d.runs}× durchgeführt ✓` : old ? 'Änderung gespeichert ✓' : 'Bezug gespeichert ✓');
+  toast(dup ? t('toast.updated', d.runs) : old ? t('toast.edited') : t('toast.saved'));
   window.scrollTo({top: 0, behavior: 'smooth'});
 };
 
 function fill(s) {
   for (const [k, v] of Object.entries(s)) if (form.elements[k]) form.elements[k].value = v ?? '';
   $('imageLink').value = form.image.value.startsWith('data:') ? '' : form.image.value;
-  preview(); beanInfo();
+  preview(); beanInfo(); labelSegs();
 }
-// Bild hängt an einem Bezug; für die Bohne gilt das neueste Bild ihrer Bezüge
-const beanImage = s => s.image || shots.filter(x => beanKey(x) === beanKey(s) && x.image).at(-1)?.image;
+// Ein Bild je Bohne, gespeichert an einem ihrer Shots; alle Shots zeigen es (ältere Daten mit mehreren: das neueste)
+const beanImage = s => shots.findLast(x => beanKey(x) === beanKey(s) && x.image)?.image;
+let imgRemoved = false; // „Bild entfernen“ gedrückt: beim Speichern verliert die ganze Bohne ihr Bild
 
-// Ohne eigenes Bild wird das Bohnenbild nur angezeigt, nicht kopiert – spart Browserspeicher
+// Löschen: trägt der Shot das angezeigte Bohnenbild, erbt es der neueste verbleibende Shot der Bohne (falls ohne eigenes Bild)
+function removeShot(list, s) {
+  const same = x => beanKey(x) === beanKey(s), rest = list.filter(x => x !== s), heir = rest.findLast(same);
+  if (s.image && heir && !heir.image && list.findLast(x => same(x) && x.image) === s) heir.image = s.image;
+  return rest;
+}
+// form.image = neu gewähltes Bild; sonst wird das Bohnenbild nur angezeigt, nicht kopiert – spart Browserspeicher
 function preview() {
-  const own = form.image.value, inherited = !own && form.brand.value && beanImage({brand: form.brand.value, variety: form.variety.value});
+  const own = form.image.value, inherited = !own && !imgRemoved && form.brand.value && beanImage({brand: form.brand.value, variety: form.variety.value});
   $('preview').src = own || inherited || '';
   $('picBox').hidden = !(own || inherited);
-  $('noImg').hidden = !own;
   $('picNote').hidden = !inherited;
 }
 $('imageLink').oninput = e => { form.image.value = e.target.value; preview(); };
-$('noImg').onclick = () => { form.image.value = $('imageLink').value = ''; preview(); };
-form.onreset = () => setTimeout(() => { preview(); beanInfo(); });
+$('noImg').onclick = () => { form.image.value = $('imageLink').value = ''; imgRemoved = true; preview(); };
+form.onreset = () => setTimeout(() => { imgRemoved = false; preview(); beanInfo(); });
 // Upload wird verkleinert gespeichert, sonst ist der Browserspeicher (~5 MB) schnell voll
 $('upload').onchange = e => {
   const img = new Image();
@@ -299,137 +708,343 @@ $('upload').onchange = e => {
     form.image.value = c.toDataURL('image/jpeg', 0.8);
     URL.revokeObjectURL(img.src); e.target.value = $('imageLink').value = ''; preview();
   };
-  img.onerror = () => alert('Bild konnte nicht gelesen werden.');
+  img.onerror = () => toast(t('err.img'), true);
   img.src = URL.createObjectURL(e.target.files[0]);
 };
-function stopEdit() { editId = null; $('submit').textContent = 'Bezug speichern'; $('cancel').hidden = true; }
+function setEditing(on) {
+  $('submit').textContent = t(on ? 'form.saveEdit' : 'form.save');
+  $('formTitle').textContent = t(on ? 'form.edit' : 'form.new');
+  $('cancel').hidden = !on;
+}
+function stopEdit() { editId = null; setEditing(false); }
 $('cancel').onclick = () => { stopEdit(); form.reset(); };
 
-// Bohnenart/-typ aus früheren Bezügen derselben Bohne übernehmen
+// Bohnenart/-typ aus früheren Shots derselben Bohne übernehmen
 form.brand.onchange = form.variety.onchange = () => {
   const k = beanKey({brand: form.brand.value, variety: form.variety.value});
   const list = shots.filter(s => beanKey(s) === k);
+  imgRemoved = false; // gilt nur für die Bohne, bei der es gedrückt wurde
   beanInfo(); preview();
   if (!form.beanKind.value) form.beanKind.value = list.findLast(s => s.beanKind)?.beanKind || '';
   if (!form.beanType.value) form.beanType.value = list.findLast(s => s.beanType)?.beanType || '';
   if (!form.shop.value) form.shop.value = list.findLast(s => s.shop)?.shop || '';
 };
 
-// Zeigt beim Einstellen, was mit dieser Bohne bisher am besten lief und was der letzte Versuch nahelegt
+// Zeigt beim Einstellen, was mit dieser Bohne bisher am besten lief und was der letzte Shot nahelegt
 function beanInfo() {
   const k = beanKey({brand: form.brand.value, variety: form.variety.value});
   const list = form.brand.value ? shots.filter(s => beanKey(s) === k && s.id !== editId) : [];
   $('beanInfo').hidden = !list.length;
   if (!list.length) return;
   const best = [...list].sort(byScore)[0], last = list.at(-1), h = hints(last);
-  $('beanInfo').innerHTML = `<b>${list.length} ${list.length === 1 ? "Versuch" : "Versuche"} mit dieser Bohne.</b><br>
-    Bester: Note ${best.score}/10 · ${best.size} · Mahlgrad ${best.grind} · Stärkegrad ${best.strength} · Temp. ${best.temp}<br>
-    ${last !== best ? `Letzter: Note ${last.score}/10 · Mahlgrad ${last.grind}<br>` : ''}${h.length ? 'Tipp aus dem letzten Versuch: ' + h.join(' ') + '<br>' : ''}
-    <button type="button" id="useBest" style="margin-top:8px">Beste Einstellung übernehmen</button>`;
+  $('beanInfo').innerHTML = `<b>${t('bi.count', list.length)}</b><br>
+    ${t('bi.best', best.score, val(best.size), best.grind, val(best.strength), val(best.temp))}<br>
+    ${last !== best ? t('bi.last', last.score, last.grind) + '<br>' : ''}${h.length ? t('bi.tip') + h.join(' ') + '<br>' : ''}
+    <button type="button" id="useBest">${t('bi.use')}</button>`;
   $('useBest').onclick = () => fill({grind: best.grind, size: best.size, strength: best.strength, temp: best.temp});
 }
 
 function show(view) {
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  document.querySelectorAll('nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === view);
+    b.setAttribute('aria-selected', b.dataset.view === view);
+  });
   document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== view);
+  window.scrollTo(0, 0);
 }
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.view));
+// „+“ öffnet ein leeres Formular; ein angefangener neuer Eintrag bleibt erhalten, nur ein Bearbeiten wird verworfen
+$('add').onclick = () => { if (editId) { stopEdit(); form.reset(); } show('new'); };
 
-// n = Anzahl Versuche: dann steht die Zeile für die ganze Bohne und öffnet sie unter „Meine Bohnen“
+// n = Anzahl Shots: dann steht die Zeile für die ganze Bohne und öffnet sie unter „Meine Bohnen“
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.9z"/></svg>';
+const starBtn = s => `<button type="button" class="star" data-fav="${s.id}" aria-pressed="${!!s.fav}" title="${t(s.fav ? 'star.remove' : 'star.add')}" aria-label="${t(s.fav ? 'star.remove' : 'star.add')}">${STAR}</button>`;
 function row(s, mark, n) {
-  // data-l = Beschriftung für die Kartenansicht auf schmalen Bildschirmen
-  return `<tr ${n ? `data-bean="${esc(beanKey(s))}"` : `data-id="${s.id}"`} tabindex="0"><td class="score">${mark ? '★ ' : ''}<b>${s.score}</b>/10${s.runs > 1 ? `<small class="runs">${s.runs}× gemacht</small>` : ''}</td><td class="bean">${esc(beanName(s))}${n ? `<small class="count">${n} ${n === 1 ? 'Versuch' : 'Versuche'} ›</small>` : ''}</td>
-    <td data-l="Einsatz">${s.size}</td><td data-l="Mahlgrad">${s.grind}</td><td data-l="Stärkegrad">${s.strength}</td><td data-l="Temp.">${s.temp}</td>
-    <td data-l="Zeit">${s.time ?? '–'} s</td><td data-l="Gewicht">${s.weight ?? '–'} g</td><td data-l="Verhältnis">${ratio(s)}</td>
-    <td class="taste" data-l="Geschmack">${SOUR[s.sour]}, ${BITTER[s.bitter]}</td><td data-l="Datum">${fmtDate(s.date)}</td></tr>`;
+  // data-l = Beschriftung für die Kartenansicht auf schmalen Bildschirmen; Stern nur an echten Shots, nicht an Bohnen-Zeilen (n)
+  return `<tr ${n ? `data-bean="${esc(beanKey(s))}"` : `data-id="${s.id}"`} tabindex="0"><td class="score"><span class="sc">${mark ? `<span class="best">${t('chip.best')}</span>` : ''}<b>${s.score}</b>/10${s.runs > 1 ? `<small class="runs">${t('runs', s.runs)}</small>` : ''}</span></td><td class="bean">${esc(beanName(s))}${n ? `<small class="count">${t('n.shots', n)}</small>` : ''}</td>
+    <td data-l="${t('h.size')}">${val(s.size)}</td><td data-l="${t('h.grind')}">${s.grind}</td><td data-l="${t('h.strength')}">${val(s.strength)}</td><td data-l="${t('h.temp')}">${val(s.temp)}</td>
+    <td data-l="${t('h.time')}">${s.time ?? '–'} s</td><td data-l="${t('h.weight')}">${s.weight ?? '–'} g</td><td data-l="${t('h.ratio')}">${ratio(s)}</td>
+    <td class="taste" data-l="${t('h.taste')}">${SOUR(s.sour)}, ${BITTER(s.bitter)}</td><td data-l="${t('h.date')}">${fmtDate(s.date)}</td><td class="favcell">${n ? '' : starBtn(s)}</td></tr>`;
 }
-const HEAD = '<thead><tr><th>Note</th><th>Bohne</th><th>Einsatz</th><th>Mahlgrad</th><th>Stärkegrad</th><th>Temp.</th><th>Zeit</th><th>Gewicht</th><th>Verh.</th><th>Geschmack</th><th>Datum</th></tr></thead>';
-const table = (list, best, ns) => `<div class="wrap"><table>${HEAD}${list.map((s, i) => row(s, s === best, ns?.[i])).join('')}</table></div>`;
+const head = () => '<thead><tr>' + ['score', 'bean', 'size', 'grind', 'strength', 'temp', 'time', 'weight', 'ratio', 'taste', 'date'].map(k => `<th>${t('h.' + k)}</th>`).join('') + '<th class="favcell"></th></tr></thead>';
+const table = (list, best, ns) => `<div class="wrap"><table>${head()}${list.map((s, i) => row(s, s === best, ns?.[i])).join('')}</table></div>`;
 
-// je Bohne alle Bezüge + der beste, beste Bohne zuerst
+// je Bohne alle Shots + der beste, beste Bohne zuerst
 function beanGroups() {
   const groups = new Map();
   for (const s of shots) { const k = beanKey(s); groups.set(k, [...(groups.get(k) || []), s]); }
   return [...groups.values()].map(list => ({list, best: [...list].sort(byScore)[0]})).sort((a, b) => byScore(a.best, b.best));
 }
 
+// Suche und Filter gelten nur für „Meine Bohnen“; das Dashboard rechnet immer mit allen Shots
+const lc = v => (v || '').toLowerCase();
+const flt0 = () => ({fav: false, size: [], strength: [], temp: [], kind: [], type: [], min: 0});
+let flt = flt0(), q = '';
+const activeCount = f => (f.fav ? 1 : 0) + ['size', 'strength', 'temp', 'kind', 'type'].filter(k => f[k].length).length + (f.min ? 1 : 0);
+const beanProp = (list, k) => list.findLast(s => s[k])?.[k] || '';
+// Shot-Filter wirken auf einzelne Shots, Bohnenart/-typ auf die Bohne (der Wert steht nicht an jedem Shot)
+const shotOk = s => (!flt.fav || s.fav) && ['size', 'strength', 'temp'].every(k => !flt[k].length || flt[k].includes(s[k])) && (!flt.min || s.score >= flt.min);
+const beanOk = list => (!flt.kind.length || flt.kind.some(k => lc(k) === lc(beanProp(list, 'beanKind'))))
+  && (!flt.type.length || flt.type.some(k => lc(k) === lc(beanProp(list, 'beanType'))));
+const beanText = list => [list[0].brand, list[0].variety, beanProp(list, 'beanType'), beanProp(list, 'beanKind'),
+  list.flatMap(s => splitShops(s.shop)).join(' '), list.map(s => s.note || '').join(' ')].join(' ').toLowerCase();
+
+// Sortierung der Bohnenkarten; bei Gleichstand gilt die beste Note
+let sortBy = 'best';
+const SORTS = {
+  best: (a, b) => byScore(a.best, b.best),
+  avg: (a, b) => b.avg - a.avg || byScore(a.best, b.best),
+  recent: (a, b) => b.last.localeCompare(a.last),
+  name: (a, b) => beanName(a.best).localeCompare(beanName(b.best), lang, {sensitivity: 'base'}),
+  count: (a, b) => b.shown.length - a.shown.length || byScore(a.best, b.best)
+};
+
+function resetFilters() { q = ''; $('q').value = ''; flt = flt0(); renderBeans(); }
+
 function openBean(key) {
   show('beans');
-  const d = [...document.querySelectorAll('#beans details')].find(d => d.dataset.key === key);
+  const find = () => [...document.querySelectorAll('#beansList details')].find(d => d.dataset.key === key);
+  let d = find();
+  if (!d && (q || activeCount(flt))) { resetFilters(); d = find(); } // Bohne wäre sonst ausgeblendet
   if (d) { d.open = true; d.scrollIntoView({behavior: 'smooth'}); }
 }
 
-function render() {
-  const empty = '<p class="empty">Noch keine Bezüge – leg unter „Neuer Bezug“ los.</p>';
-  $('best').innerHTML = shots.length ? dashboard([...shots].sort(byScore)) : empty;
+function renderBeans() {
+  // aufgeklappte Bohnen merken, sonst klappt jeder Stern-Tipp und jeder Buchstabe in der Suche alles zu
+  const open = new Set([...document.querySelectorAll('#beansList details[open]')].map(d => d.dataset.key));
+  const n = activeCount(flt);
+  $('searchbar').hidden = !shots.length;
+  $('fltBadge').hidden = !n;
+  $('fltBadge').textContent = n;
+  $('sortBtn').title = t('sort.title') + ': ' + t('sort.' + sortBy);
+  $('sortBtn').setAttribute('aria-label', $('sortBtn').title);
+  $('sorts').innerHTML = Object.keys(SORTS).map(k => `<button data-sort="${k}" class="${k === sortBy ? 'primary' : ''}" aria-pressed="${k === sortBy}">${t('sort.' + k)}</button>`).join('');
+  if (!shots.length) { $('beansList').innerHTML = `<p class="empty">${t('empty')}</p>`; return; }
+  const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const cards = beanGroups().map(({list}) => {
+    const shown = list.filter(shotOk);
+    if (!shown.length || !beanOk(list) || !terms.every(w => beanText(list).includes(w))) return null;
+    return {list, shown, best: [...shown].sort(byScore)[0], avg: shown.reduce((a, s) => a + s.score, 0) / shown.length,
+      last: shown.reduce((d, s) => s.date > d ? s.date : d, '')};
+  }).filter(Boolean).sort(SORTS[sortBy]).map(({list, shown, best, avg}) => {
+    avg = avg.toFixed(1);
+    const pic = beanImage(best), key = beanKey(best);
+    const count = shown.length === list.length ? t('n.shots', list.length) : t('n.of', shown.length, list.length);
+    return `<details data-key="${esc(key)}"${open.has(key) ? ' open' : ''}><summary>${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}<b>${esc(beanName(best))}</b>${list.some(s => s.fav) ? `<span class="fav-ic" title="${t('star.has')}" role="img" aria-label="${t('star.has')}">${STAR}</span>` : ''}
+        <small>${[best.beanKind, best.beanType, list.findLast(s => s.shop)?.shop].filter(Boolean).map(v => esc(v) + ' · ').join('')}${count} · Ø ${avg} · ${t('bean.top', best.score)}</small></summary>
+        ${table([...shown].sort(byScore), best)}</details>`;
+  }).join('');
+  $('beansList').innerHTML = cards || `<div class="empty"><p>${t('nores')}</p><button type="button" id="resetAll">${t('flt.reset')}</button></div>`;
+}
 
-  $('beans').innerHTML = shots.length ? beanGroups()
-    .map(({list, best}) => {
-      const avg = (list.reduce((n, s) => n + s.score, 0) / list.length).toFixed(1);
-      const pic = beanImage(best);
-      return `<details data-key="${esc(beanKey(best))}"><summary>${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}<b>${esc(beanName(best))}</b>
-        <small>${[best.beanKind, best.beanType, list.findLast(s => s.shop)?.shop].filter(Boolean).map(v => esc(v) + ' · ').join('')}${list.length} ${list.length === 1 ? "Versuch" : "Versuche"} · Ø ${avg} · Beste ${best.score}/10</small></summary>
-        ${table([...list].sort((a, b) => a.date.localeCompare(b.date)), best)}</details>`;
-    }).join('') : empty;
+function render() {
+  const empty = `<p class="empty">${t('empty')}</p>`;
+  $('best').innerHTML = shots.length ? dashboard([...shots].sort(byScore)) : empty;
+  renderBeans();
 
   const opts = (vals) => [...new Set(vals.filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
   $('brands').innerHTML = opts(shots.map(s => s.brand));
   $('varieties').innerHTML = opts(shots.map(s => s.variety));
-  $('types').innerHTML = opts([...TYPES, ...shots.map(s => s.beanType)]);
+  $('types').innerHTML = opts([...I18N[lang].types, ...shots.map(s => s.beanType)]);
   $('shops').innerHTML = opts(shots.flatMap(s => splitShops(s.shop)));
 }
 
+// Filterfenster: Änderungen gehen in einen Entwurf und gelten erst nach „Anwenden“
+let draft = flt0();
+function drawFilter() {
+  const keep = $('fltDlg').querySelector('.fltbody')?.scrollTop || 0;
+  const on = (k, v) => k === 'fav' ? draft.fav : k === 'min' ? draft.min === v : draft[k].includes(v);
+  const chip = (k, v, label) => `<button type="button" class="toggle" data-f="${k}" data-v="${esc(v)}" aria-pressed="${on(k, v)}">${esc(label)}</button>`;
+  const group = (title, chips) => `<div class="fgroup">${title ? `<span class="flabel">${title}</span>` : ''}<div class="chipset">${chips}</div></div>`;
+  const types = [...new Map(shots.filter(s => s.beanType).map(s => [lc(s.beanType), s.beanType])).values()];
+  $('fltDlg').innerHTML = `<h3 id="fltTitle">${t('flt.title')}</h3><div class="fltbody">
+    ${group('', chip('fav', 1, t('flt.fav')))}
+    ${group(t('l.size'), ['Single', 'Double', 'Quad'].map(v => chip('size', v, val(v))).join(''))}
+    ${group(t('l.strength'), ['Leicht', 'Mittel', 'Stark'].map(v => chip('strength', v, val(v))).join(''))}
+    ${group(t('l.temp'), ['Niedrig', 'Mittel', 'Hoch'].map(v => chip('temp', v, val(v))).join(''))}
+    ${group(t('l.kind'), ['100 % Arabica', 'Arabica-Robusta-Blend', '100 % Robusta'].map(v => chip('kind', v, v)).join(''))}
+    ${types.length ? group(t('l.type'), types.map(v => chip('type', v, v)).join('')) : ''}
+    ${group(t('flt.min'), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => chip('min', v, v)).join(''))}
+  </div><div class="fltfoot"><button type="button" id="fltReset">${t('flt.reset')}</button><button type="button" class="primary" id="fltApply">${t('flt.apply')}</button></div>`;
+  $('fltDlg').querySelector('.fltbody').scrollTop = keep;
+}
+$('fltBtn').onclick = () => { draft = JSON.parse(JSON.stringify(flt)); drawFilter(); openDlg($('fltDlg')); };
+$('fltDlg').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]');
+  if (b) {
+    const k = b.dataset.f, v = b.dataset.v;
+    if (k === 'fav') draft.fav = !draft.fav;
+    else if (k === 'min') draft.min = draft.min === +v ? 0 : +v;
+    else draft[k] = draft[k].includes(v) ? draft[k].filter(x => x !== v) : [...draft[k], v];
+    drawFilter();
+  } else if (e.target.id === 'fltReset') { draft = flt0(); drawFilter(); }
+  else if (e.target.id === 'fltApply') { flt = draft; $('fltDlg').close(); renderBeans(); }
+});
+$('q').oninput = e => { q = e.target.value; renderBeans(); };
+document.addEventListener('click', e => { if (e.target.id === 'resetAll') resetFilters(); });
+
+// lead = Rang oder Stern vor dem Namen
+const barRow = (s, lead) => `<div class="bar" data-id="${s.id}" tabindex="0"><span class="rank">${lead}</span>
+  <span class="name">${esc(beanName(s))}<small>${val(s.size)} · ${t('c.grind')} ${s.grind} · ${val(s.temp)} · ${SOUR(s.sour)}, ${BITTER(s.bitter)}</small></span>
+  <span class="track"><span style="width:${s.score * 10}%"></span></span><b>${s.score}</b></div>`;
+
 function dashboard(sorted) {
   const top = sorted[0], pic = beanImage(top);
+  const favs = sorted.filter(s => s.fav).slice(0, 5); // sorted ist nach Note geordnet
   const avg = (shots.reduce((n, s) => n + s.score, 0) / shots.length).toFixed(1);
   const tile = (v, l) => `<div class="card tile"><b>${v}</b><span>${l}</span></div>`;
-  const chips = [top.size, 'Mahlgrad ' + top.grind, 'Stärkegrad ' + top.strength, 'Temp. ' + top.temp,
+  const chips = [val(top.size), `${t('c.grind')} ${top.grind}`, `${t('c.strength')} ${val(top.strength)}`, `${t('c.temp')} ${val(top.temp)}`,
     top.time != null ? top.time + ' s' : null, top.weight != null ? top.weight + ' g' : null, top.weight ? ratio(top) : null];
-  return `<div class="tiles">${tile(shots.length, 'Bezüge')}${tile(new Set(shots.map(beanKey)).size, 'Bohnen')}${tile(avg, 'Ø Note')}${tile(top.score + '/10', 'Bestnote')}</div>
+  return `<div class="tiles">${tile(shots.length, t('tile.shots'))}${tile(new Set(shots.map(beanKey)).size, t('tile.beans'))}${tile(avg, t('tile.avg'))}${tile(top.score + '/10', t('tile.top'))}</div>
     <div class="card fav" data-id="${top.id}" tabindex="0">${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}
-      <div><small>Dein Favorit</small><h2>${esc(beanName(top))}</h2>
+      <div><small>${t('dash.fav')}</small><h2>${esc(beanName(top))}</h2>
       <div class="chips">${chips.filter(Boolean).map(c => `<span>${esc(c)}</span>`).join('')}</div></div></div>
-    <h3>Top 10</h3><div class="card">${sorted.slice(0, 10).map((s, i) => `<div class="bar" data-id="${s.id}" tabindex="0"><span class="rank">${i + 1}</span>
-      <span class="name">${esc(beanName(s))}<small>${s.size} · Mahlgrad ${s.grind} · ${s.temp} · ${SOUR[s.sour]}, ${BITTER[s.bitter]}</small></span>
-      <span class="track"><span style="width:${s.score * 10}%"></span></span><b>${s.score}</b></div>`).join('')}</div>
-    <h3>Note nach Mahlgrad</h3><div class="card">${scatter()}</div>
-    <h3>Beste Einstellung je Bohne</h3>${(g => table(g.map(x => x.best), null, g.map(x => x.list.length)))(beanGroups())}`;
+    ${favs.length ? `<h3>${t('dash.favs')}</h3><div class="card">${favs.map(s => barRow(s, STAR)).join('')}</div>` : ''}
+    <h3>${t('dash.top10')}</h3><div class="card">${sorted.slice(0, 10).map((s, i) => barRow(s, i + 1)).join('')}</div>
+    <h3>${t('an.title')}</h3><div class="card" id="analysis">${analysis()}</div>
+    <h3>${t('dash.perbean')}</h3>${(g => table(g.map(x => x.best), null, g.map(x => x.list.length)))(beanGroups())}`;
 }
 
-function scatter() {
-  const W = 600, H = 240, L = 32, R = 12, T = 10, B = 28;
-  const x = g => L + (g - 1) / 24 * (W - L - R), y = v => T + (10 - v) / 10 * (H - T - B);
-  const grid = [0, 2, 4, 6, 8, 10].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('');
-  const ticks = [1, 5, 10, 15, 20, 25].map(g => `<text x="${x(g)}" y="${H - 8}" text-anchor="middle">${g}</text>`).join('');
-  const dots = shots.map(s => `<circle data-id="${s.id}" tabindex="0" cx="${x(s.grind)}" cy="${y(s.score)}" r="6"><title>${esc(beanName(s))} – Mahlgrad ${s.grind}, Note ${s.score}/10</title></circle>`).join('');
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gesamtnote nach Mahlgrad">${grid}${ticks}${dots}</svg>`;
+// Auswertung: Geschmackskarte (sauer × bitter) und Notenverlauf, beide für alle Bohnen oder eine gewählte
+let anView = 'taste', anBean = '', anCell = '';
+function analysis() {
+  const groups = beanGroups();
+  if (anBean && !groups.some(g => beanKey(g.best) === anBean)) anBean = '';
+  const list = anBean ? groups.find(g => beanKey(g.best) === anBean).list : shots;
+  return `<div class="switch">${['taste', 'trend'].map(v => `<button type="button" class="toggle" data-an="${v}" aria-pressed="${anView === v}">${t('an.' + v)}</button>`).join('')}</div>
+    <select id="anBean" aria-label="${t('ch.choose')}"><option value="">${t('ch.all')}</option>
+    ${groups.map(g => `<option value="${esc(beanKey(g.best))}"${beanKey(g.best) === anBean ? ' selected' : ''}>${esc(beanName(g.best))}</option>`).join('')}</select>
+    ${anView === 'taste' ? tasteGrid(list) : trend(list)}`;
 }
+
+function tasteGrid(list) {
+  const I = I18N[lang];
+  let top = 0;
+  const data = [0, 1, 2, 3].map(b => [0, 1, 2, 3].map(s => {
+    const l = list.filter(x => x.sour === s && x.bitter === b);
+    const avg = l.length ? l.reduce((n, x) => n + x.score, 0) / l.length : 0;
+    top = Math.max(top, avg);
+    return {s, b, l, avg};
+  }));
+  const cell = c => !c.l.length ? '<span class="tcell empty">–</span>'
+    : `<button type="button" class="tcell${c.avg === top ? ' top' : ''}" data-cell="${c.s},${c.b}" aria-pressed="${anCell === c.s + ',' + c.b}"><b>${+c.avg.toFixed(1)}</b><small>${c.l.length}×</small><i style="width:${c.avg * 10}%"></i></button>`;
+  const sel = anCell ? anCell.split(',').map(Number) : null;
+  const picked = sel ? list.filter(x => x.sour === sel[0] && x.bitter === sel[1]).sort(byScore) : [];
+  return `<div class="tg"><span></span><span class="tgt">${t('an.sour')} →</span>
+    <span class="tga">${t('an.bitter')} ↓</span>${I.sourS.map(l => `<span class="tgh">${l}</span>`).join('')}
+    ${data.map((r, b) => `<span class="tgh tgr">${I.bitterS[b]}</span>${r.map(cell).join('')}`).join('')}</div>
+    <p class="note">${t('an.legend')}</p>
+    ${picked.length ? `<h4 class="tgtitle">${SOUR(sel[0])}, ${BITTER(sel[1])}</h4>${picked.map((s, i) => barRow(s, i + 1)).join('')}` : ''}`;
+}
+
+function trend(list) {
+  const pts = [...list].sort((a, b) => a.date.localeCompare(b.date)).slice(-30);
+  if (pts.length < 2) return `<p class="empty">${t('an.trendHint')}</p>`;
+  const W = 360, H = 220, L = 28, R = 12, T = 12, B = 30;
+  const x = i => L + i / (pts.length - 1) * (W - L - R), y = v => T + (10 - v) / 10 * (H - T - B);
+  const dm = d => new Date(d).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {day: '2-digit', month: '2-digit'});
+  const grid = [0, 2, 4, 6, 8, 10].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('');
+  const dots = pts.map((s, i) => `<circle data-id="${s.id}" tabindex="0" cx="${x(i)}" cy="${y(s.score)}" r="6"><title>${esc(beanName(s))} · ${s.score}/10 · ${fmtDate(s.date)}</title></circle>`).join('');
+  return `<svg class="trend" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t('an.trend')}">${grid}
+    <polyline points="${pts.map((s, i) => x(i) + ',' + y(s.score)).join(' ')}"/>${dots}
+    <text x="${L}" y="${H - 8}">${dm(pts[0].date)}</text><text x="${W - R}" y="${H - 8}" text-anchor="end">${dm(pts.at(-1).date)}</text></svg>
+    ${list.length > 30 ? `<p class="note">${t('an.last30')}</p>` : ''}`;
+}
+const redraw = () => { $('analysis').innerHTML = analysis(); };
+document.addEventListener('change', e => { if (e.target.id === 'anBean') { anBean = e.target.value; anCell = ''; redraw(); } });
+document.addEventListener('click', e => {
+  const v = e.target.closest('[data-an]'), c = e.target.closest('[data-cell]');
+  if (v) { anView = v.dataset.an; redraw(); }
+  else if (c) { anCell = anCell === c.dataset.cell ? '' : c.dataset.cell; redraw(); }
+});
 
 function openDetail(id) {
   const s = shots.find(x => x.id === id);
-  const rows = [['Datum', fmtDate(s.date)], ['Marke', s.brand], ['Sorte', s.variety], ['Bohnenart', s.beanKind], ['Bohnentyp', s.beanType], ['Kaufort', s.shop],
-    ['Einsatz', `${s.size} (~${DOSE[s.size]} g Mehl)`], ['Mahlgrad', s.grind], ['Stärkegrad', s.strength], ['Temperatur', s.temp],
-    ['Extraktionsdauer', s.time != null ? s.time + ' s' : null], ['Extraktionsgewicht', s.weight != null ? s.weight + ' g' : null],
-    ['Verhältnis', ratio(s)], ['Sauer', SOUR[s.sour]], ['Bitter', BITTER[s.bitter]], ['Stärke (Geschmack)', BODY[s.body]],
-    ['Gesamtnote', s.score + '/10'], ['Durchführungen', (s.runs || 1) + '×'], ['Notiz', s.note]];
+  const rows = [['date', fmtDate(s.date)], ['brand', s.brand], ['variety', s.variety], ['kind', s.beanKind], ['type', s.beanType], ['shop', s.shop],
+    ['size', t('d.size', val(s.size), DOSE[s.size])], ['grind', s.grind], ['strength', val(s.strength)], ['temp', val(s.temp)],
+    ['time', s.time != null ? s.time + ' s' : null], ['weight', s.weight != null ? s.weight + ' g' : null],
+    ['ratio', ratio(s)], ['sour', SOUR(s.sour)], ['bitter', BITTER(s.bitter)], ['body', BODY(s.body)],
+    ['score', s.score + '/10'], ['runs', (s.runs || 1) + '×'], ['note', s.note]];
   const h = hints(s);
   const pic = beanImage(s);
-  $('dlg').innerHTML = `<h3>${esc(beanName(s))}</h3>${pic ? `<p><img class="pic" src="${esc(pic)}" alt=""></p>` : ''}<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || null)}</dd>`).join('')}</dl>
+  $('dlg').innerHTML = `<div class="dlghead"><h3>${esc(beanName(s))}</h3>${starBtn(s)}</div>${pic ? `<p><img class="pic" src="${esc(pic)}" alt=""></p>` : ''}<dl>${rows.map(([k, v]) => `<dt>${t('l.' + k)}</dt><dd>${esc(v || null)}</dd>`).join('')}</dl>
     ${h.length ? `<div class="hint">${h.join('<br>')}</div>` : ''}
-    <div class="row"><button class="primary" id="dEdit">Bearbeiten</button><button id="dCopy">Als Vorlage übernehmen</button>
-    <button id="dDel">Löschen</button><button id="dClose">Schließen</button></div>`;
+    <div class="dlgactions"><button class="primary" id="dEdit">${t('btn.edit')}</button><button id="dCopy">${t('btn.template')}</button>
+    <button id="dDel">${t('btn.delete')}</button><button id="dClose">${t('close')}</button></div>`;
   $('dClose').onclick = () => $('dlg').close();
-  $('dEdit').onclick = () => { editId = s.id; fill(s); $('submit').textContent = 'Änderung speichern'; $('cancel').hidden = false; $('dlg').close(); show('new'); };
-  $('dCopy').onclick = () => { stopEdit(); fill({...s, note: '', image: ''}); $('dlg').close(); show('new'); };
-  $('dDel').onclick = () => { if (confirm('Diesen Bezug wirklich löschen?')) { shots = shots.filter(x => x !== s); $('dlg').close(); save(); } };
-  $('dlg').showModal();
+  $('dEdit').onclick = () => { editId = s.id; imgRemoved = false; fill({...s, image: ''}); setEditing(true); $('dlg').close(); show('new'); };
+  $('dCopy').onclick = () => { stopEdit(); imgRemoved = false; fill({...s, note: '', image: ''}); $('dlg').close(); show('new'); };
+  $('dDel').onclick = () => { if (confirm(t('confirm.del'))) { shots = removeShot(shots, s); $('dlg').close(); save(); } };
+  openDlg($('dlg'));
 }
+// Stern antippen = Favorit umschalten; Capture, damit die Zeile dahinter nicht zusätzlich öffnet
+document.addEventListener('click', e => {
+  const b = e.target.closest('.star');
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const s = shots.find(x => x.id === b.dataset.fav);
+  if (!s) return;
+  s.fav = !s.fav;
+  save();
+  const d = $('dlg').querySelector('.star'); // Stern im geöffneten Detailfenster mitziehen (Liste dahinter wurde neu gezeichnet)
+  if (d && d.dataset.fav === s.id) {
+    d.setAttribute('aria-pressed', !!s.fav);
+    d.title = t(s.fav ? 'star.remove' : 'star.add');
+    d.setAttribute('aria-label', d.title);
+  }
+}, true);
+// Bild antippen = vergrößern; Capture, damit weder die Bohnenkarte aufklappt noch der Shot geöffnet wird
+document.addEventListener('click', e => {
+  const img = e.target.closest('img.pic');
+  if (!img || !img.getAttribute('src')) return;
+  e.preventDefault(); e.stopPropagation();
+  $('zoomImg').src = img.src;
+  openDlg($('zoom'));
+}, true);
+$('zoom').onclick = () => $('zoom').close();
 const openRow = r => r && (r.dataset.bean ? openBean(r.dataset.bean) : openDetail(r.dataset.id));
 document.addEventListener('click', e => openRow(e.target.closest('[data-id],[data-bean]')));
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-id],[data-bean]')) openRow(e.target); });
-$('dlg').onclick = e => { // Klick neben das Fenster schließt
-  const r = $('dlg').getBoundingClientRect();
-  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) $('dlg').close();
+// Klick neben das Fenster schließt
+const closeOnBackdrop = d => d.onclick = e => {
+  const r = d.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
+};
+closeOnBackdrop($('dlg')); closeOnBackdrop($('langDlg')); closeOnBackdrop($('fltDlg')); closeOnBackdrop($('sortDlg'));
+$('sortBtn').onclick = () => openDlg($('sortDlg'));
+$('sorts').addEventListener('click', e => {
+  const b = e.target.closest('[data-sort]');
+  if (!b) return;
+  sortBy = b.dataset.sort;
+  $('sortDlg').close();
+  renderBeans();
+});
+
+// Sprache: alle festen Texte tragen data-i18n*, dynamische Texte entstehen in render()/openDetail() über t()
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.title = t('app.title');
+  document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = t(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(e => e.placeholder = t(e.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-alt]').forEach(e => e.alt = t(e.dataset.i18nAlt));
+  document.querySelectorAll('[data-i18n-title]').forEach(e => {
+    e.title = t(e.dataset.i18nTitle);
+    e.setAttribute('aria-label', e.title);
+  });
+  labelSegs();
+  setEditing(!!editId);
+  $('langs').innerHTML = Object.entries(LANGS).map(([c, n]) => `<button data-lang="${c}" class="${c === lang ? 'primary' : ''}" aria-pressed="${c === lang}" lang="${c}">${n}</button>`).join('');
+  render();
+  beanInfo();
+}
+$('langBtn').onclick = () => openDlg($('langDlg'));
+$('langs').onclick = e => {
+  const b = e.target.closest('[data-lang]');
+  if (!b) return;
+  lang = b.dataset.lang;
+  try { localStorage.setItem(LANG_KEY, lang); } catch {}
+  $('langDlg').close();
+  applyLang();
 };
 
 $('export').onclick = async () => {
@@ -453,14 +1068,17 @@ $('importFile').onchange = async e => {
     data.forEach(s => byId.set(s.id, s));
     shots = [...byId.values()];
     save();
-    toast(data.length + ' Einträge importiert ✓');
-  } catch { alert('Die Datei ist kein gültiger Kaffee-Logbuch-Export.'); }
+    toast(t('toast.imported', data.length));
+  } catch { toast(t('err.import'), true); }
   e.target.value = '';
 };
 
 console.assert(ratio({size: 'Double', weight: 36}) === '1:2.0' && ratio({size: 'Quad'}) === '–', 'ratio');
 console.assert(hints({sour: 3, bitter: 0, body: 2, time: 15}).length === 2, 'hints');
-render();
+console.assert((([a, b, c]) => removeShot([a, b, c], a).map(x => x.image).join() === ',x')(
+  [{brand: 'A', image: 'x'}, {brand: 'B'}, {brand: 'a'}]), 'removeShot'); // Bild geht an Bohne A, nicht an B
+applyLang();
+show(shots.length ? 'best' : 'new');
 // Offline-Fähigkeit; nur über https (GitHub Pages), nicht beim lokalen Öffnen der Datei
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js');
 </script>

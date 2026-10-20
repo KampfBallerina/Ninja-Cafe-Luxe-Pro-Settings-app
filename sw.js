@@ -1,8 +1,8 @@
 // Offline-Cache: App-Dateien kommen sofort aus dem Cache und werden bei Netz im Hintergrund
 // aktualisiert – eine neue Version ist also ab dem übernächsten Öffnen sichtbar.
 // Bei neuen/umbenannten Dateien CACHE hochzählen.
-const CACHE = 'kaffee-v1';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
+const CACHE = 'kaffee-v2';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png', 'Logo_NoBackground.png'];
 
 self.addEventListener('install', e => e.waitUntil(
   caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())
