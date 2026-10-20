@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaffee-Logbuch</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kaffee">
+<meta name="theme-color" content="#2563eb">
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.4 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--card)}
+header h1{font-size:1.15rem;margin:0 auto 0 0}
+nav{display:flex;flex-wrap:wrap;gap:6px;padding:16px;max-width:960px;margin:0 auto}
+main{padding:0 16px 40px;max-width:960px;margin:0 auto}
+button,.btn{font:inherit;font-size:.95rem;height:42px;padding:0 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+button.primary,nav button.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+fieldset{min-width:0;border:1px solid var(--line);border-radius:12px;margin:0 0 16px;padding:16px;display:grid;gap:14px 16px;background:var(--card)}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.span2{grid-column:span 2}
+.full{grid-column:1/-1}
+@media (max-width:700px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3 .field{grid-column:1/-1}}
+@media (max-width:600px){.g2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:360px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.span2{grid-column:auto}}
+legend{font-weight:600;padding:0 6px}
+label,.field{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:500;color:var(--muted)}
+input,select,textarea{font:inherit;font-weight:400;height:42px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--fg);width:100%}
+textarea{height:auto;padding:10px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.pair{display:flex;gap:8px}
+.pair .btn{flex:none;color:var(--fg);font-weight:400}
+/* Auswahl-Knöpfe: gleiche Höhe wie Eingabefelder, füllen die Zeile */
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg.score{display:grid;grid-template-columns:repeat(10,minmax(0,1fr))}
+@media (max-width:540px){.seg.score{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.opt{flex:1 0 auto;display:flex;flex-direction:row;position:relative}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt span{flex:1;height:42px;padding:0 10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--fg);cursor:pointer;font-weight:400;font-size:.95rem;white-space:nowrap}
+.opt span:hover{border-color:var(--accent)}
+.opt input:checked+span{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.opt input:focus-visible+span,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+tr[tabindex]{cursor:pointer}
+.runs{display:block;color:var(--muted);font-size:.75rem}
+.count{display:block;color:var(--accent);font-weight:600;font-size:.8rem}
+td.bean,td.taste{white-space:normal;min-width:120px}
+tr[tabindex]:hover{background:var(--hl)}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+summary{padding:12px;cursor:pointer}
+summary small{color:var(--muted);display:block}
+details .wrap{border:0;border-top:1px solid var(--line);border-radius:0}
+/* Handy: jede Zeile wird eine Karte statt seitlich zu scrollen */
+@media (max-width:700px){
+  .wrap{overflow:visible;background:none;border:0}
+  details .wrap{padding:8px}
+  table,tbody{display:block}
+  thead{display:none}
+  tr[tabindex]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  td{border:0;padding:0;white-space:normal}
+  td::before{content:attr(data-l);display:block;font-size:.75rem;color:var(--muted)}
+  td.bean{grid-column:span 2;order:-2;font-weight:600}
+  td.score{order:-1;text-align:right}
+  td.taste{grid-column:1/-1;order:1}
+}
+dialog::backdrop{background:rgb(0 0 0/.45)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);max-width:520px;width:calc(100% - 32px);max-height:90vh;overflow:auto}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 12px}
+dt{color:var(--muted)}dd{margin:0}
+.hint{background:var(--hl);border-radius:8px;padding:8px 12px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.pic{max-width:100%;max-height:160px;border-radius:8px;object-fit:contain}
+summary .pic{float:right;max-height:56px;margin-left:8px}
+h3{margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.tile b{font-size:1.8rem;display:block}
+.tile span,.fav small{color:var(--muted);font-size:.85rem}
+.fav{display:flex;gap:16px;align-items:center;cursor:pointer;border-color:var(--accent)}
+.fav h2{margin:2px 0 8px}
+.fav .pic{max-width:120px;max-height:120px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{background:var(--hl);border-radius:999px;padding:2px 10px;font-size:.85rem}
+.bar{display:grid;grid-template-columns:24px minmax(0,1fr) minmax(60px,30%) 28px;gap:10px;align-items:center;padding:6px 4px;border-radius:8px;cursor:pointer}
+.bar:hover{background:var(--hl)}
+.rank{color:var(--muted);text-align:right}
+.name{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.name small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.track{height:10px;background:var(--hl);border-radius:4px;overflow:hidden}
+.track span{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.chart{width:100%;height:auto;display:block}
+.chart line{stroke:var(--line)}
+.chart text{fill:var(--muted);font-size:12px}
+.chart circle{fill:var(--accent);fill-opacity:.7;stroke:var(--card);stroke-width:2;cursor:pointer}
+.chart circle:hover{fill-opacity:1}
+.empty{color:var(--muted);padding:16px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg)}
+.actions{position:sticky;bottom:0;z-index:5;padding:12px 0;background:linear-gradient(transparent,var(--bg) 35%)}
+/* innerhalb einer Bohne ist der Bohnenname überflüssig */
+details th:nth-child(2),details td.bean{display:none}
+@media (max-width:700px){
+  .actions button{flex:1}
+  details td.score{grid-column:1/-1;text-align:left}
+}
+@media (max-width:600px){
+  header h1 .sub{display:none}
+  .bar{grid-template-columns:24px minmax(0,1fr) 28px;row-gap:6px}
+  .bar .track{grid-column:2;grid-row:2}
+  .bar b{grid-column:3;grid-row:1}
+  .name{white-space:normal}
+  /* SVG wird verkleinert – Schrift und Punkte gegenrechnen, damit sie lesbar/tippbar bleiben */
+  .chart text{font-size:22px}
+  .chart circle{r:11px}
+}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>☕ Kaffee-Logbuch<span class="sub"> · Ninja Luxe Pro</span></h1>
+  <button id="export" title="Alle Daten als JSON-Datei sichern">Export</button>
+  <button onclick="importFile.click()" title="JSON-Datei laden und mit vorhandenen Daten zusammenführen">Import</button>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
+</header>
+<nav>
+  <button data-view="new" class="active">Neuer Bezug</button>
+  <button data-view="best">Dashboard</button>
+  <button data-view="beans">Meine Bohnen</button>
+</nav>
+<main>
+  <section id="new">
+    <form id="form">
+      <fieldset class="g4"><legend>Bohne</legend>
+        <label>Marke *<input name="brand" list="brands" placeholder="z. B. Lavazza" required></label>
+        <label>Sorte<input name="variety" list="varieties" placeholder="z. B. Super Crema"></label>
+        <label>Bohnenart<select name="beanKind"><option value="">– wählen –</option><option>100 % Arabica</option><option>Arabica-Robusta-Blend</option><option>100 % Robusta</option></select></label>
+        <label>Bohnentyp<input name="beanType" list="types" placeholder="z. B. Espresso"></label>
+        <label class="span2">Kaufort<input name="shop" list="shops" placeholder="z. B. Rewe, Amazon, Rösterei"></label>
+        <div class="field span2">Bild<div class="pair">
+          <input id="imageLink" type="url" placeholder="Bildadresse einfügen" aria-label="Bild-Link">
+          <label class="btn" for="upload">Hochladen</label><input type="file" id="upload" accept="image/*" hidden>
+        </div></div>
+        <input name="image" type="hidden">
+        <div class="row full" id="picBox" style="align-items:center" hidden><img id="preview" class="pic" alt="Vorschau"><button type="button" id="noImg">Bild entfernen</button><small id="picNote">Bild dieser Bohne übernommen – zum Ändern neuen Link oder Upload wählen</small></div>
+        <div id="beanInfo" class="hint full" hidden></div>
+      </fieldset>
+      <fieldset class="g3"><legend>Maschine</legend>
+        <div class="field">Einsatz *<div class="seg" id="seg-size"></div></div>
+        <div class="field">Stärkegrad *<div class="seg" id="seg-strength"></div></div>
+        <div class="field">Temperatur *<div class="seg" id="seg-temp"></div></div>
+        <label>Mahlgrad *<input name="grind" placeholder="1–25" type="number" min="1" max="25" inputmode="numeric" required></label>
+        <label>Dauer (s)<input name="time" type="number" min="0" step="1" inputmode="numeric"></label>
+        <label>Gewicht (g)<input name="weight" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      </fieldset>
+      <fieldset class="g2"><legend>Geschmack</legend>
+        <div class="field">Sauer *<div class="seg" id="seg-sour"></div></div>
+        <div class="field">Bitter *<div class="seg" id="seg-bitter"></div></div>
+        <div class="field full">Stärke *<div class="seg" id="seg-body"></div></div>
+        <div class="field full">Gesamtnote (1 = schlecht, 10 = perfekt) *<div class="seg score" id="seg-score"></div></div>
+        <label class="full">Notiz<textarea name="note" rows="2" placeholder="optional"></textarea></label>
+      </fieldset>
+      <div class="row actions">
+        <button class="primary" id="submit">Bezug speichern</button>
+        <button type="button" id="cancel" hidden>Bearbeiten abbrechen</button>
+      </div>
+    </form>
+  </section>
+  <section id="best" hidden></section>
+  <section id="beans" hidden></section>
+</main>
+<datalist id="brands"></datalist><datalist id="varieties"></datalist><datalist id="types"></datalist><datalist id="shops"></datalist>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status"></div>
+<script>
+const KEY = 'ninja-kaffee-v1';
+const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
+const SOUR = ['nicht sauer', 'leicht sauer', 'deutlich sauer', 'sehr sauer'];
+const BITTER = ['nicht bitter', 'leicht bitter', 'deutlich bitter', 'sehr bitter'];
+const BODY = ['zu schwach', 'leicht', 'genau richtig', 'kräftig', 'zu stark'];
+const TYPES = ['Espresso', 'Café Crema', 'Filterkaffee', 'Universal'];
+const NUMS = ['grind', 'time', 'weight', 'sour', 'bitter', 'body', 'score'];
+
+const $ = id => document.getElementById(id);
+const form = $('form');
+let shots = load(), editId = null;
+
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(shots)); }
+  catch { alert('Speichern im Browser fehlgeschlagen – bitte sofort exportieren!'); }
+  render();
+}
+const esc = v => String(v ?? '–').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+const beanKey = s => (s.brand + '|' + (s.variety || '')).trim().toLowerCase();
+const beanName = s => s.brand + (s.variety ? ' ' + s.variety : '');
+const ratio = s => s.weight ? '1:' + (s.weight / DOSE[s.size]).toFixed(1) : '–';
+const fmtDate = d => new Date(d).toLocaleString('de-DE', {dateStyle: 'short', timeStyle: 'short'});
+// identisch = diese Felder stimmen überein (Text ohne Groß/klein, leer = nicht angegeben)
+const SAME = ['brand', 'variety', 'beanType', 'size', 'grind', 'strength', 'temp', 'time', 'weight'];
+const norm = v => v == null || v === '' ? null : typeof v === 'string' ? v.trim().toLowerCase() : v;
+const isSame = (a, b) => SAME.every(k => norm(a[k]) === norm(b[k]));
+const splitShops = s => (s || '').split(',').map(t => t.trim()).filter(Boolean);
+const mergeShops = (a, b) => [...splitShops(a), ...splitShops(b)]
+  .filter((t, i, all) => all.findIndex(o => o.toLowerCase() === t.toLowerCase()) === i).join(', ');
+const byScore =(a, b) => b.score - a.score || b.date.localeCompare(a.date);
+
+function hints(s) {
+  const h = [];
+  if (s.sour >= 2) h.push('Eher sauer → feiner mahlen oder Temperatur höher.');
+  if (s.bitter >= 2) h.push('Eher bitter → gröber mahlen oder Temperatur niedriger.');
+  if (s.body === 0) h.push('Zu schwach → Stärkegrad höher oder feiner mahlen.');
+  if (s.body === 4) h.push('Zu stark → Stärkegrad niedriger oder gröber mahlen.');
+  if (s.time != null && s.time < 20) h.push('Sehr schneller Durchlauf (< 20 s) → feiner mahlen.');
+  if (s.time != null && s.time > 35) h.push('Sehr langsamer Durchlauf (> 35 s) → gröber mahlen.');
+  return h;
+}
+
+// Auswahl-Knöpfe statt Dropdowns: an der Maschine mit einem Tipp bedienbar
+function seg(name, labels, byIndex, def) {
+  $('seg-' + name).innerHTML = labels.map((l, i) => `<label class="opt"><input type="radio" name="${name}" value="${byIndex ? i : l}" required${l === def ? ' checked' : ''}><span>${l}</span></label>`).join('');
+}
+seg('size', ['Single', 'Double', 'Quad'], false, 'Double');
+seg('strength', ['Leicht', 'Mittel', 'Stark'], false, 'Mittel');
+seg('temp', ['Niedrig', 'Mittel', 'Hoch'], false, 'Mittel');
+seg('sour', SOUR.map(t => t.split(' ')[0]), true);
+seg('bitter', BITTER.map(t => t.split(' ')[0]), true);
+seg('body', BODY, true);
+seg('score', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], false);
+
+function toast(msg) {
+  $('toast').textContent = msg;
+  $('toast').classList.add('show');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => $('toast').classList.remove('show'), 2500);
+}
+
+form.onsubmit = e => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(form));
+  for (const k of NUMS) d[k] = d[k] === '' ? null : +d[k];
+  const old = shots.find(s => s.id === editId);
+  const dup = shots.find(s => s !== old && isSame(s, d));
+  if (dup && !confirm(`Es gibt bereits einen identischen Eintrag für ${beanName(d)} (${fmtDate(dup.date)}, Note ${dup.score}/10, ${dup.runs || 1}× durchgeführt).\n\n`
+    + 'OK = vorhandenen Eintrag mit deinen neuen Angaben überschreiben und als weitere Durchführung zählen.\nAbbrechen = nichts speichern.')) return;
+  const target = dup || old;
+  d.id = target ? target.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  d.date = dup ? new Date().toISOString() : old ? old.date : new Date().toISOString();
+  d.runs = dup ? (dup.runs || 1) + (old?.runs || 1) : old?.runs || 1;
+  // leere neue Felder löschen nichts Vorhandenes
+  if (dup) { d.shop = mergeShops(dup.shop, d.shop); d.image ||= dup.image; d.beanKind ||= dup.beanKind; d.note ||= dup.note; }
+  // beim Zusammenführen wandert der Eintrag ans Ende (neuester); ein bearbeiteter Doppelgänger geht darin auf
+  shots = dup ? [...shots.filter(s => s !== old && s !== dup), d] : old ? shots.map(s => s === old ? d : s) : [...shots, d];
+  const bean = {brand: d.brand, variety: d.variety, beanKind: d.beanKind, beanType: d.beanType, shop: d.shop};
+  stopEdit();
+  form.reset();
+  fill(bean); // nächster Versuch ist meist dieselbe Bohne
+  save();
+  toast(dup ? `Eintrag aktualisiert – ${d.runs}× durchgeführt ✓` : old ? 'Änderung gespeichert ✓' : 'Bezug gespeichert ✓');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+};
+
+function fill(s) {
+  for (const [k, v] of Object.entries(s)) if (form.elements[k]) form.elements[k].value = v ?? '';
+  $('imageLink').value = form.image.value.startsWith('data:') ? '' : form.image.value;
+  preview(); beanInfo();
+}
+// Bild hängt an einem Bezug; für die Bohne gilt das neueste Bild ihrer Bezüge
+const beanImage = s => s.image || shots.filter(x => beanKey(x) === beanKey(s) && x.image).at(-1)?.image;
+
+// Ohne eigenes Bild wird das Bohnenbild nur angezeigt, nicht kopiert – spart Browserspeicher
+function preview() {
+  const own = form.image.value, inherited = !own && form.brand.value && beanImage({brand: form.brand.value, variety: form.variety.value});
+  $('preview').src = own || inherited || '';
+  $('picBox').hidden = !(own || inherited);
+  $('noImg').hidden = !own;
+  $('picNote').hidden = !inherited;
+}
+$('imageLink').oninput = e => { form.image.value = e.target.value; preview(); };
+$('noImg').onclick = () => { form.image.value = $('imageLink').value = ''; preview(); };
+form.onreset = () => setTimeout(() => { preview(); beanInfo(); });
+// Upload wird verkleinert gespeichert, sonst ist der Browserspeicher (~5 MB) schnell voll
+$('upload').onchange = e => {
+  const img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+    c.width = img.width * k; c.height = img.height * k;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    form.image.value = c.toDataURL('image/jpeg', 0.8);
+    URL.revokeObjectURL(img.src); e.target.value = $('imageLink').value = ''; preview();
+  };
+  img.onerror = () => alert('Bild konnte nicht gelesen werden.');
+  img.src = URL.createObjectURL(e.target.files[0]);
+};
+function stopEdit() { editId = null; $('submit').textContent = 'Bezug speichern'; $('cancel').hidden = true; }
+$('cancel').onclick = () => { stopEdit(); form.reset(); };
+
+// Bohnenart/-typ aus früheren Bezügen derselben Bohne übernehmen
+form.brand.onchange = form.variety.onchange = () => {
+  const k = beanKey({brand: form.brand.value, variety: form.variety.value});
+  const list = shots.filter(s => beanKey(s) === k);
+  beanInfo(); preview();
+  if (!form.beanKind.value) form.beanKind.value = list.findLast(s => s.beanKind)?.beanKind || '';
+  if (!form.beanType.value) form.beanType.value = list.findLast(s => s.beanType)?.beanType || '';
+  if (!form.shop.value) form.shop.value = list.findLast(s => s.shop)?.shop || '';
+};
+
+// Zeigt beim Einstellen, was mit dieser Bohne bisher am besten lief und was der letzte Versuch nahelegt
+function beanInfo() {
+  const k = beanKey({brand: form.brand.value, variety: form.variety.value});
+  const list = form.brand.value ? shots.filter(s => beanKey(s) === k && s.id !== editId) : [];
+  $('beanInfo').hidden = !list.length;
+  if (!list.length) return;
+  const best = [...list].sort(byScore)[0], last = list.at(-1), h = hints(last);
+  $('beanInfo').innerHTML = `<b>${list.length} ${list.length === 1 ? "Versuch" : "Versuche"} mit dieser Bohne.</b><br>
+    Bester: Note ${best.score}/10 · ${best.size} · Mahlgrad ${best.grind} · Stärkegrad ${best.strength} · Temp. ${best.temp}<br>
+    ${last !== best ? `Letzter: Note ${last.score}/10 · Mahlgrad ${last.grind}<br>` : ''}${h.length ? 'Tipp aus dem letzten Versuch: ' + h.join(' ') + '<br>' : ''}
+    <button type="button" id="useBest" style="margin-top:8px">Beste Einstellung übernehmen</button>`;
+  $('useBest').onclick = () => fill({grind: best.grind, size: best.size, strength: best.strength, temp: best.temp});
+}
+
+function show(view) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== view);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.view));
+
+// n = Anzahl Versuche: dann steht die Zeile für die ganze Bohne und öffnet sie unter „Meine Bohnen“
+function row(s, mark, n) {
+  // data-l = Beschriftung für die Kartenansicht auf schmalen Bildschirmen
+  return `<tr ${n ? `data-bean="${esc(beanKey(s))}"` : `data-id="${s.id}"`} tabindex="0"><td class="score">${mark ? '★ ' : ''}<b>${s.score}</b>/10${s.runs > 1 ? `<small class="runs">${s.runs}× gemacht</small>` : ''}</td><td class="bean">${esc(beanName(s))}${n ? `<small class="count">${n} ${n === 1 ? 'Versuch' : 'Versuche'} ›</small>` : ''}</td>
+    <td data-l="Einsatz">${s.size}</td><td data-l="Mahlgrad">${s.grind}</td><td data-l="Stärkegrad">${s.strength}</td><td data-l="Temp.">${s.temp}</td>
+    <td data-l="Zeit">${s.time ?? '–'} s</td><td data-l="Gewicht">${s.weight ?? '–'} g</td><td data-l="Verhältnis">${ratio(s)}</td>
+    <td class="taste" data-l="Geschmack">${SOUR[s.sour]}, ${BITTER[s.bitter]}</td><td data-l="Datum">${fmtDate(s.date)}</td></tr>`;
+}
+const HEAD = '<thead><tr><th>Note</th><th>Bohne</th><th>Einsatz</th><th>Mahlgrad</th><th>Stärkegrad</th><th>Temp.</th><th>Zeit</th><th>Gewicht</th><th>Verh.</th><th>Geschmack</th><th>Datum</th></tr></thead>';
+const table = (list, best, ns) => `<div class="wrap"><table>${HEAD}${list.map((s, i) => row(s, s === best, ns?.[i])).join('')}</table></div>`;
+
+// je Bohne alle Bezüge + der beste, beste Bohne zuerst
+function beanGroups() {
+  const groups = new Map();
+  for (const s of shots) { const k = beanKey(s); groups.set(k, [...(groups.get(k) || []), s]); }
+  return [...groups.values()].map(list => ({list, best: [...list].sort(byScore)[0]})).sort((a, b) => byScore(a.best, b.best));
+}
+
+function openBean(key) {
+  show('beans');
+  const d = [...document.querySelectorAll('#beans details')].find(d => d.dataset.key === key);
+  if (d) { d.open = true; d.scrollIntoView({behavior: 'smooth'}); }
+}
+
+function render() {
+  const empty = '<p class="empty">Noch keine Bezüge – leg unter „Neuer Bezug“ los.</p>';
+  $('best').innerHTML = shots.length ? dashboard([...shots].sort(byScore)) : empty;
+
+  $('beans').innerHTML = shots.length ? beanGroups()
+    .map(({list, best}) => {
+      const avg = (list.reduce((n, s) => n + s.score, 0) / list.length).toFixed(1);
+      const pic = beanImage(best);
+      return `<details data-key="${esc(beanKey(best))}"><summary>${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}<b>${esc(beanName(best))}</b>
+        <small>${[best.beanKind, best.beanType, list.findLast(s => s.shop)?.shop].filter(Boolean).map(v => esc(v) + ' · ').join('')}${list.length} ${list.length === 1 ? "Versuch" : "Versuche"} · Ø ${avg} · Beste ${best.score}/10</small></summary>
+        ${table([...list].sort((a, b) => a.date.localeCompare(b.date)), best)}</details>`;
+    }).join('') : empty;
+
+  const opts = (vals) => [...new Set(vals.filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
+  $('brands').innerHTML = opts(shots.map(s => s.brand));
+  $('varieties').innerHTML = opts(shots.map(s => s.variety));
+  $('types').innerHTML = opts([...TYPES, ...shots.map(s => s.beanType)]);
+  $('shops').innerHTML = opts(shots.flatMap(s => splitShops(s.shop)));
+}
+
+function dashboard(sorted) {
+  const top = sorted[0], pic = beanImage(top);
+  const avg = (shots.reduce((n, s) => n + s.score, 0) / shots.length).toFixed(1);
+  const tile = (v, l) => `<div class="card tile"><b>${v}</b><span>${l}</span></div>`;
+  const chips = [top.size, 'Mahlgrad ' + top.grind, 'Stärkegrad ' + top.strength, 'Temp. ' + top.temp,
+    top.time != null ? top.time + ' s' : null, top.weight != null ? top.weight + ' g' : null, top.weight ? ratio(top) : null];
+  return `<div class="tiles">${tile(shots.length, 'Bezüge')}${tile(new Set(shots.map(beanKey)).size, 'Bohnen')}${tile(avg, 'Ø Note')}${tile(top.score + '/10', 'Bestnote')}</div>
+    <div class="card fav" data-id="${top.id}" tabindex="0">${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}
+      <div><small>Dein Favorit</small><h2>${esc(beanName(top))}</h2>
+      <div class="chips">${chips.filter(Boolean).map(c => `<span>${esc(c)}</span>`).join('')}</div></div></div>
+    <h3>Top 10</h3><div class="card">${sorted.slice(0, 10).map((s, i) => `<div class="bar" data-id="${s.id}" tabindex="0"><span class="rank">${i + 1}</span>
+      <span class="name">${esc(beanName(s))}<small>${s.size} · Mahlgrad ${s.grind} · ${s.temp} · ${SOUR[s.sour]}, ${BITTER[s.bitter]}</small></span>
+      <span class="track"><span style="width:${s.score * 10}%"></span></span><b>${s.score}</b></div>`).join('')}</div>
+    <h3>Note nach Mahlgrad</h3><div class="card">${scatter()}</div>
+    <h3>Beste Einstellung je Bohne</h3>${(g => table(g.map(x => x.best), null, g.map(x => x.list.length)))(beanGroups())}`;
+}
+
+function scatter() {
+  const W = 600, H = 240, L = 32, R = 12, T = 10, B = 28;
+  const x = g => L + (g - 1) / 24 * (W - L - R), y = v => T + (10 - v) / 10 * (H - T - B);
+  const grid = [0, 2, 4, 6, 8, 10].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('');
+  const ticks = [1, 5, 10, 15, 20, 25].map(g => `<text x="${x(g)}" y="${H - 8}" text-anchor="middle">${g}</text>`).join('');
+  const dots = shots.map(s => `<circle data-id="${s.id}" tabindex="0" cx="${x(s.grind)}" cy="${y(s.score)}" r="6"><title>${esc(beanName(s))} – Mahlgrad ${s.grind}, Note ${s.score}/10</title></circle>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gesamtnote nach Mahlgrad">${grid}${ticks}${dots}</svg>`;
+}
+
+function openDetail(id) {
+  const s = shots.find(x => x.id === id);
+  const rows = [['Datum', fmtDate(s.date)], ['Marke', s.brand], ['Sorte', s.variety], ['Bohnenart', s.beanKind], ['Bohnentyp', s.beanType], ['Kaufort', s.shop],
+    ['Einsatz', `${s.size} (~${DOSE[s.size]} g Mehl)`], ['Mahlgrad', s.grind], ['Stärkegrad', s.strength], ['Temperatur', s.temp],
+    ['Extraktionsdauer', s.time != null ? s.time + ' s' : null], ['Extraktionsgewicht', s.weight != null ? s.weight + ' g' : null],
+    ['Verhältnis', ratio(s)], ['Sauer', SOUR[s.sour]], ['Bitter', BITTER[s.bitter]], ['Stärke (Geschmack)', BODY[s.body]],
+    ['Gesamtnote', s.score + '/10'], ['Durchführungen', (s.runs || 1) + '×'], ['Notiz', s.note]];
+  const h = hints(s);
+  const pic = beanImage(s);
+  $('dlg').innerHTML = `<h3>${esc(beanName(s))}</h3>${pic ? `<p><img class="pic" src="${esc(pic)}" alt=""></p>` : ''}<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || null)}</dd>`).join('')}</dl>
+    ${h.length ? `<div class="hint">${h.join('<br>')}</div>` : ''}
+    <div class="row"><button class="primary" id="dEdit">Bearbeiten</button><button id="dCopy">Als Vorlage übernehmen</button>
+    <button id="dDel">Löschen</button><button id="dClose">Schließen</button></div>`;
+  $('dClose').onclick = () => $('dlg').close();
+  $('dEdit').onclick = () => { editId = s.id; fill(s); $('submit').textContent = 'Änderung speichern'; $('cancel').hidden = false; $('dlg').close(); show('new'); };
+  $('dCopy').onclick = () => { stopEdit(); fill({...s, note: '', image: ''}); $('dlg').close(); show('new'); };
+  $('dDel').onclick = () => { if (confirm('Diesen Bezug wirklich löschen?')) { shots = shots.filter(x => x !== s); $('dlg').close(); save(); } };
+  $('dlg').showModal();
+}
+const openRow = r => r && (r.dataset.bean ? openBean(r.dataset.bean) : openDetail(r.dataset.id));
+document.addEventListener('click', e => openRow(e.target.closest('[data-id],[data-bean]')));
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-id],[data-bean]')) openRow(e.target); });
+$('dlg').onclick = e => { // Klick neben das Fenster schließt
+  const r = $('dlg').getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) $('dlg').close();
+};
+
+$('export').onclick = async () => {
+  const name = 'kaffee-logbuch-' + new Date().toISOString().slice(0, 10) + '.json';
+  const file = new File([JSON.stringify(shots, null, 2)], name, {type: 'application/json'});
+  // iPhone-App vom Home-Bildschirm: Teilen-Menü ist zuverlässiger als ein Download
+  if (navigator.canShare?.({files: [file]})) {
+    try { return await navigator.share({files: [file]}); } catch (err) { if (err.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file);
+  a.download = name;
+  a.click();
+};
+$('importFile').onchange = async e => {
+  try {
+    const data = JSON.parse(await e.target.files[0].text());
+    if (!Array.isArray(data) || !data.every(s => s && s.id && s.brand && s.date)) throw 0;
+    // zusammenführen statt ersetzen: gleiche ID wird überschrieben, nichts geht verloren
+    const byId = new Map(shots.map(s => [s.id, s]));
+    data.forEach(s => byId.set(s.id, s));
+    shots = [...byId.values()];
+    save();
+    toast(data.length + ' Einträge importiert ✓');
+  } catch { alert('Die Datei ist kein gültiger Kaffee-Logbuch-Export.'); }
+  e.target.value = '';
+};
+
+console.assert(ratio({size: 'Double', weight: 36}) === '1:2.0' && ratio({size: 'Quad'}) === '–', 'ratio');
+console.assert(hints({sour: 3, bitter: 0, body: 2, time: 15}).length === 2, 'hints');
+render();
+// Offline-Fähigkeit; nur über https (GitHub Pages), nicht beim lokalen Öffnen der Datei
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
