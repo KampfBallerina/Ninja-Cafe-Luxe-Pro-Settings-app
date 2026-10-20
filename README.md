@@ -56,6 +56,8 @@ Danach startet die App im Vollbild und funktioniert auch ohne Internet.
 ### Deine Daten
 
 - Alles bleibt **lokal auf deinem Gerät**. Es gibt keinen Upload und kein Tracking.
+- Die App bittet den Browser, die Daten dauerhaft zu speichern, damit er sie nicht bei Speicherknappheit löscht.
+- Löschungen und Änderungen werden beim Import berücksichtigt: Pro Shot gewinnt die neuere Änderung, gelöschte Shots tauchen nicht wieder auf.
 - Die Daten gehören zu diesem Browser. Auf dem iPhone können Homescreen-App und Safari getrennte Speicher haben.
 - Löschst du die Browserdaten oder die App, sind die Daten weg. **Exportiere regelmäßig ein Backup.** So ziehst du auch auf ein neues Handy um.
 
@@ -94,6 +96,8 @@ The app then opens full screen and also works without internet.
 ### Your data
 
 - Everything stays **on your device**. There is no upload and no tracking.
+- The app asks the browser to store the data persistently, so it isn't cleared when storage runs low.
+- Imports respect changes and deletions: for each shot the newer change wins, and deleted shots don't come back.
 - The data belongs to this browser. On an iPhone, the home screen app and Safari may have separate storage.
 - If you clear the browser data or delete the app, your data is gone. **Export a backup regularly.** That's also how you move to a new phone.
 
@@ -106,12 +110,14 @@ The app then opens full screen and also works without internet.
 
 - Eine einzige `index.html` (HTML, CSS, JavaScript), ohne Frameworks und ohne Build-Schritt.
   · A single `index.html` (HTML, CSS, JavaScript), with no frameworks and no build step.
+- Daten liegen in IndexedDB (Rückfall: localStorage). Jeder Shot trägt einen Änderungszeitpunkt (`updated`), gelöschte Shots bleiben als Löschmarke (`deleted`) erhalten. Der Export hat das Format `{version: 2, shots, deleted}`, alte Exporte (nur die Liste) lassen sich weiter importieren.
+  · Data lives in IndexedDB (fallback: localStorage). Each shot carries a change time (`updated`), deleted shots are kept as tombstones (`deleted`). Exports use `{version: 2, shots, deleted}`; old exports (just the list) can still be imported.
 - `manifest.webmanifest` und `sw.js` (Service Worker) sorgen für Installation und Offline-Betrieb. Gehostet wird über GitHub Pages.
   · `manifest.webmanifest` and `sw.js` (service worker) handle installation and offline use. Hosted on GitHub Pages.
 - **Lokal starten / Run locally:** `index.html` im Browser öffnen. Der Service Worker läuft nur über `https` oder `localhost`, z. B. mit `npx serve`.
   · Open `index.html` in a browser. The service worker only runs over `https` or on `localhost`, e.g. with `npx serve`.
-- **Updates:** Die App lädt aus dem Cache und aktualisiert sich im Hintergrund. Neue Versionen sind ab dem übernächsten Öffnen sichtbar.
-  · The app loads from the cache and updates in the background. A new version shows up from the second launch after the change.
+- **Updates:** Mit Internet lädt die App immer die aktuelle Version, ohne Internet die zuletzt geladene aus dem Cache.
+  · With internet the app always loads the latest version, offline it uses the last one from the cache.
 - **Neue oder umbenannte Dateien / New or renamed files:** `FILES` in `sw.js` anpassen und `CACHE` hochzählen (z. B. `kaffee-v2` → `kaffee-v3`).
   · Update `FILES` in `sw.js` and bump `CACHE`.
 
