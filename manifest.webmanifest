@@ -1,6 +1,6 @@
 {
-  "name": "Kaffee-Logbuch",
-  "short_name": "Kaffee",
+  "name": "Caffeine Analytica",
+  "short_name": "Caffeine",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
