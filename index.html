@@ -13,9 +13,9 @@
 <style>
 /* Abstandsskala (4er-Raster): 4 Mini · 8 eng · 12 Liste · 16 Standard/Seitenrand/Karten · 24 Abschnitt · 32 Seitenende */
 :root{--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--r:12px;--r-s:8px;--h:44px;
-  --bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc;--danger:#b42318;--on-danger:#fff;color-scheme:light dark;
+  --bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc;--danger:#b42318;--on-danger:#fff;--red:#ff3b30;color-scheme:light dark;
   --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
-@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922;--danger:#ff8a80;--on-danger:#1c1210;
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922;--danger:#ff8a80;--on-danger:#1c1210;--red:#ff453a;
   --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b98a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -209,8 +209,40 @@ dd{margin:0}
 #zoom::backdrop{background:rgb(0 0 0/.85)}
 
 .langs{display:grid;gap:var(--s2)}
-#syncBox{margin-top:var(--s5)}
+/* Einstellungen: Sprache als Zweier-Auswahl nebeneinander, Abschnitte durch Linien getrennt */
+#langs{grid-template-columns:repeat(2,minmax(0,1fr))}
+#syncBox,.about{margin-top:var(--s5);padding-top:var(--s4);border-top:1px solid var(--line)}
+/* zerstörende Aktion wie bei iOS (getönter Knopf): Systemrot als Schrift auf blassrotem Grund */
+button.destructive{margin-top:var(--s2);background:color-mix(in srgb,var(--red) 15%,transparent);border-color:transparent;color:var(--red);font-weight:600}
+/* Dropbox-Knopf in Dropbox-Blau, wie in anderen Apps */
+button.dbx{background:#0061ff;border-color:#0061ff;color:#fff;font-weight:500}
+button svg.brand{width:20px;height:20px;margin-right:var(--s2);fill:currentColor;flex:none}
+.about{margin-bottom:0;color:var(--muted);font-size:.85rem;text-align:center}
+.about a{color:var(--accent)}
 #syncBox .note{margin:0 0 var(--s3);font-size:.9rem}
+#syncBox .state{color:var(--muted)}
+/* Konto und Status links, Sync-Knopf rechts daneben; während des Abgleichs dreht sich das Symbol */
+.syncrow{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)}
+.syncrow>div{flex:1;min-width:0;display:grid;gap:var(--s1)}
+#syncBox .syncrow .note{margin:0;overflow-wrap:anywhere}
+#dbxNow:disabled{cursor:default}
+#dbxNow:disabled svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#dbxNow:disabled svg{animation:none}}
+#syncBox .state.bad{color:var(--danger)}
+/* Schalter: ganze Zeile ist die Tippfläche, rechts der Schieber */
+button.swrow{display:flex;justify-content:space-between;gap:var(--s3);width:100%;padding:0 var(--s4);text-align:left}
+.sw{flex:none;position:relative;width:44px;height:26px;border-radius:13px;background:var(--line);transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgb(0 0 0/.3);transition:transform .15s}
+[aria-checked=true]>.sw{background:var(--accent)}
+[aria-checked=true]>.sw::after{transform:translateX(18px)}
+@media (prefers-reduced-motion:reduce){.sw,.sw::after{transition:none}}
+/* Sync-Status am Zahnrad: gelb = ausstehend, rot = Fehler */
+#setBtn{position:relative}
+.dot{position:absolute;top:6px;right:6px;width:12px;height:12px;border:2px solid var(--card);border-radius:50%;background:#eab308}
+.dot.bad{background:var(--danger)}
+#firstDlg p{margin:0 0 var(--s4)}
+#firstDlg small{display:block;margin:calc(var(--s1) * -1) 0 var(--s2);color:var(--muted)}
 button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(--accent);font-size:.85rem}
 
 /* Tablet/Handy */
@@ -269,7 +301,7 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
   <button class="icon" onclick="importFile.click()" data-i18n-title="btn.import">
     <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button>
   <button id="setBtn" class="icon" aria-haspopup="dialog" data-i18n-title="btn.settings">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <span class="dot" id="syncDot" hidden></span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
 </header>
 <nav role="tablist">
@@ -340,14 +372,18 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
   <h3 id="sortTitle" data-i18n="sort.title"></h3>
   <div class="langs" id="sorts"></div>
 </dialog>
+<dialog id="firstDlg" aria-labelledby="firstTitle"></dialog>
 <dialog id="setDlg" aria-labelledby="setTitle">
   <h3 id="setTitle" data-i18n="set.title"></h3>
   <span class="flabel" id="langLabel" data-i18n="set.lang"></span>
   <div class="langs" id="langs" role="group" aria-labelledby="langLabel"></div>
   <div id="syncBox" hidden></div>
+  <p class="about"><span data-i18n="set.version"></span> <span id="appVersion"></span> ·
+    <a href="https://github.com/KampfBallerina/Ninja-Cafe-Luxe-Pro-Settings-app" target="_blank" rel="noopener" data-i18n="set.source"></a></p>
 </dialog>
 <div id="toast" role="status"></div>
 <script>
+const APP_VERSION = '1.0.0'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
 const KEY = 'ninja-kaffee-v1';
 const LANG_KEY = 'ninja-kaffee-lang';
 const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
@@ -362,10 +398,22 @@ const I18N = {
     'btn.add': 'Neuer Shot', 'btn.export': 'Export: alle Daten als Datei sichern',
     'btn.import': 'Import: Datei laden und mit vorhandenen Daten zusammenführen', 'btn.settings': 'Einstellungen',
     'set.title': 'Einstellungen', 'set.lang': 'Sprache', 'close': 'Schließen',
+    'set.version': 'Version', 'set.source': 'GitHub',
     'sync.title': 'Synchronisation', 'sync.intro': 'Gleiche deine Shots über deine eigene Dropbox zwischen deinen Geräten ab. Die App sieht nur ihren eigenen Ordner darin.',
     'sync.connect': 'Mit Dropbox verbinden', 'sync.manual': 'Anmeldung klappt nicht? Code manuell eingeben',
     'sync.pasteCode': 'Melde dich im geöffneten Fenster bei Dropbox an, kopiere den angezeigten Code und füge ihn hier ein:',
     'sync.confirm': 'Code bestätigen', 'sync.back': 'Zurück',
+    'sync.now': 'Jetzt synchronisieren', 'sync.offlineImgs': 'Bilder offline verfügbar', 'sync.reconnect': 'Neu verbinden',
+    'sync.st.running': 'Wird synchronisiert …', 'sync.st.pending': 'Ausstehend – wird synchronisiert, sobald Internet da ist',
+    'sync.st.idle': d => `Synchronisiert · ${d}`, 'sync.st.error': m => `Fehler beim Synchronisieren: ${m}`,
+    'sync.st.auth': 'Zugriff abgelaufen, widerrufen oder ohne nötige Berechtigung – bitte neu verbinden', 'sync.full': 'Deine Dropbox ist voll',
+    'sync.first.title': 'Daten zusammenführen?',
+    'sync.first.text': (l, r) => `In deiner Dropbox liegen schon ${r} Shots, auf diesem Gerät ${l}. Was soll passieren?`,
+    'sync.first.merge': 'Zusammenführen', 'sync.first.mergeHint': 'Empfohlen: Beides wird vereint, die neuere Änderung gewinnt.',
+    'sync.first.remote': 'Dropbox-Daten verwenden', 'sync.first.remoteHint': 'Ersetzt die Daten auf diesem Gerät. Vorher wird eine Sicherung exportiert.',
+    'sync.first.local': 'Daten dieses Geräts verwenden', 'sync.first.localHint': 'Ersetzt die Daten in der Dropbox. Dort bleibt eine Sicherungskopie.',
+    'sync.first.later': 'Später entscheiden',
+    'sync.missingImgs': n => `${n} Bilder liegen nur in der Dropbox und fehlen nach dem Trennen auf diesem Gerät. Trotzdem trennen?`,
     'sync.as': (n, e) => `Verbunden mit Dropbox: ${n}${e ? ` (${e})` : ''}`, 'sync.disconnect': 'Trennen',
     'sync.connected': 'Mit Dropbox verbunden', 'sync.disconnected': 'Dropbox getrennt',
     'sync.denied': 'Dropbox-Anmeldung abgebrochen', 'sync.failed': 'Verbindung mit Dropbox fehlgeschlagen',
@@ -444,10 +492,22 @@ const I18N = {
     'btn.add': 'New shot', 'btn.export': 'Export: save all data as a file',
     'btn.import': 'Import: load a file and merge it with existing data', 'btn.settings': 'Settings',
     'set.title': 'Settings', 'set.lang': 'Language', 'close': 'Close',
+    'set.version': 'Version', 'set.source': 'GitHub',
     'sync.title': 'Sync', 'sync.intro': 'Sync your shots between your devices through your own Dropbox. The app only sees its own folder there.',
     'sync.connect': 'Connect to Dropbox', 'sync.manual': 'Sign-in not working? Enter a code manually',
     'sync.pasteCode': 'Sign in to Dropbox in the window that opened, copy the code shown there and paste it here:',
     'sync.confirm': 'Confirm code', 'sync.back': 'Back',
+    'sync.now': 'Sync now', 'sync.offlineImgs': 'Images available offline', 'sync.reconnect': 'Reconnect',
+    'sync.st.running': 'Syncing …', 'sync.st.pending': 'Pending – will sync as soon as you are online',
+    'sync.st.idle': d => `Synced · ${d}`, 'sync.st.error': m => `Sync failed: ${m}`,
+    'sync.st.auth': 'Access expired, revoked or missing a permission – please reconnect', 'sync.full': 'Your Dropbox is full',
+    'sync.first.title': 'Merge data?',
+    'sync.first.text': (l, r) => `Your Dropbox already holds ${r} shots, this device ${l}. What should happen?`,
+    'sync.first.merge': 'Merge', 'sync.first.mergeHint': 'Recommended: both are combined, the newer change wins.',
+    'sync.first.remote': 'Use Dropbox data', 'sync.first.remoteHint': 'Replaces the data on this device. A backup is exported first.',
+    'sync.first.local': 'Use this device\'s data', 'sync.first.localHint': 'Replaces the data in Dropbox. A backup copy stays there.',
+    'sync.first.later': 'Decide later',
+    'sync.missingImgs': n => `${n} images are only in Dropbox and will be missing on this device after disconnecting. Disconnect anyway?`,
     'sync.as': (n, e) => `Connected to Dropbox: ${n}${e ? ` (${e})` : ''}`, 'sync.disconnect': 'Disconnect',
     'sync.connected': 'Connected to Dropbox', 'sync.disconnected': 'Dropbox disconnected',
     'sync.denied': 'Dropbox sign-in cancelled', 'sync.failed': 'Connecting to Dropbox failed',
@@ -590,14 +650,28 @@ function merge(a, b) {
   return {shots: [...byId.values()].filter(s => !(deleted[s.id] >= ts(s))), deleted};
 }
 
+// Daten von außen (Import-Datei, Dropbox) prüfen und vereinheitlichen; alte Exporte sind nur die Liste ohne Löschmarken
+function parseData(raw) {
+  const list = Array.isArray(raw) ? raw : raw?.shots;
+  if (!Array.isArray(list) || !list.every(s => s && s.id && s.brand && s.date)) throw new Error('invalid data');
+  const deleted = {};
+  for (const [id, v] of Object.entries(Array.isArray(raw) ? {} : raw.deleted || {})) if (+v > 0) deleted[id] = +v;
+  list.forEach(s => s.updated = ts(s));
+  return {shots: list, deleted};
+}
+
 let writing = Promise.resolve(); // Schreibvorgänge nacheinander, damit kein älterer Stand einen neueren überholt
 let loadFailed = false; // Daten nicht lesbar: nichts speichern, sonst würde der leere Stand sie überschreiben
-function save() {
+let dataReady = false; // erst nach dem Laden darf sync.js abgleichen
+// local = Änderung durch den Nutzer: Zeitpunkte setzen und Sync anstoßen.
+// false = Stand vom Sync übernommen: dessen Zeitpunkte bleiben, sonst gälte er als neue lokale Änderung.
+function save(local = true) {
   if (loadFailed) return alert(t('err.load'));
-  stamp();
+  if (local) stamp(); else remember();
   const data = {shots, deleted: graves};
   writing = writing.then(() => dbSet(data)).catch(() => alert(t('err.save')));
   render();
+  if (local) window.syncSoon?.();
 }
 const esc = v => String(v ?? '–').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
 const beanKey = s => (s.brand + '|' + (s.variety || '')).trim().toLowerCase();
@@ -758,7 +832,10 @@ function fill(s) {
   preview(); beanInfo(); labelSegs();
 }
 // Ein Bild je Bohne, gespeichert an einem ihrer Shots; alle Shots zeigen es (ältere Daten mit mehreren: das neueste)
-const beanImage = s => shots.findLast(x => beanKey(x) === beanKey(s) && x.image)?.image;
+const beanImage = s => imgSrc(shots.findLast(x => beanKey(x) === beanKey(s) && x.image)?.image);
+// „img:<name>“ = Bild liegt nur in der Dropbox (Option „Bilder offline verfügbar“ aus); sync.js lädt es bei Bedarf
+const IMG_PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>');
+const imgSrc = v => v?.startsWith('img:') ? window.imgUrl?.(v) || IMG_PH : v;
 let imgRemoved = false; // „Bild entfernen“ gedrückt: beim Speichern verliert die ganze Bohne ihr Bild
 
 // Löschen: trägt der Shot das angezeigte Bohnenbild, erbt es der neueste verbleibende Shot der Bohne (falls ohne eigenes Bild)
@@ -1120,6 +1197,7 @@ function applyLang() {
   beanInfo();
 }
 $('setBtn').onclick = () => openDlg($('setDlg'));
+$('appVersion').textContent = APP_VERSION;
 $('langs').onclick = e => {
   const b = e.target.closest('[data-lang]');
   if (!b) return;
@@ -1142,16 +1220,11 @@ $('export').onclick = async () => {
 };
 $('importFile').onchange = async e => {
   try {
-    const raw = JSON.parse(await e.target.files[0].text());
-    const list = Array.isArray(raw) ? raw : raw?.shots; // alte Exporte: nur die Liste, ohne Löschmarken
-    if (!Array.isArray(list) || !list.every(s => s && s.id && s.brand && s.date)) throw 0;
-    const deleted = {};
-    for (const [id, v] of Object.entries(Array.isArray(raw) ? {} : raw.deleted || {})) if (+v > 0) deleted[id] = +v;
-    list.forEach(s => s.updated = ts(s));
+    const data = parseData(JSON.parse(await e.target.files[0].text()));
     // zusammenführen statt ersetzen: pro Shot gewinnt die neuere Änderung, Löschungen werden übernommen
-    ({shots, deleted: graves} = merge({shots, deleted: graves}, {shots: list, deleted}));
+    ({shots, deleted: graves} = merge({shots, deleted: graves}, data));
     save();
-    toast(t('toast.imported', list.length));
+    toast(t('toast.imported', data.shots.length));
   } catch { toast(t('err.import'), true); }
   e.target.value = '';
 };
@@ -1170,6 +1243,8 @@ load().catch(() => { loadFailed = true; toast(t('err.load'), true); return {shot
   if (d.fresh && shots.length) dbSet({shots, deleted: graves}).catch(() => {}); // Umzug sichern; scheitert er, bleibt localStorage die Quelle
   applyLang();
   show(shots.length ? 'best' : 'new');
+  dataReady = !loadFailed;
+  window.syncSoon?.(0); // beim Öffnen abgleichen
 });
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht bei Speicherknappheit zu löschen
 // Offline-Fähigkeit; nur über https (GitHub Pages), nicht beim lokalen Öffnen der Datei

@@ -16,9 +16,13 @@
 </p>
 
 <p align="center">
-  <img src="screenshots/dashboard.png" alt="Dashboard" width="260">
-  &nbsp;&nbsp;
-  <img src="screenshots/new-shot.png" alt="Neuer Shot / New shot" width="260">
+  <img src="screenshots/dashboard.png" alt="Dashboard" width="200">
+  &nbsp;
+  <img src="screenshots/new-shot.png" alt="Neuer Shot / New shot" width="200">
+  &nbsp;
+  <img src="screenshots/beans.png" alt="Meine Bohnen / My beans" width="200">
+  &nbsp;
+  <img src="screenshots/settings.png" alt="Einstellungen / Settings" width="200">
 </p>
 
 ---
@@ -41,7 +45,8 @@ Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell
 | **Meine Bohnen** | Alle Bohnen als Karten mit ihren Shots, der beste zuerst. Mit Suche, Filter und Sortierung |
 | **Favoriten** | Einzelne Shots mit dem Stern markieren und gezielt filtern |
 | **Bohnenbild** | Ein Bild pro Bohne, das bei allen ihren Shots erscheint. Als Link oder Upload (wird automatisch verkleinert) |
-| **Export / Import** | Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt, nichts wird überschrieben |
+| **Export / Import** | Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt statt ersetzt |
+| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App sieht nur ihren Ordner `Apps/Caffeine Analytica`. Mit „Bilder offline verfügbar“ aus liegen die Bilder nur in der Dropbox und sparen Platz auf dem Gerät |
 
 Ein Tipp auf einen Shot öffnet die Details. Dort kannst du ihn **bearbeiten**, als **Vorlage** nutzen oder **löschen**.
 
@@ -55,7 +60,7 @@ Danach startet die App im Vollbild und funktioniert auch ohne Internet.
 
 ### Deine Daten
 
-- Alles bleibt **lokal auf deinem Gerät**. Es gibt keinen Upload und kein Tracking.
+- Alles bleibt **lokal auf deinem Gerät**. Es gibt kein Tracking. Nur wenn du Dropbox verbindest, landen die Daten zusätzlich in deiner eigenen Dropbox (und bei ausgeschalteter Option „Bilder offline verfügbar“ die Bilder nur dort).
 - Die App bittet den Browser, die Daten dauerhaft zu speichern, damit er sie nicht bei Speicherknappheit löscht.
 - Löschungen und Änderungen werden beim Import berücksichtigt: Pro Shot gewinnt die neuere Änderung, gelöschte Shots tauchen nicht wieder auf.
 - Die Daten gehören zu diesem Browser. Auf dem iPhone können Homescreen-App und Safari getrennte Speicher haben.
@@ -81,7 +86,8 @@ No account, no server · works offline · installs to your home screen · light 
 | **My beans** | All beans as cards with their shots, best first. With search, filters and sorting |
 | **Favorites** | Mark individual shots with the star and filter for them |
 | **Bean image** | One image per bean, shown for all of its shots. As a link or upload (resized automatically) |
-| **Export / import** | Back up as a JSON file. Importing merges the data, nothing is overwritten |
+| **Export / import** | Back up as a JSON file. Importing merges the data instead of replacing it |
+| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only sees its folder `Apps/Caffeine Analytica`. With “Images available offline” turned off, images are kept only in Dropbox to save space on the device |
 
 Tap a shot to open its details. From there you can **edit** it, use it as a **template** or **delete** it.
 
@@ -95,7 +101,7 @@ The app then opens full screen and also works without internet.
 
 ### Your data
 
-- Everything stays **on your device**. There is no upload and no tracking.
+- Everything stays **on your device**. There is no tracking. Only if you connect Dropbox is the data also stored in your own Dropbox (and with “Images available offline” turned off, the images only there).
 - The app asks the browser to store the data persistently, so it isn't cleared when storage runs low.
 - Imports respect changes and deletions: for each shot the newer change wins, and deleted shots don't come back.
 - The data belongs to this browser. On an iPhone, the home screen app and Safari may have separate storage.
@@ -108,17 +114,25 @@ The app then opens full screen and also works without internet.
 
 <br>
 
-- Eine einzige `index.html` (HTML, CSS, JavaScript), ohne Frameworks und ohne Build-Schritt.
-  · A single `index.html` (HTML, CSS, JavaScript), with no frameworks and no build step.
+- `index.html` (HTML, CSS, JavaScript) plus `sync.js` für Dropbox, ohne Frameworks und ohne Build-Schritt.
+  · `index.html` (HTML, CSS, JavaScript) plus `sync.js` for Dropbox, with no frameworks and no build step.
 - Daten liegen in IndexedDB (Rückfall: localStorage). Jeder Shot trägt einen Änderungszeitpunkt (`updated`), gelöschte Shots bleiben als Löschmarke (`deleted`) erhalten. Der Export hat das Format `{version: 2, shots, deleted}`, alte Exporte (nur die Liste) lassen sich weiter importieren.
   · Data lives in IndexedDB (fallback: localStorage). Each shot carries a change time (`updated`), deleted shots are kept as tombstones (`deleted`). Exports use `{version: 2, shots, deleted}`; old exports (just the list) can still be imported.
+- **Dropbox-Sync** (`sync.js`, ohne Bibliotheken): Login per OAuth mit PKCE direkt aus dem Browser, ohne Server. Im App-Ordner liegen `data.json` (Shots + Löschmarken, Bilder als Verweis `img:<sha256>`) und `images/`. Ein Abgleich lädt `data.json`, führt pro Shot zusammen (neuere Änderung gewinnt) und lädt nur hoch, wenn sich die Datei seitdem nicht geändert hat, sonst beginnt er von vorn.
+  · **Dropbox sync** (`sync.js`, no libraries): OAuth with PKCE straight from the browser, no server. The app folder holds `data.json` (shots + tombstones, images as `img:<sha256>` references) and `images/`. A sync downloads `data.json`, merges per shot (newer change wins) and only uploads if the file hasn't changed in the meantime, otherwise it starts over.
 - `manifest.webmanifest` und `sw.js` (Service Worker) sorgen für Installation und Offline-Betrieb. Gehostet wird über GitHub Pages.
   · `manifest.webmanifest` and `sw.js` (service worker) handle installation and offline use. Hosted on GitHub Pages.
 - **Lokal starten / Run locally:** `index.html` im Browser öffnen. Der Service Worker läuft nur über `https` oder `localhost`, z. B. mit `npx serve`.
   · Open `index.html` in a browser. The service worker only runs over `https` or on `localhost`, e.g. with `npx serve`.
 - **Updates:** Mit Internet lädt die App immer die aktuelle Version, ohne Internet die zuletzt geladene aus dem Cache.
   · With internet the app always loads the latest version, offline it uses the last one from the cache.
+- **Version:** `APP_VERSION` in `index.html` bei jeder Veröffentlichung hochzählen, sie steht in den Einstellungen.
+  · Bump `APP_VERSION` in `index.html` with every release, it is shown in the settings.
 - **Neue oder umbenannte Dateien / New or renamed files:** `FILES` in `sw.js` anpassen und `CACHE` hochzählen (z. B. `kaffee-v2` → `kaffee-v3`).
   · Update `FILES` in `sw.js` and bump `CACHE`.
 
 </details>
+
+## Lizenz / License
+
+MIT – siehe / see [LICENSE](LICENSE).
