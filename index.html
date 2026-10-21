@@ -407,6 +407,7 @@ const I18N = {
     'btn.import': 'Import: Datei laden und mit vorhandenen Daten zusammenführen', 'btn.settings': 'Einstellungen',
     'set.title': 'Einstellungen', 'set.lang': 'Sprache', 'close': 'Schließen',
     'set.version': 'Version', 'set.source': 'GitHub',
+    'upd.ask': 'Eine neue Version der App ist da. Jetzt neu laden? Nicht gespeicherte Eingaben im Formular gehen dabei verloren.',
     'sync.title': 'Synchronisation', 'sync.intro': 'Gleiche deine Shots über deine eigene Dropbox zwischen deinen Geräten ab. Die App sieht nur ihren eigenen Ordner darin.',
     'sync.connect': 'Mit Dropbox verbinden', 'sync.manual': 'Anmeldung klappt nicht? Code manuell eingeben',
     'sync.pasteCode': 'Melde dich im geöffneten Fenster bei Dropbox an, kopiere den angezeigten Code und füge ihn hier ein:',
@@ -502,6 +503,7 @@ const I18N = {
     'btn.import': 'Import: load a file and merge it with existing data', 'btn.settings': 'Settings',
     'set.title': 'Settings', 'set.lang': 'Language', 'close': 'Close',
     'set.version': 'Version', 'set.source': 'GitHub',
+    'upd.ask': 'A new version of the app is available. Reload now? Unsaved input in the form will be lost.',
     'sync.title': 'Sync', 'sync.intro': 'Sync your shots between your devices through your own Dropbox. The app only sees its own folder there.',
     'sync.connect': 'Connect to Dropbox', 'sync.manual': 'Sign-in not working? Enter a code manually',
     'sync.pasteCode': 'Sign in to Dropbox in the window that opened, copy the code shown there and paste it here:',
@@ -1278,6 +1280,19 @@ load().catch(() => { loadFailed = true; toast(t('err.load'), true); return {shot
   show(shots.length ? 'best' : 'new');
   dataReady = !loadFailed;
   window.syncSoon?.(0); // beim Öffnen abgleichen
+});
+// Home-Bildschirm-App (iPhone) lädt beim Zurückholen nicht neu, sondern macht mit der alten Seite weiter: dann nach neuer
+// Version schauen (darum APP_VERSION hochzählen) und neu laden; im Formular vorher fragen, damit nichts Eingetipptes verloren geht
+let skipVersion = '';
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden || !navigator.onLine) return;
+  try {
+    const v = (await (await fetch('index.html', {cache: 'no-store'})).text()).match(/APP_VERSION = '([^']+)'/)?.[1];
+    if (!v || v === APP_VERSION || v === skipVersion) return;
+    if (!$('new').hidden && !confirm(t('upd.ask'))) { skipVersion = v; return; }
+    await writing; // laufendes Speichern nicht abbrechen
+    location.reload();
+  } catch {} // offline o. Ä.: beim nächsten Mal
 });
 navigator.storage?.persist?.(); // Browser bitten, die Daten nicht bei Speicherknappheit zu löschen
 // Offline-Fähigkeit; nur über https (GitHub Pages), nicht beim lokalen Öffnen der Datei
