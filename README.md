@@ -33,16 +33,40 @@ Du protokollierst jeden Shot: welche Bohne, welche Maschineneinstellung und wie 
 
 Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell- und Dunkelmodus · Deutsch und Englisch
 
+### Neu in Version 1.2.0
+
+- **Röstgrad** je Bohne in fünf Stufen (hell bis dunkel). Passt die Temperatur nicht dazu, empfiehlt die App die Einstellung laut Ninja-Handbuch
+- **Probleme ankreuzen:** zu kalt, zu heiß, wenig Crema, schmeckt verbrannt, jeweils mit passendem Tipp
+- **Bessere Tipps** aus der Fehlerdiagnose im Handbuch, z. B. bei zu schnellem oder zu langsamem Durchlauf
+- **Grunddaten je Bohne:** Bohnenart, -typ und Röstgrad sind bei allen Shots einer Bohne gleich. Eine Änderung gilt für alle
+- **Alle Kauforte einer Bohne** auf einen Blick: in „Meine Bohnen“, im Formular und in den Shot-Details. Dazu ein Kaufort-Filter
+
+<details>
+<summary>Frühere Versionen</summary>
+
+**1.1.0**
+- Getränk und Tassengröße wählbar, nur in den Kombinationen, die die Maschine anbietet
+- Die Homescreen-App lädt eine neue Version automatisch
+
+**1.0.1**
+- Korrektur am Filterfenster
+
+**1.0.0**
+- Erste Version mit Dropbox-Sync
+
+</details>
+
 ### Funktionen
 
 | Funktion | Kurz erklärt |
 |---|---|
-| **Neuer Shot** | Bohne (Marke, Sorte, Art, Typ, Kaufort, Bild), Maschine (Einsatz, Stärkegrad, Temperatur, Mahlgrad, Dauer, Gewicht) und Geschmack per Schieberegler (sauer, bitter, Stärke, Note 1–10) |
-| **Mitdenkendes Formular** | Schlägt bekannte Werte vor, füllt Bohnendaten automatisch aus und übernimmt auf Knopfdruck die beste bisherige Einstellung der Bohne |
-| **Tipps** | Aus dem Geschmack werden Hinweise, z. B. „eher sauer → feiner mahlen oder Temperatur höher“. Dazu das Brühverhältnis (z. B. 1:2,0) |
+| **Neuer Shot** | Bohne (Marke, Sorte, Art, Typ, Röstgrad, Kaufort, Bild), Maschine (Einsatz, Getränk – nur Kombinationen, die die Maschine anbietet, Tassengröße bei Coffee-Programmen –, Stärkegrad, Temperatur, Mahlgrad, Dauer, Gewicht) und Geschmack per Schieberegler (sauer, bitter, Stärke, Note 1–10). Dazu ankreuzbare Probleme: zu kalt, zu heiß, wenig Crema, schmeckt verbrannt |
+| **Mitdenkendes Formular** | Schlägt bekannte Werte vor, füllt Bohnendaten und den zuletzt genutzten Kaufort automatisch aus, zeigt, wo die Bohne bisher gekauft wurde, und übernimmt auf Knopfdruck die beste bisherige Einstellung der Bohne |
+| **Grunddaten je Bohne** | Bohnenart, Bohnentyp und Röstgrad gelten für alle Shots einer Bohne (Marke + Sorte). Änderst du sie bei einem Shot, ändern sie sich bei allen |
+| **Tipps** | Aus Geschmack, Durchlaufzeit und angekreuzten Problemen werden Hinweise, gestützt auf die Fehlerdiagnose im Ninja-Handbuch, z. B. „eher sauer → feiner mahlen oder Temperatur höher“ oder „zu kalt → Siebträger und Tasse vorwärmen“. Passt die Temperatur nicht zum Röstgrad, gibt es die Empfehlung von Ninja. Dazu das Brühverhältnis (z. B. 1:2,0) |
 | **Doppelte Shots** | Gleiche Einstellungen werden zusammengefasst und als „2× zubereitet“ gezählt |
 | **Dashboard** | Kennzahlen, bester Shot, Favoriten, Top 10, Geschmackskarte (sauer × bitter), Notenverlauf und die beste Einstellung je Bohne |
-| **Meine Bohnen** | Alle Bohnen als Karten mit ihren Shots, der beste zuerst. Mit Suche, Filter und Sortierung |
+| **Meine Bohnen** | Alle Bohnen als Karten mit ihren Shots, der beste zuerst. Zugeklappt steht der letzte Kaufort („Rewe +2“), aufgeklappt alle. Mit Suche, Filter (u. a. Röstgrad und Kaufort) und Sortierung |
 | **Favoriten** | Einzelne Shots mit dem Stern markieren und gezielt filtern |
 | **Bohnenbild** | Ein Bild pro Bohne, das bei allen ihren Shots erscheint. Als Link oder Upload (wird automatisch verkleinert) |
 | **Export / Import** | Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt statt ersetzt |
@@ -74,16 +98,40 @@ Log every shot: which bean, which machine settings and how it tasted. From that,
 
 No account, no server · works offline · installs to your home screen · light and dark mode · German and English
 
+### What's new in version 1.2.0
+
+- **Roast level** per bean in five steps (light to dark). If the temperature doesn't suit it, the app recommends the setting from the Ninja manual
+- **Tick problems:** too cold, too hot, little crema, tastes burnt, each with a matching tip
+- **Better tips** from the manual's troubleshooting section, e.g. for extraction that runs too fast or too slow
+- **Bean basics:** species, type and roast are the same on all shots of a bean. A change applies to all of them
+- **Every shop for a bean** at a glance: in “My beans”, in the form and in the shot details. Plus a shop filter
+
+<details>
+<summary>Earlier versions</summary>
+
+**1.1.0**
+- Choose drink and cup size, only in combinations the machine offers
+- The home screen app loads a new version automatically
+
+**1.0.1**
+- Fix for the filter window
+
+**1.0.0**
+- First version with Dropbox sync
+
+</details>
+
 ### Features
 
 | Feature | In short |
 |---|---|
-| **New shot** | Bean (brand, product, species, type, shop, image), machine (basket, drink — only combinations the machine offers, cup size for Coffee programs — strength, temperature, grind size, time, yield) and taste with sliders (sour, bitter, strength, score 1–10) |
-| **Smart form** | Suggests known values, fills in bean details automatically and applies the bean's best setting so far with one tap |
-| **Tips** | Turns your taste rating into hints, e.g. “tastes sour → grind finer or raise the temperature”. Also shows the brew ratio (e.g. 1:2.0) |
+| **New shot** | Bean (brand, product, species, type, roast, shop, image), machine (basket, drink — only combinations the machine offers, cup size for Coffee programs — strength, temperature, grind size, time, yield) and taste with sliders (sour, bitter, strength, score 1–10). Plus problems you can tick: too cold, too hot, little crema, tastes burnt |
+| **Smart form** | Suggests known values, fills in bean details and the last shop automatically, shows where you've bought the bean so far, and applies the bean's best setting so far with one tap |
+| **Bean basics** | Species, type and roast apply to all shots of a bean (brand + product). Change them on one shot and they change on all |
+| **Tips** | Turns taste, extraction time and ticked problems into hints based on the troubleshooting section of the Ninja manual, e.g. “tastes sour → grind finer or raise the temperature” or “too cold → preheat portafilter and cup”. If the temperature doesn't suit the roast, you get Ninja's recommendation. Also shows the brew ratio (e.g. 1:2.0) |
 | **Duplicate shots** | Identical settings are merged and counted as “prepared 2×” |
 | **Dashboard** | Key figures, best shot, favorites, top 10, taste map (sour × bitter), score progress and the best setting per bean |
-| **My beans** | All beans as cards with their shots, best first. With search, filters and sorting |
+| **My beans** | All beans as cards with their shots, best first. Collapsed cards show the last shop (“Rewe +2”), expanded ones all of them. With search, filters (incl. roast and shop) and sorting |
 | **Favorites** | Mark individual shots with the star and filter for them |
 | **Bean image** | One image per bean, shown for all of its shots. As a link or upload (resized automatically) |
 | **Export / import** | Back up as a JSON file. Importing merges the data instead of replacing it |
