@@ -247,6 +247,10 @@ button.swrow{display:flex;justify-content:space-between;gap:var(--s3);width:100%
 .dot.bad{background:var(--danger)}
 #firstDlg p{margin:0 0 var(--s4)}
 #firstDlg small{display:block;margin:calc(var(--s1) * -1) 0 var(--s2);color:var(--muted)}
+#firstDlg details{margin:var(--s2) 0 0}
+#firstDlg details .langs{padding:0 var(--s4) var(--s3)}
+#shareForm{grid-template-columns:1fr auto;margin-bottom:var(--s2)}
+#syncBox .flabel.share{margin-top:var(--s4)}
 button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(--accent);font-size:.85rem}
 
 /* Tablet/Handy */
@@ -391,7 +395,7 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
 </dialog>
 <div id="toast" role="status"></div>
 <script>
-const APP_VERSION = '1.2.0'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
+const APP_VERSION = '1.2.1'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
 const KEY = 'ninja-kaffee-v1';
 const LANG_KEY = 'ninja-kaffee-lang';
 const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
@@ -412,7 +416,7 @@ const I18N = {
     'set.title': 'Einstellungen', 'set.lang': 'Sprache', 'close': 'Schließen',
     'set.version': 'Version', 'set.source': 'GitHub',
     'upd.ask': 'Eine neue Version der App ist da. Jetzt neu laden? Nicht gespeicherte Eingaben im Formular gehen dabei verloren.',
-    'sync.title': 'Synchronisation', 'sync.intro': 'Gleiche deine Shots über deine eigene Dropbox zwischen deinen Geräten ab. Die App sieht nur ihren eigenen Ordner darin.',
+    'sync.title': 'Synchronisation', 'sync.intro': 'Gleiche deine Shots über deine eigene Dropbox zwischen deinen Geräten ab und teile sie auf Wunsch mit anderen. Die App arbeitet nur im Ordner „Caffeine Analytica“.',
     'sync.connect': 'Mit Dropbox verbinden', 'sync.manual': 'Anmeldung klappt nicht? Code manuell eingeben',
     'sync.pasteCode': 'Melde dich im geöffneten Fenster bei Dropbox an, kopiere den angezeigten Code und füge ihn hier ein:',
     'sync.confirm': 'Code bestätigen', 'sync.back': 'Zurück',
@@ -421,12 +425,24 @@ const I18N = {
     'sync.st.idle': d => `Synchronisiert · ${d}`, 'sync.st.error': m => `Fehler beim Synchronisieren: ${m}`,
     'sync.st.auth': 'Zugriff abgelaufen, widerrufen oder ohne nötige Berechtigung – bitte neu verbinden', 'sync.full': 'Deine Dropbox ist voll',
     'sync.first.title': 'Daten zusammenführen?',
-    'sync.first.text': (l, r) => `In deiner Dropbox liegen schon ${r} Shots, auf diesem Gerät ${l}. Was soll passieren?`,
-    'sync.first.merge': 'Zusammenführen', 'sync.first.mergeHint': 'Empfohlen: Beides wird vereint, die neuere Änderung gewinnt.',
-    'sync.first.remote': 'Dropbox-Daten verwenden', 'sync.first.remoteHint': 'Ersetzt die Daten auf diesem Gerät. Vorher wird eine Sicherung exportiert.',
-    'sync.first.local': 'Daten dieses Geräts verwenden', 'sync.first.localHint': 'Ersetzt die Daten in der Dropbox. Dort bleibt eine Sicherungskopie.',
+    'sync.first.text': (l, r, who) => `${who ? `${who} teilt ${r} Shots mit dir` : `In deiner Dropbox liegen ${r} Shots`}, auf diesem Gerät sind ${l}. Beide Seiten haben Shots, die der anderen fehlen.`,
+    'sync.first.merge': 'Zusammenführen (empfohlen)', 'sync.first.mergeHint': 'Alle Shots von beiden Seiten bleiben erhalten. Wurde derselbe Shot auf beiden Seiten geändert, gilt die neuere Änderung.',
+    'sync.first.more': 'Andere Möglichkeiten',
+    'sync.first.remote': 'Nur die Dropbox-Daten behalten', 'sync.first.remoteHint': n => `${n} Shots, die nur auf diesem Gerät sind, werden gelöscht. Vorher wird eine Sicherung exportiert.`,
+    'sync.first.local': 'Nur die Daten dieses Geräts behalten', 'sync.first.localHint': n => `${n} Shots, die nur in der Dropbox sind, werden auf allen Geräten gelöscht. In der Dropbox bleibt eine Sicherungskopie.`,
     'sync.first.later': 'Später entscheiden',
-    'sync.missingImgs': n => `${n} Bilder liegen nur in der Dropbox und fehlen nach dem Trennen auf diesem Gerät. Trotzdem trennen?`,
+    'share.title': 'Gemeinsam nutzen', 'share.intro': 'Lade andere ein, z. B. deinen Haushalt. Alle sehen und bearbeiten dieselben Shots, Favoriten bleiben pro Person.',
+    'share.using': n => `Du nutzt die Daten von ${n}. Alle sehen und bearbeiten dieselben Shots, Favoriten bleiben pro Person.`,
+    'share.mail': 'E-Mail-Adresse (Dropbox-Konto)', 'share.invite': 'Einladen', 'share.sent': m => `Einladung an ${m} verschickt`,
+    'share.find': 'Eingeladen worden? Geteilte Daten suchen', 'share.none': 'Keine geteilten Daten gefunden',
+    'share.leave': 'Nicht mehr mitmachen', 'share.leaveAsk': n => `Die Daten von ${n} nicht mehr nutzen? Was du schon hast, bleibt auf diesem Gerät und wandert in deine eigene Dropbox.`,
+    'share.found': 'Geteilte Daten gefunden', 'share.foundText': 'Jemand teilt Kaffeedaten mit dir. Welche Daten möchtest du verwenden?',
+    'share.owning': 'Du teilst deine Daten. Alle Eingeladenen sehen und bearbeiten dieselben Shots, Favoriten bleiben pro Person.',
+    'share.stop': 'Teilen beenden', 'share.stopAsk': 'Teilen beenden? Alle Eingeladenen behalten eine Kopie in ihrer Dropbox, sehen aber keine neuen Shots mehr von dir.',
+    'share.lost': n => `Die geteilten Daten von ${n} sind nicht mehr verfügbar. Du nutzt jetzt wieder deine eigenen, deine Shots bleiben erhalten.`,
+    'share.ended': 'Das Teilen wurde beendet. Du nutzt deinen Ordner jetzt wieder allein.',
+    'share.use': n => `Daten von ${n} verwenden`, 'share.own': 'Meine eigenen Daten verwenden', 'share.later': 'Das kannst du später in den Einstellungen ändern.',
+    'sync.missingImgs': n => `${n} Bilder liegen nur in der Dropbox und konnten nicht geladen werden (offline?). Sie fehlen danach auf diesem Gerät. Trotzdem fortfahren?`,
     'sync.as': (n, e) => `Verbunden mit Dropbox: ${n}${e ? ` (${e})` : ''}`, 'sync.disconnect': 'Trennen',
     'sync.connected': 'Mit Dropbox verbunden', 'sync.disconnected': 'Dropbox getrennt',
     'sync.denied': 'Dropbox-Anmeldung abgebrochen', 'sync.failed': 'Verbindung mit Dropbox fehlgeschlagen',
@@ -450,7 +466,7 @@ const I18N = {
     'l.date': 'Datum', 'l.brand': 'Marke', 'l.variety': 'Sorte', 'l.kind': 'Bohnenart', 'l.type': 'Bohnentyp', 'l.roast': 'Röstgrad',
     'l.shop': 'Kaufort', 'l.size': 'Einsatz', 'l.grind': 'Mahlgrad', 'l.strength': 'Stärkegrad', 'l.temp': 'Temperatur',
     'l.time': 'Extraktionsdauer', 'l.weight': 'Extraktionsgewicht', 'l.ratio': 'Verhältnis', 'l.sour': 'Sauer',
-    'l.bitter': 'Bitter', 'l.body': 'Stärke (Geschmack)', 'l.score': 'Gesamtnote', 'l.runs': 'Zubereitet', 'l.note': 'Notiz',
+    'l.bitter': 'Bitter', 'l.body': 'Stärke (Geschmack)', 'l.score': 'Gesamtnote', 'l.runs': 'Zubereitet', 'l.note': 'Notiz', 'l.by': 'Angelegt von',
     'd.size': (s, g) => `${s} (~${g} g Mehl)`,
     'h.score': 'Note', 'h.bean': 'Bohne', 'h.size': 'Einsatz', 'h.grind': 'Mahlgrad', 'h.strength': 'Stärkegrad',
     'h.temp': 'Temp.', 'h.time': 'Zeit', 'h.weight': 'Gewicht', 'h.ratio': 'Verh.', 'h.taste': 'Geschmack', 'h.date': 'Datum',
@@ -515,7 +531,7 @@ const I18N = {
     'set.title': 'Settings', 'set.lang': 'Language', 'close': 'Close',
     'set.version': 'Version', 'set.source': 'GitHub',
     'upd.ask': 'A new version of the app is available. Reload now? Unsaved input in the form will be lost.',
-    'sync.title': 'Sync', 'sync.intro': 'Sync your shots between your devices through your own Dropbox. The app only sees its own folder there.',
+    'sync.title': 'Sync', 'sync.intro': 'Sync your shots between your devices through your own Dropbox and share them with others if you like. The app only works in the folder “Caffeine Analytica”.',
     'sync.connect': 'Connect to Dropbox', 'sync.manual': 'Sign-in not working? Enter a code manually',
     'sync.pasteCode': 'Sign in to Dropbox in the window that opened, copy the code shown there and paste it here:',
     'sync.confirm': 'Confirm code', 'sync.back': 'Back',
@@ -524,12 +540,24 @@ const I18N = {
     'sync.st.idle': d => `Synced · ${d}`, 'sync.st.error': m => `Sync failed: ${m}`,
     'sync.st.auth': 'Access expired, revoked or missing a permission – please reconnect', 'sync.full': 'Your Dropbox is full',
     'sync.first.title': 'Merge data?',
-    'sync.first.text': (l, r) => `Your Dropbox already holds ${r} shots, this device ${l}. What should happen?`,
-    'sync.first.merge': 'Merge', 'sync.first.mergeHint': 'Recommended: both are combined, the newer change wins.',
-    'sync.first.remote': 'Use Dropbox data', 'sync.first.remoteHint': 'Replaces the data on this device. A backup is exported first.',
-    'sync.first.local': 'Use this device\'s data', 'sync.first.localHint': 'Replaces the data in Dropbox. A backup copy stays there.',
+    'sync.first.text': (l, r, who) => `${who ? `${who} shares ${r} shots with you` : `Your Dropbox holds ${r} shots`}, this device has ${l}. Each side has shots the other is missing.`,
+    'sync.first.merge': 'Merge (recommended)', 'sync.first.mergeHint': 'All shots from both sides are kept. If the same shot was changed on both sides, the newer change wins.',
+    'sync.first.more': 'Other options',
+    'sync.first.remote': 'Keep only the Dropbox data', 'sync.first.remoteHint': n => `${n} shots that are only on this device will be deleted. A backup is exported first.`,
+    'sync.first.local': 'Keep only this device\'s data', 'sync.first.localHint': n => `${n} shots that are only in Dropbox will be deleted on all devices. A backup copy stays in Dropbox.`,
     'sync.first.later': 'Decide later',
-    'sync.missingImgs': n => `${n} images are only in Dropbox and will be missing on this device after disconnecting. Disconnect anyway?`,
+    'share.title': 'Share', 'share.intro': 'Invite others, e.g. your household. Everyone sees and edits the same shots, favorites stay personal.',
+    'share.using': n => `You are using ${n}'s data. Everyone sees and edits the same shots, favorites stay personal.`,
+    'share.mail': 'Email address (Dropbox account)', 'share.invite': 'Invite', 'share.sent': m => `Invitation sent to ${m}`,
+    'share.find': 'Been invited? Look for shared data', 'share.none': 'No shared data found',
+    'share.leave': 'Stop using shared data', 'share.leaveAsk': n => `Stop using ${n}'s data? What you already have stays on this device and moves to your own Dropbox.`,
+    'share.found': 'Shared data found', 'share.foundText': 'Someone shares coffee data with you. Which data do you want to use?',
+    'share.owning': 'You are sharing your data. Everyone invited sees and edits the same shots, favorites stay personal.',
+    'share.stop': 'Stop sharing', 'share.stopAsk': 'Stop sharing? Everyone invited keeps a copy in their Dropbox but will no longer see your new shots.',
+    'share.lost': n => `${n}'s shared data is no longer available. You are back to your own data, your shots are kept.`,
+    'share.ended': 'Sharing has ended. You are using your folder on your own again.',
+    'share.use': n => `Use ${n}'s data`, 'share.own': 'Use my own data', 'share.later': 'You can change this later in the settings.',
+    'sync.missingImgs': n => `${n} images are only in Dropbox and could not be loaded (offline?). They will be missing on this device afterwards. Continue anyway?`,
     'sync.as': (n, e) => `Connected to Dropbox: ${n}${e ? ` (${e})` : ''}`, 'sync.disconnect': 'Disconnect',
     'sync.connected': 'Connected to Dropbox', 'sync.disconnected': 'Dropbox disconnected',
     'sync.denied': 'Dropbox sign-in cancelled', 'sync.failed': 'Connecting to Dropbox failed',
@@ -553,7 +581,7 @@ const I18N = {
     'l.date': 'Date', 'l.brand': 'Brand', 'l.variety': 'Product', 'l.kind': 'Bean species', 'l.type': 'Bean type', 'l.roast': 'Roast',
     'l.shop': 'Bought at', 'l.size': 'Shot size', 'l.grind': 'Grind size', 'l.strength': 'Strength setting', 'l.temp': 'Temperature',
     'l.time': 'Extraction time', 'l.weight': 'Yield', 'l.ratio': 'Ratio', 'l.sour': 'Sour',
-    'l.bitter': 'Bitter', 'l.body': 'Strength (taste)', 'l.score': 'Overall score', 'l.runs': 'Prepared', 'l.note': 'Note',
+    'l.bitter': 'Bitter', 'l.body': 'Strength (taste)', 'l.score': 'Overall score', 'l.runs': 'Prepared', 'l.note': 'Note', 'l.by': 'Created by',
     'd.size': (s, g) => `${s} (~${g} g grounds)`,
     'h.score': 'Score', 'h.bean': 'Bean', 'h.size': 'Size', 'h.grind': 'Grind', 'h.strength': 'Strength',
     'h.temp': 'Temp.', 'h.time': 'Time', 'h.weight': 'Yield', 'h.ratio': 'Ratio', 'h.taste': 'Taste', 'h.date': 'Date',
@@ -659,6 +687,16 @@ async function load() {
 // Änderungszeitpunkt (updated) und Löschmarken entstehen beim Speichern aus dem Vergleich mit dem letzten Stand,
 // so kann keine Stelle, die Shots ändert, sie vergessen. Von außen gesetzte Zeitpunkte (Import) bleiben stehen.
 const ts = s => +s.updated || Date.parse(s.date) || 0;
+
+// Wer bin ich: das zuletzt verbundene Dropbox-Konto {id, name} (setzt sync.js, bleibt nach dem Trennen); ohne Dropbox 'local'
+const ME_KEY = 'ca-me';
+const mine = () => { try { return JSON.parse(localStorage.getItem(ME_KEY)); } catch { return null; } };
+const me = () => mine()?.id || 'local';
+// Favoriten pro Person (favs = Konto-IDs); ältere Shots kennen nur fav: true
+const favsOf = s => s?.favs || (s?.fav ? [me()] : []);
+const isFav = s => favsOf(s).includes(me());
+// „Angelegt von“ nur zeigen, wenn wirklich mehrere Personen Shots angelegt haben
+const shared = () => new Set(shots.map(s => s.by?.id).filter(Boolean)).size > 1;
 const body = s => { const {updated, ...r} = s; return JSON.stringify(r); };
 const snap = new Map(); // id → {j: Inhalt, u: updated} beim letzten Speichern
 const remember = () => { snap.clear(); shots.forEach(s => snap.set(s.id, {j: body(s), u: s.updated})); };
@@ -865,7 +903,10 @@ form.onsubmit = e => {
   d.id = target ? target.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   d.date = dup ? new Date().toISOString() : old ? old.date : new Date().toISOString();
   d.runs = dup ? (dup.runs || 1) + (old?.runs || 1) : old?.runs || 1;
-  if (dup?.fav || old?.fav) d.fav = true; // Favorit geht beim Bearbeiten oder Zusammenführen nicht verloren
+  const favs = [...new Set([...favsOf(dup), ...favsOf(old)])]; // Favoriten gehen beim Bearbeiten oder Zusammenführen nicht verloren
+  if (favs.length) d.favs = favs;
+  const by = old?.by || dup?.by || mine();
+  if (by) d.by = by;
   // leere neue Felder löschen nichts Vorhandenes
   if (dup) { d.shop = mergeShops(dup.shop, d.shop); d.note ||= dup.note; }
   // beim Zusammenführen wandert der Eintrag ans Ende (neuester); ein bearbeiteter Doppelgänger geht darin auf
@@ -987,7 +1028,7 @@ $('add').onclick = () => { if (editId) { stopEdit(); form.reset(); } show('new')
 
 // n = Anzahl Shots: dann steht die Zeile für die ganze Bohne und öffnet sie unter „Meine Bohnen“
 const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.9z"/></svg>';
-const starBtn = s => `<button type="button" class="star" data-fav="${s.id}" aria-pressed="${!!s.fav}" title="${t(s.fav ? 'star.remove' : 'star.add')}" aria-label="${t(s.fav ? 'star.remove' : 'star.add')}">${STAR}</button>`;
+const starBtn = s => `<button type="button" class="star" data-fav="${s.id}" aria-pressed="${isFav(s)}" title="${t(isFav(s) ? 'star.remove' : 'star.add')}" aria-label="${t(isFav(s) ? 'star.remove' : 'star.add')}">${STAR}</button>`;
 function row(s, mark, n) {
   // data-l = Beschriftung für die Kartenansicht auf schmalen Bildschirmen; Stern nur an echten Shots, nicht an Bohnen-Zeilen (n)
   return `<tr ${n ? `data-bean="${esc(beanKey(s))}"` : `data-id="${s.id}"`} tabindex="0"><td class="score"><span class="sc">${mark ? `<span class="best">${t('chip.best')}</span>` : ''}<b>${s.score}</b>/10${s.runs > 1 ? `<small class="runs">${t('runs', s.runs)}</small>` : ''}</span></td><td class="bean">${esc(beanName(s))}${n ? `<small class="count">${t('n.shots', n)}</small>` : ''}</td>
@@ -1014,7 +1055,7 @@ const ROASTS = ['Hell', 'Mittelhell', 'Mittel', 'Mitteldunkel', 'Dunkel'];
 const beanProp = (list, k) => list.findLast(s => s[k])?.[k] || '';
 const BEAN_FIELDS = ['beanKind', 'beanType', 'roast'];
 // Shot-Filter wirken auf einzelne Shots, Bohnenart/-typ auf die Bohne (der Wert steht nicht an jedem Shot)
-const shotOk = s => (!flt.fav || s.fav) && ['size', 'strength', 'temp'].every(k => !flt[k].length || flt[k].includes(s[k])) && (!flt.drink.length || flt.drink.includes(drinkOf(s))) && (!flt.min || s.score >= flt.min);
+const shotOk = s => (!flt.fav || isFav(s)) && ['size', 'strength', 'temp'].every(k => !flt[k].length || flt[k].includes(s[k])) && (!flt.drink.length || flt.drink.includes(drinkOf(s))) && (!flt.min || s.score >= flt.min);
 const beanOk = list => (!flt.kind.length || flt.kind.some(k => lc(k) === lc(beanProp(list, 'beanKind'))))
   && (!flt.type.length || flt.type.some(k => lc(k) === lc(beanProp(list, 'beanType'))))
   && (!flt.roast.length || flt.roast.includes(beanProp(list, 'roast')))
@@ -1068,7 +1109,7 @@ function renderBeans() {
     avg = avg.toFixed(1);
     const pic = beanImage(best), key = beanKey(best), shops = beanShops(list);
     const count = shown.length === list.length ? t('n.shots', list.length) : t('n.of', shown.length, list.length);
-    return `<details data-key="${esc(key)}"${open.has(key) ? ' open' : ''}><summary>${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}<b>${esc(beanName(best))}</b>${list.some(s => s.fav) ? `<span class="fav-ic" title="${t('star.has')}" role="img" aria-label="${t('star.has')}">${STAR}</span>` : ''}
+    return `<details data-key="${esc(key)}"${open.has(key) ? ' open' : ''}><summary>${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}<b>${esc(beanName(best))}</b>${list.some(isFav) ? `<span class="fav-ic" title="${t('star.has')}" role="img" aria-label="${t('star.has')}">${STAR}</span>` : ''}
         <small>${[beanProp(list, 'beanKind'), beanProp(list, 'beanType'), beanProp(list, 'roast') && val(beanProp(list, 'roast'))].filter(Boolean).map(v => esc(v) + ' · ').join('')}${shopsText(shops)}${count} · Ø ${avg} · ${t('bean.top', best.score)}</small></summary>
         ${table([...shown].sort(byScore), best)}</details>`;
   }).join('');
@@ -1138,7 +1179,7 @@ const barRow = (s, lead) => `<div class="bar" data-id="${s.id}" tabindex="0"><sp
 
 function dashboard(sorted) {
   const top = sorted[0], pic = beanImage(top);
-  const favs = sorted.filter(s => s.fav).slice(0, 5); // sorted ist nach Note geordnet
+  const favs = sorted.filter(isFav).slice(0, 5); // sorted ist nach Note geordnet
   const avg = (shots.reduce((n, s) => n + s.score, 0) / shots.length).toFixed(1);
   const tile = (v, l) => `<div class="card tile"><b>${v}</b><span>${l}</span></div>`;
   const roast = beanProp(shots.filter(s => beanKey(s) === beanKey(top)), 'roast');
@@ -1212,7 +1253,7 @@ function openDetail(id) {
   // übrige Kauforte der Bohne gedämpft unter dem dieses Shots
   const own = splitShops(s.shop).map(lc), more = beanShops(shots.filter(x => beanKey(x) === beanKey(s))).filter(o => !own.includes(lc(o)));
   const also = more.length ? `<small class="also">${t(own.length ? 'd.also' : 'bean.shops')}${esc(more.join(' · '))}</small>` : '';
-  const rows = [['date', fmtDate(s.date)], ['brand', s.brand], ['variety', s.variety], ['kind', b('beanKind')], ['type', b('beanType')], ['roast', b('roast') && val(b('roast'))], ['shop', s.shop, also],
+  const rows = [['date', fmtDate(s.date)], ...(shared() ? [['by', s.by?.name]] : []), ['brand', s.brand], ['variety', s.variety], ['kind', b('beanKind')], ['type', b('beanType')], ['roast', b('roast') && val(b('roast'))], ['shop', s.shop, also],
     ['size', t('d.size', val(s.size), DOSE[s.size])], ['drink', drinkLabel(s)], ['grind', s.grind], ['strength', val(s.strength)], ['temp', val(s.temp)],
     ['time', s.time != null ? s.time + ' s' : null], ['weight', s.weight != null ? s.weight + ' g' : null],
     ['ratio', ratio(s)], ['sour', SOUR(s.sour)], ['bitter', BITTER(s.bitter)], ['body', BODY(s.body)], ['issues', (s.issues || []).map(i => t('is.' + i)).join(', ')],
@@ -1237,12 +1278,15 @@ document.addEventListener('click', e => {
   e.preventDefault(); e.stopPropagation();
   const s = shots.find(x => x.id === b.dataset.fav);
   if (!s) return;
-  s.fav = !s.fav;
+  const f = new Set(favsOf(s));
+  if (!f.delete(me())) f.add(me());
+  s.favs = [...f];
+  delete s.fav;
   save();
   const d = $('dlg').querySelector('.star'); // Stern im geöffneten Detailfenster mitziehen (Liste dahinter wurde neu gezeichnet)
   if (d && d.dataset.fav === s.id) {
-    d.setAttribute('aria-pressed', !!s.fav);
-    d.title = t(s.fav ? 'star.remove' : 'star.add');
+    d.setAttribute('aria-pressed', isFav(s));
+    d.title = t(isFav(s) ? 'star.remove' : 'star.add');
     d.setAttribute('aria-label', d.title);
   }
 }, true);
