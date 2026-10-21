@@ -62,6 +62,7 @@ legend{padding:0 var(--s2);font-weight:600}
 label,.field{display:flex;flex-direction:column;gap:var(--s1);min-width:0;font-size:.85rem;font-weight:500;color:var(--muted)}
 .pair{display:flex;gap:var(--s2)}
 .seg{display:flex;gap:var(--s2)}
+.seg.many{flex-wrap:wrap}.seg.many .opt{flex:1 0 auto}
 .opt{flex:1 1 0;display:flex;flex-direction:row;position:relative;min-width:0}
 .opt input{position:absolute;opacity:0;width:1px;height:1px}
 .opt span{flex:1;height:var(--h);padding:0 var(--s1);display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:var(--r-s);background:var(--field);color:var(--fg);cursor:pointer;font-weight:400;font-size:.95rem;white-space:nowrap}
@@ -333,6 +334,8 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
         <div class="field"><span data-i18n="f.size"></span><div class="seg" id="seg-size"></div></div>
         <div class="field"><span data-i18n="f.strength"></span><div class="seg" id="seg-strength"></div></div>
         <div class="field"><span data-i18n="f.temp"></span><div class="seg" id="seg-temp"></div></div>
+        <div class="field full"><span data-i18n="f.drink"></span><div class="seg many" id="seg-drink"></div></div>
+        <div class="field full" id="cupBox"><span data-i18n="f.cup"></span><div class="seg many" id="seg-cup"></div></div>
         <label><span data-i18n="f.grind"></span><select name="grind" required></select></label>
         <label><span data-i18n="f.time"></span><input name="time" type="number" min="0" step="1" inputmode="numeric"></label>
         <label><span data-i18n="f.weight"></span><input name="weight" type="number" min="0" step="0.1" inputmode="decimal"></label>
@@ -384,10 +387,14 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
 </dialog>
 <div id="toast" role="status"></div>
 <script>
-const APP_VERSION = '1.0.1'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
+const APP_VERSION = '1.1.0'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
 const KEY = 'ninja-kaffee-v1';
 const LANG_KEY = 'ninja-kaffee-lang';
 const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
+// Mögliche Getränke je Einsatz laut Hersteller; „Quad“ ist der Luxe-Einsatz (gespeichert bleibt Quad, angezeigt wird Luxe)
+const ESPRESSO = ['Ristretto', 'Espresso', 'Lungo', 'Americano', 'Cold-Pressed'], COFFEE = ['Classic', 'Rich', 'Over Ice', 'Cold Brew'];
+const DRINKS = {Single: ['Espresso', 'Lungo', 'Americano'], Double: ESPRESSO, Quad: [...ESPRESSO, ...COFFEE]};
+const CUPS = {S: 175, 'S+': 235, M: 295, 'M+': 355, L: 415, 'L+': 475, XL: 530}; // ml, nur bei Coffee-Programmen
 const NUMS = ['grind', 'time', 'weight', 'sour', 'bitter', 'body', 'score'];
 
 // Gespeichert werden Einsatz/Stärkegrad/Temperatur weiter als deutsche Werte (Single, Leicht, Hoch …),
@@ -430,6 +437,7 @@ const I18N = {
     'img.upload': 'Bild hochladen', 'img.remove': 'Bild entfernen', 'img.link': 'Bild-Link', 'img.preview': 'Vorschau',
     'img.zoom': 'Bild vergrößert', 'img.inherited': 'Bild dieser Bohne – gilt für alle ihre Shots. Neuer Link oder Upload ersetzt es.',
     'f.size': 'Einsatz *', 'f.strength': 'Stärkegrad *', 'f.temp': 'Temperatur *', 'f.grind': 'Mahlgrad *',
+    'f.drink': 'Getränk *', 'f.cup': 'Größe *', 'l.drink': 'Getränk', 'h.drink': 'Getränk',
     'f.time': 'Dauer (s)', 'f.weight': 'Gewicht (g)',
     'f.sour': 'Sauer *', 'f.bitter': 'Bitter *', 'f.body': 'Stärke *',
     'f.score': 'Gesamtnote (1 = schlecht, 10 = perfekt) *', 'f.note': 'Notiz',
@@ -457,7 +465,7 @@ const I18N = {
     'nores': 'Keine Treffer.', 'n.of': (a, b) => `${a} von ${b} Shots`,
     'bean.top': n => `Top ${n}/10`,
     'bi.count': n => `${n} ${n === 1 ? 'Shot' : 'Shots'} mit dieser Bohne`,
-    'bi.best': (sc, size, g, st, tp) => `Bester: Note ${sc}/10 · ${size} · Mahlgrad ${g} · Stärkegrad ${st} · Temp. ${tp}`,
+    'bi.best': (sc, size, dr, g, st, tp) => `Bester: Note ${sc}/10 · ${size} · ${dr} · Mahlgrad ${g} · Stärkegrad ${st} · Temp. ${tp}`,
     'bi.last': (sc, g) => `Letzter: Note ${sc}/10 · Mahlgrad ${g}`,
     'bi.tip': 'Tipp zum letzten Shot: ', 'bi.use': 'Beste Einstellung übernehmen',
     'empty': 'Noch keine Shots – tippe oben auf +, um den ersten anzulegen.',
@@ -472,7 +480,7 @@ const I18N = {
     'val.num': 'Bitte eine Zahl ab 0 eingeben.', 'val.pick': 'Bitte eine Auswahl treffen.',
     'val.summary': n => n === 1 ? 'Ein Feld muss noch ausgefüllt werden.' : `${n} Felder müssen noch ausgefüllt werden.`,
     'err.img': 'Bild konnte nicht gelesen werden.', 'err.import': 'Die Datei ist kein gültiger Kaffee-Logbuch-Export.',
-    'v.Single': 'Single', 'v.Double': 'Double', 'v.Quad': 'Quad', 'v.Leicht': 'Leicht', 'v.Mittel': 'Mittel',
+    'v.Single': 'Single', 'v.Double': 'Double', 'v.Quad': 'Luxe', 'v.Leicht': 'Leicht', 'v.Mittel': 'Mittel',
     'v.Stark': 'Stark', 'v.Niedrig': 'Niedrig', 'v.Hoch': 'Hoch',
     sour: ['nicht sauer', 'leicht sauer', 'deutlich sauer', 'sehr sauer'], sourS: ['nicht', 'leicht', 'deutlich', 'sehr'],
     bitter: ['nicht bitter', 'leicht bitter', 'deutlich bitter', 'sehr bitter'], bitterS: ['nicht', 'leicht', 'deutlich', 'sehr'],
@@ -524,6 +532,7 @@ const I18N = {
     'img.upload': 'Upload image', 'img.remove': 'Remove image', 'img.link': 'Image link', 'img.preview': 'Preview',
     'img.zoom': 'Enlarged image', 'img.inherited': 'This bean\'s image – used for all its shots. A new link or upload replaces it.',
     'f.size': 'Shot size *', 'f.strength': 'Strength setting *', 'f.temp': 'Temperature *', 'f.grind': 'Grind size *',
+    'f.drink': 'Drink *', 'f.cup': 'Cup size *', 'l.drink': 'Drink', 'h.drink': 'Drink',
     'f.time': 'Time (s)', 'f.weight': 'Yield (g)',
     'f.sour': 'Sour *', 'f.bitter': 'Bitter *', 'f.body': 'Strength *',
     'f.score': 'Overall score (1 = poor, 10 = perfect) *', 'f.note': 'Note',
@@ -551,7 +560,7 @@ const I18N = {
     'nores': 'No results.', 'n.of': (a, b) => `${a} of ${b} shots`,
     'bean.top': n => `Top ${n}/10`,
     'bi.count': n => `${n} ${n === 1 ? 'shot' : 'shots'} with this bean`,
-    'bi.best': (sc, size, g, st, tp) => `Best: score ${sc}/10 · ${size} · grind ${g} · strength ${st} · temp. ${tp}`,
+    'bi.best': (sc, size, dr, g, st, tp) => `Best: score ${sc}/10 · ${size} · ${dr} · grind ${g} · strength ${st} · temp. ${tp}`,
     'bi.last': (sc, g) => `Latest: score ${sc}/10 · grind ${g}`,
     'bi.tip': 'Tip from the last shot: ', 'bi.use': 'Use best setting',
     'empty': 'No shots yet – tap + at the top to add your first one.',
@@ -566,7 +575,7 @@ const I18N = {
     'val.num': 'Please enter a number of 0 or more.', 'val.pick': 'Please make a selection.',
     'val.summary': n => n === 1 ? 'One field still needs your input.' : `${n} fields still need your input.`,
     'err.img': 'The image could not be read.', 'err.import': 'The file is not a valid Coffee Log export.',
-    'v.Single': 'Single', 'v.Double': 'Double', 'v.Quad': 'Quad', 'v.Leicht': 'Light', 'v.Mittel': 'Medium',
+    'v.Single': 'Single', 'v.Double': 'Double', 'v.Quad': 'Luxe', 'v.Leicht': 'Light', 'v.Mittel': 'Medium',
     'v.Stark': 'Strong', 'v.Niedrig': 'Low', 'v.Hoch': 'High',
     sour: ['not sour', 'slightly sour', 'distinctly sour', 'strongly sour'], sourS: ['none', 'slight', 'distinct', 'strong'],
     bitter: ['not bitter', 'slightly bitter', 'distinctly bitter', 'strongly bitter'], bitterS: ['none', 'slight', 'distinct', 'strong'],
@@ -678,11 +687,14 @@ const esc = v => String(v ?? '–').replace(/[&<>"']/g, c => '&#' + c.charCodeAt
 const beanKey = s => (s.brand + '|' + (s.variety || '')).trim().toLowerCase();
 const beanName = s => s.brand + (s.variety ? ' ' + s.variety : '');
 const ratio = s => s.weight ? '1:' + (s.weight / DOSE[s.size]).toFixed(1) : '–';
+const drinkOf = s => s.drink || 'Espresso'; // Shots von vor der Getränkeauswahl waren Espressi
+// mit Luxe-Einsatz bezieht die Maschine alle Espresso-Getränke außer Americano als Quad
+const drinkLabel = s => { const d = drinkOf(s); return d + (s.size === 'Quad' && ESPRESSO.includes(d) && d !== 'Americano' ? ' Quad' : '') + (s.cup ? ` ${s.cup} (${CUPS[s.cup]} ml)` : ''); };
 const fmtDate = d => new Date(d).toLocaleString(lang === 'de' ? 'de-DE' : 'en-GB', {dateStyle: 'short', timeStyle: 'short'});
 // identisch = diese Felder stimmen überein (Text ohne Groß/klein, leer = nicht angegeben)
-const SAME = ['brand', 'variety', 'beanType', 'size', 'grind', 'strength', 'temp', 'time', 'weight'];
+const SAME = ['brand', 'variety', 'beanType', 'size', 'cup', 'grind', 'strength', 'temp', 'time', 'weight'];
 const norm = v => v == null || v === '' ? null : typeof v === 'string' ? v.trim().toLowerCase() : v;
-const isSame = (a, b) => SAME.every(k => norm(a[k]) === norm(b[k]));
+const isSame = (a, b) => SAME.every(k => norm(a[k]) === norm(b[k])) && drinkOf(a) === drinkOf(b);
 const splitShops = s => (s || '').split(',').map(t => t.trim()).filter(Boolean);
 const mergeShops = (a, b) => [...splitShops(a), ...splitShops(b)]
   .filter((t, i, all) => all.findIndex(o => o.toLowerCase() === t.toLowerCase()) === i).join(', ');
@@ -705,9 +717,23 @@ const SEGS = {
   size: {vals: ['Single', 'Double', 'Quad'], def: 'Double', label: val},
   strength: {vals: ['Leicht', 'Mittel', 'Stark'], def: 'Mittel', label: val},
   temp: {vals: ['Niedrig', 'Mittel', 'Hoch'], def: 'Mittel', label: val},
+  drink: {vals: [...ESPRESSO, ...COFFEE], def: 'Espresso', label: v => v},
+  cup: {vals: Object.keys(CUPS), def: 'M', label: v => `${v} · ${CUPS[v]} ml`},
 };
 for (const [name, c] of Object.entries(SEGS))
   $('seg-' + name).innerHTML = c.vals.map(v => `<label class="opt"><input type="radio" name="${name}" value="${v}" required${v === c.def ? ' checked' : ''}><span></span></label>`).join('');
+// Nur an der Maschine mögliche Kombinationen anbieten; ausgeblendete Knöpfe sind deaktiviert und landen nicht im Shot
+function syncDrink() {
+  const el = form.elements, ok = DRINKS[el.size.value];
+  el.drink.forEach(r => r.parentElement.hidden = r.disabled = !ok.includes(r.value));
+  if (!ok.includes(el.drink.value)) el.drink.value = 'Espresso';
+  const coffee = COFFEE.includes(el.drink.value);
+  $('cupBox').hidden = !coffee;
+  el.cup.forEach(r => r.disabled = !coffee);
+  if (!el.cup.value) el.cup.value = 'M';
+}
+syncDrink();
+form.addEventListener('change', e => { if (e.target.name === 'size' || e.target.name === 'drink') { syncDrink(); beanInfo(); } });
 // Schieberegler für die Bewertungen; tick = kurze Skalenbeschriftung, label = Wert für Screenreader
 const SLIDERS = {
   sour: {min: 0, max: 3, def: 0, label: SOUR, tick: i => I18N[lang].sourS[i]},
@@ -787,7 +813,7 @@ function validate(d) {
   return false;
 }
 form.addEventListener('input', e => { if (e.target.name) clearError(e.target.name); if (e.target.type === 'range') labelSegs(); });
-form.addEventListener('reset', () => setTimeout(labelSegs)); // nach dem Zurücksetzen der Werte
+form.addEventListener('reset', () => setTimeout(() => { syncDrink(); labelSegs(); })); // nach dem Zurücksetzen der Werte
 
 form.onsubmit = e => {
   e.preventDefault();
@@ -830,7 +856,7 @@ form.onsubmit = e => {
 function fill(s) {
   for (const [k, v] of Object.entries(s)) if (form.elements[k]) form.elements[k].value = v ?? '';
   $('imageLink').value = form.image.value.startsWith('data:') ? '' : form.image.value;
-  preview(); beanInfo(); labelSegs();
+  syncDrink(); preview(); beanInfo(); labelSegs();
 }
 // Ein Bild je Bohne, gespeichert an einem ihrer Shots; alle Shots zeigen es (ältere Daten mit mehreren: das neueste)
 const beanImage = s => imgSrc(shots.findLast(x => beanKey(x) === beanKey(s) && x.image)?.image);
@@ -893,12 +919,14 @@ function beanInfo() {
   const list = form.brand.value ? shots.filter(s => beanKey(s) === k && s.id !== editId) : [];
   $('beanInfo').hidden = !list.length;
   if (!list.length) return;
-  const best = [...list].sort(byScore)[0], last = list.at(-1), h = hints(last);
+  // bester Shot fürs gewählte Getränk; gibt es keinen, der beste insgesamt
+  const sorted = [...list].sort(byScore), best = sorted.find(s => drinkOf(s) === form.elements.drink.value) || sorted[0];
+  const last = list.at(-1), h = hints(last);
   $('beanInfo').innerHTML = `<b>${t('bi.count', list.length)}</b><br>
-    ${t('bi.best', best.score, val(best.size), best.grind, val(best.strength), val(best.temp))}<br>
+    ${t('bi.best', best.score, val(best.size), esc(drinkLabel(best)), best.grind, val(best.strength), val(best.temp))}<br>
     ${last !== best ? t('bi.last', last.score, last.grind) + '<br>' : ''}${h.length ? t('bi.tip') + h.join(' ') + '<br>' : ''}
     <button type="button" id="useBest">${t('bi.use')}</button>`;
-  $('useBest').onclick = () => fill({grind: best.grind, size: best.size, strength: best.strength, temp: best.temp});
+  $('useBest').onclick = () => fill({grind: best.grind, size: best.size, drink: drinkOf(best), cup: best.cup, strength: best.strength, temp: best.temp});
 }
 
 function show(view) {
@@ -919,11 +947,11 @@ const starBtn = s => `<button type="button" class="star" data-fav="${s.id}" aria
 function row(s, mark, n) {
   // data-l = Beschriftung für die Kartenansicht auf schmalen Bildschirmen; Stern nur an echten Shots, nicht an Bohnen-Zeilen (n)
   return `<tr ${n ? `data-bean="${esc(beanKey(s))}"` : `data-id="${s.id}"`} tabindex="0"><td class="score"><span class="sc">${mark ? `<span class="best">${t('chip.best')}</span>` : ''}<b>${s.score}</b>/10${s.runs > 1 ? `<small class="runs">${t('runs', s.runs)}</small>` : ''}</span></td><td class="bean">${esc(beanName(s))}${n ? `<small class="count">${t('n.shots', n)}</small>` : ''}</td>
-    <td data-l="${t('h.size')}">${val(s.size)}</td><td data-l="${t('h.grind')}">${s.grind}</td><td data-l="${t('h.strength')}">${val(s.strength)}</td><td data-l="${t('h.temp')}">${val(s.temp)}</td>
+    <td data-l="${t('h.size')}">${val(s.size)}</td><td data-l="${t('h.drink')}">${esc(drinkLabel(s))}</td><td data-l="${t('h.grind')}">${s.grind}</td><td data-l="${t('h.strength')}">${val(s.strength)}</td><td data-l="${t('h.temp')}">${val(s.temp)}</td>
     <td data-l="${t('h.time')}">${s.time ?? '–'} s</td><td data-l="${t('h.weight')}">${s.weight ?? '–'} g</td><td data-l="${t('h.ratio')}">${ratio(s)}</td>
     <td class="taste" data-l="${t('h.taste')}">${SOUR(s.sour)}, ${BITTER(s.bitter)}</td><td data-l="${t('h.date')}">${fmtDate(s.date)}</td><td class="favcell">${n ? '' : starBtn(s)}</td></tr>`;
 }
-const head = () => '<thead><tr>' + ['score', 'bean', 'size', 'grind', 'strength', 'temp', 'time', 'weight', 'ratio', 'taste', 'date'].map(k => `<th>${t('h.' + k)}</th>`).join('') + '<th class="favcell"></th></tr></thead>';
+const head = () => '<thead><tr>' + ['score', 'bean', 'size', 'drink', 'grind', 'strength', 'temp', 'time', 'weight', 'ratio', 'taste', 'date'].map(k => `<th>${t('h.' + k)}</th>`).join('') + '<th class="favcell"></th></tr></thead>';
 const table = (list, best, ns) => `<div class="wrap"><table>${head()}${list.map((s, i) => row(s, s === best, ns?.[i])).join('')}</table></div>`;
 
 // je Bohne alle Shots + der beste, beste Bohne zuerst
@@ -935,12 +963,12 @@ function beanGroups() {
 
 // Suche und Filter gelten nur für „Meine Bohnen“; das Dashboard rechnet immer mit allen Shots
 const lc = v => (v || '').toLowerCase();
-const flt0 = () => ({fav: false, size: [], strength: [], temp: [], kind: [], type: [], min: 0});
+const flt0 = () => ({fav: false, size: [], drink: [], strength: [], temp: [], kind: [], type: [], min: 0});
 let flt = flt0(), q = '';
-const activeCount = f => (f.fav ? 1 : 0) + ['size', 'strength', 'temp', 'kind', 'type'].filter(k => f[k].length).length + (f.min ? 1 : 0);
+const activeCount = f => (f.fav ? 1 : 0) + ['size', 'drink', 'strength', 'temp', 'kind', 'type'].filter(k => f[k].length).length + (f.min ? 1 : 0);
 const beanProp = (list, k) => list.findLast(s => s[k])?.[k] || '';
 // Shot-Filter wirken auf einzelne Shots, Bohnenart/-typ auf die Bohne (der Wert steht nicht an jedem Shot)
-const shotOk = s => (!flt.fav || s.fav) && ['size', 'strength', 'temp'].every(k => !flt[k].length || flt[k].includes(s[k])) && (!flt.min || s.score >= flt.min);
+const shotOk = s => (!flt.fav || s.fav) && ['size', 'strength', 'temp'].every(k => !flt[k].length || flt[k].includes(s[k])) && (!flt.drink.length || flt.drink.includes(drinkOf(s))) && (!flt.min || s.score >= flt.min);
 const beanOk = list => (!flt.kind.length || flt.kind.some(k => lc(k) === lc(beanProp(list, 'beanKind'))))
   && (!flt.type.length || flt.type.some(k => lc(k) === lc(beanProp(list, 'beanType'))));
 const beanText = list => [list[0].brand, list[0].variety, beanProp(list, 'beanType'), beanProp(list, 'beanKind'),
@@ -1017,6 +1045,7 @@ function drawFilter() {
   $('fltDlg').innerHTML = `<h3 id="fltTitle">${t('flt.title')}</h3><div class="fltbody">
     ${group('', chip('fav', 1, t('flt.fav')))}
     ${group(t('l.size'), ['Single', 'Double', 'Quad'].map(v => chip('size', v, val(v))).join(''))}
+    ${group(t('l.drink'), [...ESPRESSO, ...COFFEE].map(v => chip('drink', v, v)).join(''))}
     ${group(t('l.strength'), ['Leicht', 'Mittel', 'Stark'].map(v => chip('strength', v, val(v))).join(''))}
     ${group(t('l.temp'), ['Niedrig', 'Mittel', 'Hoch'].map(v => chip('temp', v, val(v))).join(''))}
     ${group(t('l.kind'), ['100 % Arabica', 'Arabica-Robusta-Blend', '100 % Robusta'].map(v => chip('kind', v, v)).join(''))}
@@ -1042,7 +1071,7 @@ document.addEventListener('click', e => { if (e.target.id === 'resetAll') resetF
 
 // lead = Rang oder Stern vor dem Namen
 const barRow = (s, lead) => `<div class="bar" data-id="${s.id}" tabindex="0"><span class="rank">${lead}</span>
-  <span class="name">${esc(beanName(s))}<small>${val(s.size)} · ${t('c.grind')} ${s.grind} · ${val(s.temp)} · ${SOUR(s.sour)}, ${BITTER(s.bitter)}</small></span>
+  <span class="name">${esc(beanName(s))}<small>${val(s.size)} · ${esc(drinkLabel(s))} · ${t('c.grind')} ${s.grind} · ${val(s.temp)} · ${SOUR(s.sour)}, ${BITTER(s.bitter)}</small></span>
   <span class="track"><span style="width:${s.score * 10}%"></span></span><b>${s.score}</b></div>`;
 
 function dashboard(sorted) {
@@ -1050,7 +1079,7 @@ function dashboard(sorted) {
   const favs = sorted.filter(s => s.fav).slice(0, 5); // sorted ist nach Note geordnet
   const avg = (shots.reduce((n, s) => n + s.score, 0) / shots.length).toFixed(1);
   const tile = (v, l) => `<div class="card tile"><b>${v}</b><span>${l}</span></div>`;
-  const chips = [val(top.size), `${t('c.grind')} ${top.grind}`, `${t('c.strength')} ${val(top.strength)}`, `${t('c.temp')} ${val(top.temp)}`,
+  const chips = [val(top.size), drinkLabel(top), `${t('c.grind')} ${top.grind}`, `${t('c.strength')} ${val(top.strength)}`, `${t('c.temp')} ${val(top.temp)}`,
     top.time != null ? top.time + ' s' : null, top.weight != null ? top.weight + ' g' : null, top.weight ? ratio(top) : null];
   return `<div class="tiles">${tile(shots.length, t('tile.shots'))}${tile(new Set(shots.map(beanKey)).size, t('tile.beans'))}${tile(avg, t('tile.avg'))}${tile(top.score + '/10', t('tile.top'))}</div>
     <div class="card fav" data-id="${top.id}" tabindex="0">${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}
@@ -1118,7 +1147,7 @@ document.addEventListener('click', e => {
 function openDetail(id) {
   const s = shots.find(x => x.id === id);
   const rows = [['date', fmtDate(s.date)], ['brand', s.brand], ['variety', s.variety], ['kind', s.beanKind], ['type', s.beanType], ['shop', s.shop],
-    ['size', t('d.size', val(s.size), DOSE[s.size])], ['grind', s.grind], ['strength', val(s.strength)], ['temp', val(s.temp)],
+    ['size', t('d.size', val(s.size), DOSE[s.size])], ['drink', drinkLabel(s)], ['grind', s.grind], ['strength', val(s.strength)], ['temp', val(s.temp)],
     ['time', s.time != null ? s.time + ' s' : null], ['weight', s.weight != null ? s.weight + ' g' : null],
     ['ratio', ratio(s)], ['sour', SOUR(s.sour)], ['bitter', BITTER(s.bitter)], ['body', BODY(s.body)],
     ['score', s.score + '/10'], ['runs', (s.runs || 1) + '×'], ['note', s.note]];
@@ -1129,8 +1158,8 @@ function openDetail(id) {
     <div class="dlgactions"><button class="primary" id="dEdit">${t('btn.edit')}</button><button id="dCopy">${t('btn.template')}</button>
     <button id="dDel">${t('btn.delete')}</button><button id="dClose">${t('close')}</button></div>`;
   $('dClose').onclick = () => $('dlg').close();
-  $('dEdit').onclick = () => { editId = s.id; imgRemoved = false; fill({...s, image: ''}); setEditing(true); $('dlg').close(); show('new'); };
-  $('dCopy').onclick = () => { stopEdit(); imgRemoved = false; fill({...s, note: '', image: ''}); $('dlg').close(); show('new'); };
+  $('dEdit').onclick = () => { editId = s.id; imgRemoved = false; fill({...s, drink: drinkOf(s), image: ''}); setEditing(true); $('dlg').close(); show('new'); };
+  $('dCopy').onclick = () => { stopEdit(); imgRemoved = false; fill({...s, drink: drinkOf(s), note: '', image: ''}); $('dlg').close(); show('new'); };
   $('dDel').onclick = () => { if (confirm(t('confirm.del'))) { shots = removeShot(shots, s); $('dlg').close(); save(); } };
   openDlg($('dlg'));
 }
@@ -1231,6 +1260,9 @@ $('importFile').onchange = async e => {
 };
 
 console.assert(ratio({size: 'Double', weight: 36}) === '1:2.0' && ratio({size: 'Quad'}) === '–', 'ratio');
+console.assert(drinkLabel({size: 'Quad', drink: 'Lungo'}) === 'Lungo Quad' && drinkLabel({size: 'Quad', drink: 'Americano'}) === 'Americano'
+  && drinkLabel({size: 'Quad', drink: 'Rich', cup: 'M'}) === 'Rich M (295 ml)' && drinkLabel({size: 'Single'}) === 'Espresso', 'drinkLabel');
+console.assert(isSame({brand: 'A', size: 'Double'}, {brand: 'A', size: 'Double', drink: 'Espresso'}), 'isSame drink'); // alter Shot = Espresso
 console.assert(hints({sour: 3, bitter: 0, body: 2, time: 15}).length === 2, 'hints');
 console.assert((([a, b, c]) => removeShot([a, b, c], a).map(x => x.image).join() === ',x')(
   [{brand: 'A', image: 'x'}, {brand: 'B'}, {brand: 'a'}]), 'removeShot'); // Bild geht an Bohne A, nicht an B

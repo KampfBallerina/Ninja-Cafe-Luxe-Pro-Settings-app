@@ -78,7 +78,7 @@ No account, no server · works offline · installs to your home screen · light 
 
 | Feature | In short |
 |---|---|
-| **New shot** | Bean (brand, product, species, type, shop, image), machine (shot size, strength, temperature, grind size, time, yield) and taste with sliders (sour, bitter, strength, score 1–10) |
+| **New shot** | Bean (brand, product, species, type, shop, image), machine (basket, drink — only combinations the machine offers, cup size for Coffee programs — strength, temperature, grind size, time, yield) and taste with sliders (sour, bitter, strength, score 1–10) |
 | **Smart form** | Suggests known values, fills in bean details automatically and applies the bean's best setting so far with one tap |
 | **Tips** | Turns your taste rating into hints, e.g. “tastes sour → grind finer or raise the temperature”. Also shows the brew ratio (e.g. 1:2.0) |
 | **Duplicate shots** | Identical settings are merged and counted as “prepared 2×” |
