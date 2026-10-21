@@ -316,6 +316,50 @@ async function syncNow() {
 addEventListener('online', () => syncSoon(0));
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncSoon(0); });
 
+// Ziehen zum Aktualisieren wie in iOS-Mail, auf Dashboard und „Meine Bohnen“. Nur in der installierten App:
+// im Browser lädt dessen eigenes Ziehen die Seite neu und gleicht dabei ohnehin ab
+if (matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+  const PULL = 70, el = document.createElement('div');
+  el.id = 'ptr';
+  el.setAttribute('aria-hidden', 'true'); // Ergebnis kommt für Screenreader über die Statuszeile bzw. Meldung
+  el.innerHTML = `<svg viewBox="0 0 24 24">${[...Array(8)].map((_, i) =>
+    `<line x1="12" y1="2.5" x2="12" y2="7" transform="rotate(${i * 45} 12 12)" opacity="${1 - i * .1}"/>`).join('')}</svg><small></small>`;
+  document.querySelector('main').prepend(el);
+  const lines = el.querySelectorAll('line'), msg = el.querySelector('small');
+  // h = sichtbare Höhe; die Striche des Kreisels füllen sich bis zur Auslöseschwelle
+  const show = h => { el.style.height = h + 'px'; lines.forEach((l, i) => l.style.visibility = h >= PULL * (i + 1) / 8 ? '' : 'hidden'); };
+  let y0 = null, h = 0, busy = false;
+  const can = () => dbx.get().refresh && !busy && scrollY <= 0 && !document.querySelector('dialog[open]')
+    && (!$('best').hidden || !$('beans').hidden);
+  addEventListener('touchstart', e => { y0 = e.touches.length === 1 && can() ? e.touches[0].clientY : null; h = 0; }, {passive: true});
+  addEventListener('touchmove', e => {
+    if (y0 == null) return;
+    h = Math.min(Math.max(0, e.touches[0].clientY - y0) * .5, PULL * 1.4); // gebremst wie das Gummiband in iOS
+    el.classList.remove('back');
+    msg.textContent = '';
+    show(h);
+  }, {passive: true});
+  const release = async () => {
+    if (y0 == null) return;
+    y0 = null;
+    el.classList.add('back');
+    if (h < PULL) return show(0);
+    busy = true;
+    show(PULL);
+    el.classList.add('spin');
+    await syncNow();
+    el.classList.remove('spin');
+    if (state === 'idle') {
+      msg.textContent = t('ptr.done', new Date().toLocaleTimeString(lang === 'de' ? 'de-DE' : 'en-GB', {hour: '2-digit', minute: '2-digit'}));
+      await new Promise(r => setTimeout(r, 900));
+    } else toast(statusText(), state === 'error' || state === 'auth');
+    show(0);
+    busy = false;
+  };
+  addEventListener('touchend', release);
+  addEventListener('touchcancel', release);
+}
+
 // Auswahl im Fenster firstDlg; liefert data-c der getippten Schaltfläche, Esc = ''
 function ask(html, onTap) {
   const d = $('firstDlg');
@@ -499,34 +543,40 @@ async function dbxDisconnect() {
 // Dropbox-Logo (offene Box aus fünf Rauten)
 const DBX_ICON = '<svg class="brand" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 1.81 0 5.63l6 3.82 6-3.82zm12 0-6 3.82 6 3.82 6-3.82zM0 13.27l6 3.83 6-3.83-6-3.82zm18-3.82-6 3.82 6 3.83 6-3.83zM6 18.37l6 3.82 6-3.82-6-3.82z"/></svg>';
 const SYNC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
+const statusText = () => state === 'running' ? t('sync.st.running') : state === 'pending' ? t('sync.st.pending')
+  : state === 'auth' ? t('sync.st.auth') : state === 'error' ? t('sync.st.error', esc(lastError))
+  : dbx.get().last ? t('sync.st.idle', fmtDate(dbx.get().last)) : '';
 function renderSync() {
   const box = $('syncBox');
   box.hidden = !DBX_KEY;
   const s = dbx.get();
   // Neuzeichnen beim Statuswechsel darf eine angefangene E-Mail-Adresse nicht verlieren
   const mail = $('shareMail')?.value, typing = document.activeElement?.id === 'shareMail';
-  const status = state === 'running' ? t('sync.st.running') : state === 'pending' ? t('sync.st.pending')
-    : state === 'auth' ? t('sync.st.auth') : state === 'error' ? t('sync.st.error', esc(lastError))
-    : s.last ? t('sync.st.idle', fmtDate(s.last)) : '';
-  box.innerHTML = `<span class="flabel">${t('sync.title')}</span>` + (s.refresh
-    ? `<div class="syncrow"><div><p class="note">${t('sync.as', esc(s.name), esc(s.email))}</p>
-       ${status ? `<p class="note state${state === 'error' || state === 'auth' ? ' bad' : ''}" role="status">${status}</p>` : ''}</div>
-       ${state === 'auth' ? '' : `<button type="button" class="icon" id="dbxNow" title="${t('sync.now')}" aria-label="${t('sync.now')}"${state === 'running' ? ' disabled' : ''}>${SYNC_ICON}</button>`}</div>
-       <div class="langs">${state === 'auth' ? `<button type="button" class="dbx" id="dbxOn">${DBX_ICON}${t('sync.reconnect')}</button>` : ''}
-       <button type="button" class="swrow" id="dbxImg" role="switch" aria-checked="${offlineImages()}">${t('sync.offlineImgs')}<span class="sw" aria-hidden="true"></span></button></div>
-       ${state === 'auth' ? '' : `<span class="flabel share">${t('share.title')}</span><p class="note">${s.owner ? t('share.using', esc(s.owner)) : s.ns && !s.alone ? t('share.owning') : t('share.intro')}</p>
-       <form class="langs" id="shareForm"><input type="email" id="shareMail" placeholder="${t('share.mail')}" aria-label="${t('share.mail')}" autocomplete="email" required>
-       <button class="primary">${t('share.invite')}</button></form>
-       <div class="langs">${s.owner ? `<button type="button" class="destructive" id="shareLeave">${t('share.leave')}</button>`
-         : s.ns && !s.alone ? `<button type="button" class="destructive" id="shareStop">${t('share.stop')}</button>`
-         : `<button type="button" class="link" id="shareFind">${t('share.find')}</button>`}</div>`}
-       <div class="langs"><button type="button" class="destructive" id="dbxOff">${t('sync.disconnect')}</button></div>`
+  const status = statusText();
+  // Kurzstatus in der Zeile auf der Startseite der Einstellungen
+  document.querySelector('[data-go=sync]').hidden = !DBX_KEY;
+  $('syncVal').textContent = t('sync.val.' + (!s.refresh ? 'off' : state === 'auth' || state === 'error' ? state : state === 'pending' ? 'pending' : 'on'));
+  // Zeilen wie in den iOS-Einstellungen (Stile in index.html: .grp, .row, .gh = Überschrift, .gf = Erklärung darunter)
+  const row = (id, label, cls = 'act', icon = '') => `<button type="button" class="row ${cls}" id="${id}">${icon}<span class="lbl">${label}</span></button>`;
+  box.innerHTML = s.refresh
+    ? `<div class="grp"><div class="row"><span class="ic" style="--ic:#0061ff">${DBX_ICON}</span><span class="lbl">${esc(s.name)}<small>${esc(s.email)}</small></span></div>
+       ${state === 'auth' ? row('dbxOn', t('sync.reconnect'))
+         : `<button type="button" class="row" id="dbxNow"${state === 'running' ? ' disabled' : ''}>${SYNC_ICON}<span class="lbl">${t('sync.now')}</span></button>`}</div>
+       ${status ? `<p class="gf${state === 'error' || state === 'auth' ? ' bad' : ''}" role="status">${status}</p>` : ''}
+       <div class="grp"><button type="button" class="row swrow" id="dbxImg" role="switch" aria-checked="${offlineImages()}"><span>${t('sync.offlineImgs')}</span><span class="sw" aria-hidden="true"></span></button></div>
+       ${state === 'auth' ? '' : `<p class="gh">${t('share.title')}</p>
+       <div class="grp"><form class="row" id="shareForm"><input type="email" id="shareMail" placeholder="${t('share.mail')}" aria-label="${t('share.mail')}" autocomplete="email" required>
+         <button class="link">${t('share.invite')}</button></form>
+         ${s.owner ? row('shareLeave', t('share.leave'), 'danger') : s.ns && !s.alone ? row('shareStop', t('share.stop'), 'danger') : row('shareFind', t('share.find'))}</div>
+       <p class="gf">${s.owner ? t('share.using', esc(s.owner)) : s.ns && !s.alone ? t('share.owning') : t('share.intro')}</p>`}
+       <div class="grp">${row('dbxOff', t('sync.disconnect'), 'danger')}</div>`
     : manualPending
-    ? `<form class="langs" id="dbxCodeForm"><label for="dbxCode" class="note">${t('sync.pasteCode')}</label>
-       <input id="dbxCode" autocomplete="off" autocapitalize="off" spellcheck="false" required>
-       <button class="primary">${t('sync.confirm')}</button><button type="button" class="link" id="dbxBack">${t('sync.back')}</button></form>`
-    : `<p class="note">${t('sync.intro')}</p><div class="langs"><button type="button" class="dbx" id="dbxOn">${DBX_ICON}${t('sync.connect')}</button>
-       <button type="button" class="link" id="dbxManual">${t('sync.manual')}</button></div>`);
+    ? `<form id="dbxCodeForm"><p class="gf top"><label for="dbxCode">${t('sync.pasteCode')}</label></p>
+       <div class="grp"><div class="row"><input id="dbxCode" autocomplete="off" autocapitalize="off" spellcheck="false" required></div>
+       <button class="row act">${t('sync.confirm')}</button></div></form>
+       <div class="grp">${row('dbxBack', t('sync.back'))}</div>`
+    : `<div class="grp">${row('dbxOn', t('sync.connect'), 'act', DBX_ICON)}${row('dbxManual', t('sync.manual'))}</div>
+       <p class="gf">${t('sync.intro')}</p>`;
   if (mail && $('shareMail')) { $('shareMail').value = mail; if (typing) $('shareMail').focus(); }
 }
 const syncFail = err => toast(t('sync.failed') + ' (' + err.message + ')', true);
@@ -559,7 +609,7 @@ $('syncBox').onsubmit = e => {
   history.replaceState(null, '', redirectUri()); // Code nicht in der Adresszeile oder im Verlauf lassen
   if (q.has('error')) return toast(t('sync.denied'), true);
   if (q.get('state') !== dbx.get().state) return toast(t('sync.failed'), true);
-  try { await dbxExchange(q.get('code'), true); openDlg($('setDlg')); }
+  try { await dbxExchange(q.get('code'), true); setPage('sync'); openDlg($('setDlg')); }
   catch (err) { syncFail(err); }
 })();
 // Verbindung über einen älteren App-Schlüssel (andere Dropbox-App) gilt nicht mehr: neu verbinden lassen

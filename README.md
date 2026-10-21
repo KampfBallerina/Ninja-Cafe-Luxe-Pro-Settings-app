@@ -33,16 +33,26 @@ Du protokollierst jeden Shot: welche Bohne, welche Maschineneinstellung und wie 
 
 Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell- und Dunkelmodus · Deutsch und Englisch
 
-### Neu in Version 1.2.0
+### Neu in Version 1.2.2
 
-- **Röstgrad** je Bohne in fünf Stufen (hell bis dunkel). Passt die Temperatur nicht dazu, empfiehlt die App die Einstellung laut Ninja-Handbuch
-- **Probleme ankreuzen:** zu kalt, zu heiß, wenig Crema, schmeckt verbrannt, jeweils mit passendem Tipp
-- **Bessere Tipps** aus der Fehlerdiagnose im Handbuch, z. B. bei zu schnellem oder zu langsamem Durchlauf
-- **Grunddaten je Bohne:** Bohnenart, -typ und Röstgrad sind bei allen Shots einer Bohne gleich. Eine Änderung gilt für alle
-- **Alle Kauforte einer Bohne** auf einen Blick: in „Meine Bohnen“, im Formular und in den Shot-Details. Dazu ein Kaufort-Filter
+- **Getränk am Ende:** Was du aus dem Shot gemacht hast, z. B. Cappuccino, Flat White oder Latte Macchiato, dazu Milchschaum und Milchart (tierisch oder pflanzlich). Die Bewertung gilt dem fertigen Getränk, Tipps zu sauer und bitter entfallen bei Milchgetränken
+- **Eigener Filter fürs Dashboard** mit allen Gruppen, auch nach Endgetränk und Milchart. Auf Wunsch merkt sich die App den letzten Filter (nur auf diesem Gerät)
+- **Neue Einstellungen** im Stil von iOS: Gruppen, Unterseiten und „Fertig“. Export und Import sind von der Kopfzeile unter Einstellungen → „Datensicherung“ gewandert
+- **Ziehen zum Aktualisieren:** In der installierten App gleicht Herunterziehen auf Dashboard und „Meine Bohnen“ mit der Dropbox ab
 
 <details>
 <summary>Frühere Versionen</summary>
+
+**1.2.1**
+- Gemeinsam nutzen: andere per E-Mail einladen, alle sehen dieselben Shots, Favoriten bleiben pro Person
+- Filter nach Person, die einen Shot angelegt hat
+
+**1.2.0**
+- Röstgrad je Bohne in fünf Stufen. Passt die Temperatur nicht dazu, empfiehlt die App die Einstellung laut Ninja-Handbuch
+- Probleme ankreuzen (zu kalt, zu heiß, wenig Crema, schmeckt verbrannt), jeweils mit passendem Tipp
+- Bessere Tipps aus der Fehlerdiagnose im Handbuch
+- Grunddaten je Bohne: Bohnenart, -typ und Röstgrad gelten für alle Shots einer Bohne
+- Alle Kauforte einer Bohne auf einen Blick, dazu ein Kaufort-Filter
 
 **1.1.0**
 - Getränk und Tassengröße wählbar, nur in den Kombinationen, die die Maschine anbietet
@@ -60,18 +70,18 @@ Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell
 
 | Funktion | Kurz erklärt |
 |---|---|
-| **Neuer Shot** | Bohne (Marke, Sorte, Art, Typ, Röstgrad, Kaufort, Bild), Maschine (Einsatz, Getränk – nur Kombinationen, die die Maschine anbietet, Tassengröße bei Coffee-Programmen –, Stärkegrad, Temperatur, Mahlgrad, Dauer, Gewicht) und Geschmack per Schieberegler (sauer, bitter, Stärke, Note 1–10). Dazu ankreuzbare Probleme: zu kalt, zu heiß, wenig Crema, schmeckt verbrannt |
+| **Neuer Shot** | Bohne (Marke, Sorte, Art, Typ, Röstgrad, Kaufort, Bild), Maschine (Einsatz, Getränk – nur Kombinationen, die die Maschine anbietet, Tassengröße bei Coffee-Programmen –, Stärkegrad, Temperatur, Mahlgrad, Dauer, Gewicht) Getränk am Ende (pur oder z. B. Cappuccino, dann mit Milchschaum und Milchart) und Geschmack per Schieberegler (sauer, bitter, Stärke, Note 1–10). Dazu ankreuzbare Probleme: zu kalt, zu heiß, wenig Crema, schmeckt verbrannt |
 | **Mitdenkendes Formular** | Schlägt bekannte Werte vor, füllt Bohnendaten und den zuletzt genutzten Kaufort automatisch aus, zeigt, wo die Bohne bisher gekauft wurde, und übernimmt auf Knopfdruck die beste bisherige Einstellung der Bohne |
 | **Grunddaten je Bohne** | Bohnenart, Bohnentyp und Röstgrad gelten für alle Shots einer Bohne (Marke + Sorte). Änderst du sie bei einem Shot, ändern sie sich bei allen |
-| **Tipps** | Aus Geschmack, Durchlaufzeit und angekreuzten Problemen werden Hinweise, gestützt auf die Fehlerdiagnose im Ninja-Handbuch, z. B. „eher sauer → feiner mahlen oder Temperatur höher“ oder „zu kalt → Siebträger und Tasse vorwärmen“. Passt die Temperatur nicht zum Röstgrad, gibt es die Empfehlung von Ninja. Dazu das Brühverhältnis (z. B. 1:2,0) |
+| **Tipps** | Aus Geschmack, Durchlaufzeit und angekreuzten Problemen werden Hinweise, gestützt auf die Fehlerdiagnose im Ninja-Handbuch, z. B. „eher sauer → feiner mahlen oder Temperatur höher“ oder „zu kalt → Siebträger und Tasse vorwärmen“. Passt die Temperatur nicht zum Röstgrad, gibt es die Empfehlung von Ninja. Bei Milchgetränken entfallen die Tipps zu sauer und bitter, weil die Milch beides überdeckt. Dazu das Brühverhältnis (z. B. 1:2,0) |
 | **Doppelte Shots** | Gleiche Einstellungen werden zusammengefasst und als „2× zubereitet“ gezählt |
-| **Dashboard** | Kennzahlen, bester Shot, Favoriten, Top 10, Geschmackskarte (sauer × bitter), Notenverlauf und die beste Einstellung je Bohne |
-| **Meine Bohnen** | Alle Bohnen als Karten mit ihren Shots, der beste zuerst. Zugeklappt steht der letzte Kaufort („Rewe +2“), aufgeklappt alle. Mit Suche, Filter (u. a. Röstgrad und Kaufort) und Sortierung |
+| **Dashboard** | Kennzahlen, bester Shot, Favoriten, Top 10, Geschmackskarte (sauer × bitter), Notenverlauf und die beste Einstellung je Bohne. Mit eigenem Filter (z. B. nur Cappuccinos mit Pflanzenmilch oder – beim Teilen – nur eine Person), den sich die App auf Wunsch merkt |
+| **Meine Bohnen** | Alle Bohnen als Karten mit ihren Shots, der beste zuerst. Zugeklappt steht der letzte Kaufort („Rewe +2“), aufgeklappt alle. Mit Suche, Filter (u. a. Röstgrad, Kaufort, Endgetränk, Milchart und – beim Teilen – Person) und Sortierung |
 | **Favoriten** | Einzelne Shots mit dem Stern markieren und gezielt filtern. Beim Teilen hat jede Person ihre eigenen |
 | **Bohnenbild** | Ein Bild pro Bohne, das bei allen ihren Shots erscheint. Als Link oder Upload (wird automatisch verkleinert) |
-| **Export / Import** | Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt statt ersetzt |
-| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App arbeitet nur im Ordner `Caffeine Analytica`. Bilder liegen dann standardmäßig nur in der Dropbox und sparen Platz auf dem Gerät. Mit „Bilder offline verfügbar machen“ werden sie zusätzlich auf dem Gerät gespeichert |
-| **Gemeinsam nutzen** | Optional, z. B. für einen Haushalt: Unter Einstellungen → „Gemeinsam nutzen“ lädst du andere per E-Mail ein (sie brauchen ein Dropbox-Konto). Wer eingeladen ist, wählt beim Verbinden „Daten von … verwenden“. Alle sehen und bearbeiten dieselben Shots, Favoriten bleiben pro Person, und in den Details steht, wer einen Shot angelegt hat. „Nicht mehr mitmachen“ bzw. „Teilen beenden“ löst das wieder, die Shots bleiben dabei auf jedem Gerät erhalten |
+| **Export / Import** | Unter Einstellungen → „Datensicherung“: Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt statt ersetzt |
+| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App arbeitet nur im Ordner `Caffeine Analytica`. Bilder liegen dann standardmäßig nur in der Dropbox und sparen Platz auf dem Gerät. Mit „Bilder offline verfügbar machen“ werden sie zusätzlich auf dem Gerät gespeichert. In der installierten App gleicht Herunterziehen auf Dashboard und „Meine Bohnen“ sofort ab |
+| **Gemeinsam nutzen** | Optional, z. B. für einen Haushalt: Unter Einstellungen → Synchronisation → „Gemeinsam nutzen“ lädst du andere per E-Mail ein (sie brauchen ein Dropbox-Konto). Wer eingeladen ist, wählt beim Verbinden „Daten von … verwenden“. Alle sehen und bearbeiten dieselben Shots, Favoriten bleiben pro Person, und in den Details steht, wer einen Shot angelegt hat. „Nicht mehr mitmachen“ bzw. „Teilen beenden“ löst das wieder, die Shots bleiben dabei auf jedem Gerät erhalten |
 
 Ein Tipp auf einen Shot öffnet die Details. Dort kannst du ihn **bearbeiten**, als **Vorlage** nutzen oder **löschen**.
 
@@ -99,16 +109,26 @@ Log every shot: which bean, which machine settings and how it tasted. From that,
 
 No account, no server · works offline · installs to your home screen · light and dark mode · German and English
 
-### What's new in version 1.2.0
+### What's new in version 1.2.2
 
-- **Roast level** per bean in five steps (light to dark). If the temperature doesn't suit it, the app recommends the setting from the Ninja manual
-- **Tick problems:** too cold, too hot, little crema, tastes burnt, each with a matching tip
-- **Better tips** from the manual's troubleshooting section, e.g. for extraction that runs too fast or too slow
-- **Bean basics:** species, type and roast are the same on all shots of a bean. A change applies to all of them
-- **Every shop for a bean** at a glance: in “My beans”, in the form and in the shot details. Plus a shop filter
+- **Final drink:** what you made from the shot, e.g. cappuccino, flat white or latte macchiato, plus milk froth and milk type (dairy or plant-based). The rating applies to the finished drink, and sour/bitter tips are skipped for milk drinks
+- **Dashboard filter of its own** with all groups, including final drink and milk type. If you like, the app remembers your last filter (on this device only)
+- **New settings** in iOS style: groups, sub-pages and “Done”. Export and import moved from the header to Settings → “Backup”
+- **Pull to refresh:** in the installed app, pulling down on the dashboard or “My beans” syncs with Dropbox
 
 <details>
 <summary>Earlier versions</summary>
+
+**1.2.1**
+- Sharing: invite others by email, everyone sees the same shots, favorites stay personal
+- Filter by the person who created a shot
+
+**1.2.0**
+- Roast level per bean in five steps. If the temperature doesn't suit it, the app recommends the setting from the Ninja manual
+- Tick problems (too cold, too hot, little crema, tastes burnt), each with a matching tip
+- Better tips from the manual's troubleshooting section
+- Bean basics: species, type and roast apply to all shots of a bean
+- Every shop for a bean at a glance, plus a shop filter
 
 **1.1.0**
 - Choose drink and cup size, only in combinations the machine offers
@@ -126,18 +146,18 @@ No account, no server · works offline · installs to your home screen · light 
 
 | Feature | In short |
 |---|---|
-| **New shot** | Bean (brand, product, species, type, roast, shop, image), machine (basket, drink — only combinations the machine offers, cup size for Coffee programs — strength, temperature, grind size, time, yield) and taste with sliders (sour, bitter, strength, score 1–10). Plus problems you can tick: too cold, too hot, little crema, tastes burnt |
+| **New shot** | Bean (brand, product, species, type, roast, shop, image), machine (basket, drink — only combinations the machine offers, cup size for Coffee programs — strength, temperature, grind size, time, yield) final drink (straight or e.g. cappuccino, then with milk froth and milk type) and taste with sliders (sour, bitter, strength, score 1–10). Plus problems you can tick: too cold, too hot, little crema, tastes burnt |
 | **Smart form** | Suggests known values, fills in bean details and the last shop automatically, shows where you've bought the bean so far, and applies the bean's best setting so far with one tap |
 | **Bean basics** | Species, type and roast apply to all shots of a bean (brand + product). Change them on one shot and they change on all |
-| **Tips** | Turns taste, extraction time and ticked problems into hints based on the troubleshooting section of the Ninja manual, e.g. “tastes sour → grind finer or raise the temperature” or “too cold → preheat portafilter and cup”. If the temperature doesn't suit the roast, you get Ninja's recommendation. Also shows the brew ratio (e.g. 1:2.0) |
+| **Tips** | Turns taste, extraction time and ticked problems into hints based on the troubleshooting section of the Ninja manual, e.g. “tastes sour → grind finer or raise the temperature” or “too cold → preheat portafilter and cup”. If the temperature doesn't suit the roast, you get Ninja's recommendation. For milk drinks the sour/bitter tips are skipped, since milk masks both. Also shows the brew ratio (e.g. 1:2.0) |
 | **Duplicate shots** | Identical settings are merged and counted as “prepared 2×” |
-| **Dashboard** | Key figures, best shot, favorites, top 10, taste map (sour × bitter), score progress and the best setting per bean |
-| **My beans** | All beans as cards with their shots, best first. Collapsed cards show the last shop (“Rewe +2”), expanded ones all of them. With search, filters (incl. roast and shop) and sorting |
+| **Dashboard** | Key figures, best shot, favorites, top 10, taste map (sour × bitter), score progress and the best setting per bean. With a filter of its own (e.g. only cappuccinos with plant-based milk or – when sharing – only one person) that the app can remember |
+| **My beans** | All beans as cards with their shots, best first. Collapsed cards show the last shop (“Rewe +2”), expanded ones all of them. With search, filters (incl. roast, shop, final drink, milk type and – when sharing – person) and sorting |
 | **Favorites** | Mark individual shots with the star and filter for them. When sharing, everyone has their own |
 | **Bean image** | One image per bean, shown for all of its shots. As a link or upload (resized automatically) |
-| **Export / import** | Back up as a JSON file. Importing merges the data instead of replacing it |
-| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only works in the folder `Caffeine Analytica`. By default, images are then kept only in Dropbox to save space on the device. Turn on “Make images available offline” to also store them on the device |
-| **Share** | Optional, e.g. for a household: under Settings → “Share” you invite others by email (they need a Dropbox account). Whoever is invited picks “Use …'s data” when connecting. Everyone sees and edits the same shots, favorites stay personal, and the details show who created a shot. “Stop using shared data” or “Stop sharing” ends it again, and every device keeps its shots |
+| **Export / import** | Under Settings → “Backup”: back up as a JSON file. Importing merges the data instead of replacing it |
+| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only works in the folder `Caffeine Analytica`. By default, images are then kept only in Dropbox to save space on the device. Turn on “Make images available offline” to also store them on the device. In the installed app, pulling down on the dashboard or “My beans” syncs right away |
+| **Share** | Optional, e.g. for a household: under Settings → Sync → “Share” you invite others by email (they need a Dropbox account). Whoever is invited picks “Use …'s data” when connecting. Everyone sees and edits the same shots, favorites stay personal, and the details show who created a shot. “Stop using shared data” or “Stop sharing” ends it again, and every device keeps its shots |
 
 Tap a shot to open its details. From there you can **edit** it, use it as a **template** or **delete** it.
 
@@ -166,8 +186,8 @@ The app then opens full screen and also works without internet.
 
 - `index.html` (HTML, CSS, JavaScript) plus `sync.js` für Dropbox, ohne Frameworks und ohne Build-Schritt.
   · `index.html` (HTML, CSS, JavaScript) plus `sync.js` for Dropbox, with no frameworks and no build step.
-- Daten liegen in IndexedDB (Rückfall: localStorage). Jeder Shot trägt einen Änderungszeitpunkt (`updated`), gelöschte Shots bleiben als Löschmarke (`deleted`) erhalten. Der Export hat das Format `{version: 2, shots, deleted}`, alte Exporte (nur die Liste) lassen sich weiter importieren.
-  · Data lives in IndexedDB (fallback: localStorage). Each shot carries a change time (`updated`), deleted shots are kept as tombstones (`deleted`). Exports use `{version: 2, shots, deleted}`; old exports (just the list) can still be imported.
+- Daten liegen in IndexedDB (Rückfall: localStorage). Jeder Shot trägt einen Änderungszeitpunkt (`updated`), gelöschte Shots bleiben als Löschmarke (`deleted`) erhalten. Das Endgetränk steht in `final` (fehlt = pur), bei Milchgetränken dazu `froth` und `milk`. Der Export hat das Format `{version: 2, shots, deleted}`, alte Exporte (nur die Liste) lassen sich weiter importieren.
+  · Data lives in IndexedDB (fallback: localStorage). Each shot carries a change time (`updated`), deleted shots are kept as tombstones (`deleted`). The final drink is stored in `final` (missing = straight), milk drinks add `froth` and `milk`. Exports use `{version: 2, shots, deleted}`; old exports (just the list) can still be imported.
 - **Dropbox-Sync** (`sync.js`, ohne Bibliotheken): Login per OAuth mit PKCE direkt aus dem Browser, ohne Server. Die Dropbox-App hat Zugriff „Full Dropbox“, weil App-Ordner nicht geteilt werden können. Im Ordner `Caffeine Analytica` liegen `data.json` (Shots + Löschmarken, Bilder als Verweis `img:<sha256>`) und `images/`. Ein Abgleich lädt `data.json`, führt pro Shot zusammen (neuere Änderung gewinnt) und lädt nur hoch, wenn sich die Datei seitdem nicht geändert hat, sonst beginnt er von vorn.
   · **Dropbox sync** (`sync.js`, no libraries): OAuth with PKCE straight from the browser, no server. The Dropbox app has “Full Dropbox” access because app folders can't be shared. The folder `Caffeine Analytica` holds `data.json` (shots + tombstones, images as `img:<sha256>` references) and `images/`. A sync downloads `data.json`, merges per shot (newer change wins) and only uploads if the file hasn't changed in the meantime, otherwise it starts over.
 - **Teilen:** Der Ordner wird über die Dropbox-API geteilt (`sharing/share_folder`, Mitglieder mit Bearbeitungsrecht). Weil er bei jedem Mitglied anders heißen und liegen kann, spricht die App ihn über seine ID an (Kopfzeile `Dropbox-API-Path-Root`). Jeder Shot trägt `by: {id, name}` (Dropbox-Konto des Erstellers) und `favs` (Konto-IDs; ohne Dropbox `local`). Fällt der Zugriff weg, wechselt die App automatisch zum eigenen Ordner. Bilder aus dem früheren App-Ordner `Apps/Caffeine Analytica` übernimmt sie beim Abgleich.

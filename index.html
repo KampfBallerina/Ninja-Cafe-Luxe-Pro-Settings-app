@@ -13,9 +13,9 @@
 <style>
 /* Abstandsskala (4er-Raster): 4 Mini · 8 eng · 12 Liste · 16 Standard/Seitenrand/Karten · 24 Abschnitt · 32 Seitenende */
 :root{--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--r:12px;--r-s:8px;--h:44px;
-  --bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc;--danger:#b42318;--on-danger:#fff;--red:#ff3b30;color-scheme:light dark;
+  --bg:#f3f5f8;--card:#fff;--fg:#1e293b;--muted:#64748b;--accent:#2563eb;--on-accent:#fff;--line:#dfe4ec;--hl:#eaf0fd;--field:#f8fafc;--danger:#b42318;--on-danger:#fff;--red:#ff3b30;--green:#248a3d;color-scheme:light dark;
   --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
-@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922;--danger:#ff8a80;--on-danger:#1c1210;--red:#ff453a;
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#18202a;--fg:#e6edf3;--muted:#8b98a8;--accent:#6ea8fe;--on-accent:#0f141a;--line:#2a3441;--hl:#1e2b3d;--field:#121922;--danger:#ff8a80;--on-danger:#1c1210;--red:#ff453a;--green:#30d158;
   --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b98a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -128,11 +128,25 @@ td.favcell .star{margin:-12px -10px -12px var(--s2);vertical-align:middle}
 /* Suche und Filter */
 .searchbar{display:flex;gap:var(--s2);margin-bottom:var(--s4)}
 .searchbar input{flex:1;min-width:0}
-#fltBtn{position:relative}
+#fltBtn,#dfltBtn{position:relative}
+/* Personen-Filter über dem Dashboard: Auswahl links, Knopf rechts */
+.dashbar{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s4);color:var(--muted);font-size:.9rem}
+.dashbar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:.75rem;font-weight:600}
 button.toggle[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .chipset{display:flex;flex-wrap:wrap;gap:var(--s2)}
 .fgroup{margin-bottom:var(--s4)}
+/* Filtergruppen als Zeilen: Titel links, Auswahl rechts (gekürzt), Pfeil dreht beim Aufklappen */
+#fltDlg details.fgroup{margin:0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none}
+#fltDlg summary{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) 0;list-style:none;font-weight:500}
+#fltDlg summary::-webkit-details-marker{display:none}
+#fltDlg summary::after{content:"›";display:inline-block;clear:none;color:var(--muted);font-size:1.3rem;line-height:1;transition:transform .15s}
+#fltDlg details[open]>summary::after{transform:rotate(90deg)}
+@media (prefers-reduced-motion:reduce){#fltDlg summary::after{transition:none}}
+.fsum{flex:1;min-width:0;text-align:right;color:var(--muted);font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsum.on{color:var(--accent)}
+#fltDlg details .chipset{padding-bottom:var(--s3)}
+.favrow{padding-bottom:var(--s3);border-bottom:1px solid var(--line)}
 .flabel{display:block;margin-bottom:var(--s2);color:var(--muted);font-size:.85rem;font-weight:500}
 #fltDlg[open]{display:flex;flex-direction:column;padding:0;overflow:hidden}
 #fltDlg h3{margin:0;padding:var(--s4) var(--s4) 0}
@@ -213,34 +227,71 @@ dd .also{display:block;color:var(--muted)}
 #zoom::backdrop{background:rgb(0 0 0/.85)}
 
 .langs{display:grid;gap:var(--s2)}
-/* Einstellungen: Sprache als Zweier-Auswahl nebeneinander, Abschnitte durch Linien getrennt */
-#langs{grid-template-columns:repeat(2,minmax(0,1fr))}
-#syncBox,.about{margin-top:var(--s5);padding-top:var(--s4);border-top:1px solid var(--line)}
-/* zerstörende Aktion wie bei iOS (getönter Knopf): Systemrot als Schrift auf blassrotem Grund */
-button.destructive{margin-top:var(--s2);background:color-mix(in srgb,var(--red) 15%,transparent);border-color:transparent;color:var(--red);font-weight:600}
-/* Dropbox-Knopf in Dropbox-Blau, wie in anderen Apps */
-button.dbx{background:#0061ff;border-color:#0061ff;color:#fff;font-weight:500}
-button svg.brand{width:20px;height:20px;margin-right:var(--s2);fill:currentColor;flex:none}
-.about{margin-bottom:0;color:var(--muted);font-size:.85rem;text-align:center}
+/* Einstellungen wie in iOS: grauer Grund, weiße Gruppen mit Zeilen, Überschrift über und Erklärung unter der Gruppe,
+   Unterseiten (data-page) mit „Zurück“ links und „Fertig“ rechts in der mitlaufenden Kopfzeile */
+#setDlg{padding-top:0;background:var(--bg)}
+.sethead{position:sticky;top:0;z-index:1;display:flex;align-items:center;margin:0 calc(-1 * var(--s4));padding:var(--s1) var(--s2);background:var(--bg)}
+.sethead button.link{height:var(--h);padding:0 var(--s2);font-size:1rem}
+/* ausgeblendetes „Zurück“ hält seinen Platz, damit „Fertig“ rechts bleibt */
+.sethead button.link[hidden]{display:inline-flex!important;visibility:hidden}
+#setBack{gap:var(--s1)}
+#setBack svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+#setDone{margin-left:auto;font-weight:600}
+/* großer Seitentitel wie in iOS */
+#setDlg h3#setTitle{margin:var(--s1) 0 0;font-size:1.75rem;font-weight:700}
+.grp{margin-top:var(--s5);border-radius:var(--r);background:var(--card);overflow:hidden}
+.gh{margin:var(--s5) var(--s4) var(--s2);color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+.gh+.grp,.gf.top+.grp{margin-top:0}
+.gf{margin:var(--s2) var(--s4) 0;color:var(--muted);font-size:.8rem}
+.gf.top{margin:var(--s5) var(--s4) var(--s2)}
+.gf.bad{color:var(--danger)}
+.row{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:var(--s3);width:100%;min-height:var(--h);height:auto;padding:var(--s2) var(--s4);border:0;border-radius:0;background:none;color:var(--fg);text-align:left}
+/* Trennlinie zwischen Zeilen, eingerückt wie in iOS */
+.row+.row::before{content:"";position:absolute;top:0;left:var(--s4);right:0;border-top:1px solid var(--line)}
+button.row:not(:disabled):active{background:var(--hl)}
+.lbl{flex:1;min-width:0}
+.lbl small{display:block;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.row .val{color:var(--muted)}
+.row.nav::after{content:"";flex:none;width:8px;height:8px;margin:0 var(--s1);border:solid var(--muted);border-width:2px 2px 0 0;transform:rotate(45deg)}
+.row.act{color:var(--accent)}
+.row.danger{color:var(--red)}
+.row>svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.row>svg.brand{fill:currentColor;stroke:none;margin:0}
+form.row{display:flex}
+.row input{flex:1;height:auto;min-width:0;padding:0;border:0;background:none}
+.row input:focus-visible{outline:none}
+.row:has(input:focus-visible){box-shadow:inset 0 0 0 2px var(--accent)}
+.row button.link{flex:none;font-size:.95rem;font-weight:600}
+/* farbiges Symbol vor einer Zeile wie in den iOS-Einstellungen */
+.ic{display:grid;place-items:center;width:29px;height:29px;border-radius:7px;background:var(--ic);color:#fff;flex:none}
+.ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ic svg.brand{fill:currentColor;stroke:none;margin:0}
+.chk{width:20px;height:20px;flex:none;fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.about{margin:var(--s6) 0 0;color:var(--muted);font-size:.8rem;text-align:center}
 .about a{color:var(--accent)}
-#syncBox .note{margin:0 0 var(--s3);font-size:.9rem}
-#syncBox .state{color:var(--muted)}
-/* Konto und Status links, Sync-Knopf rechts daneben; während des Abgleichs dreht sich das Symbol */
-.syncrow{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)}
-.syncrow>div{flex:1;min-width:0;display:grid;gap:var(--s1)}
-#syncBox .syncrow .note{margin:0;overflow-wrap:anywhere}
+/* Sync-Zeile in Systemgrün (hell: Apples kontraststärkeres Grün); während des Abgleichs dreht sich das Symbol */
+#dbxNow{color:var(--green)}
 #dbxNow:disabled{cursor:default}
 #dbxNow:disabled svg{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#dbxNow:disabled svg{animation:none}}
-#syncBox .state.bad{color:var(--danger)}
-/* Schalter: ganze Zeile ist die Tippfläche, rechts der Schieber */
-button.swrow{display:flex;justify-content:space-between;gap:var(--s3);width:100%;padding:0 var(--s4);text-align:left}
-.sw{flex:none;position:relative;width:44px;height:26px;border-radius:13px;background:var(--line);transition:background .15s}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgb(0 0 0/.3);transition:transform .15s}
-[aria-checked=true]>.sw{background:var(--accent)}
-[aria-checked=true]>.sw::after{transform:translateX(18px)}
+/* Dropbox-Knopf in Dropbox-Blau (Fenster beim ersten Abgleich) */
+button.dbx{background:#0061ff;border-color:#0061ff;color:#fff;font-weight:500}
+button svg.brand{width:20px;height:20px;margin-right:var(--s2);fill:currentColor;flex:none}
+/* Schalter wie in iOS: ganze Zeile ist die Tippfläche, rechts der Schieber, an = Systemgrün */
+.swrow{justify-content:space-between}
+.sw{flex:none;position:relative;width:51px;height:31px;border-radius:16px;background:var(--line);transition:background .15s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgb(0 0 0/.3);transition:transform .15s}
+[aria-checked=true]>.sw{background:var(--green)}
+[aria-checked=true]>.sw::after{transform:translateX(20px)}
 @media (prefers-reduced-motion:reduce){.sw,.sw::after{transition:none}}
+/* Ziehen zum Aktualisieren (sync.js): Kreisel wie in iOS, dreht in 8 Schritten; die App selbst federt nicht zusätzlich nach */
+#ptr{height:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s1);color:var(--muted);font-size:.8rem}
+#ptr.back{transition:height .25s}
+#ptr svg{width:28px;height:28px;flex:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+#ptr.spin svg{animation:spin .8s steps(8) infinite}
+@media (prefers-reduced-motion:reduce){#ptr.back{transition:none}#ptr.spin svg{animation:none}}
+@media (display-mode:standalone){html,body{overscroll-behavior-y:none}}
 /* Sync-Status am Zahnrad: gelb = ausstehend, rot = Fehler */
 #setBtn{position:relative}
 .dot{position:absolute;top:6px;right:6px;width:12px;height:12px;border:2px solid var(--card);border-radius:50%;background:#eab308}
@@ -249,8 +300,6 @@ button.swrow{display:flex;justify-content:space-between;gap:var(--s3);width:100%
 #firstDlg small{display:block;margin:calc(var(--s1) * -1) 0 var(--s2);color:var(--muted)}
 #firstDlg details{margin:var(--s2) 0 0}
 #firstDlg details .langs{padding:0 var(--s4) var(--s3)}
-#shareForm{grid-template-columns:1fr auto;margin-bottom:var(--s2)}
-#syncBox .flabel.share{margin-top:var(--s4)}
 button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(--accent);font-size:.85rem}
 
 /* Tablet/Handy */
@@ -304,13 +353,8 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
   <h1><span data-i18n="app.title">Caffeine Analytica</span><span class="sub"> · Ninja Luxe Café Pro</span></h1>
   <button id="add" class="icon primary" data-i18n-title="btn.add">
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-  <button id="export" class="icon" data-i18n-title="btn.export">
-    <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button>
-  <button class="icon" onclick="importFile.click()" data-i18n-title="btn.import">
-    <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button>
   <button id="setBtn" class="icon" aria-haspopup="dialog" data-i18n-title="btn.settings">
     <span class="dot" id="syncDot" hidden></span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-  <input type="file" id="importFile" accept=".json,application/json" hidden>
 </header>
 <nav role="tablist">
   <button role="tab" data-view="best" data-i18n="tab.dash">Dashboard</button>
@@ -346,6 +390,11 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
         <label><span data-i18n="f.grind"></span><select name="grind" required></select></label>
         <label><span data-i18n="f.time"></span><input name="time" type="number" min="0" step="1" inputmode="numeric"></label>
         <label><span data-i18n="f.weight"></span><input name="weight" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      </fieldset>
+      <fieldset class="g2"><legend data-i18n="lg.final"></legend>
+        <div class="field full"><span data-i18n="f.final"></span><div class="seg many" id="seg-final"></div></div>
+        <div class="field full"><span data-i18n="f.froth"></span><div class="seg many" id="seg-froth"></div></div>
+        <div class="field full"><span data-i18n="f.milk"></span><div class="seg many" id="seg-milk"></div></div>
       </fieldset>
       <fieldset class="g2"><legend data-i18n="lg.taste"></legend>
         <div class="field full"><span data-i18n="f.sour"></span><div class="slider" id="seg-sour"></div></div>
@@ -386,16 +435,39 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
 </dialog>
 <dialog id="firstDlg" aria-labelledby="firstTitle"></dialog>
 <dialog id="setDlg" aria-labelledby="setTitle">
-  <h3 id="setTitle" data-i18n="set.title"></h3>
-  <span class="flabel" id="langLabel" data-i18n="set.lang"></span>
-  <div class="langs" id="langs" role="group" aria-labelledby="langLabel"></div>
-  <div id="syncBox" hidden></div>
-  <p class="about"><span data-i18n="set.version"></span> <span id="appVersion"></span> ·
+  <div class="sethead">
+    <button type="button" class="link" id="setBack" data-go="root" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span data-i18n="set.title"></span></button>
+    <button type="button" class="link" id="setDone" data-i18n="set.done"></button>
+  </div>
+  <h3 id="setTitle"></h3>
+  <div data-page="root">
+    <div class="grp">
+      <button type="button" class="row nav" data-go="sync"><span class="ic" style="--ic:#34c759"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span><span class="lbl" data-i18n="sync.title"></span><span class="val" id="syncVal"></span></button>
+      <button type="button" class="row nav" data-go="data"><span class="ic" style="--ic:#8e8e93"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></span><span class="lbl" data-i18n="set.data"></span></button>
+    </div>
+    <p class="gh" data-i18n="tab.dash"></p>
+    <div class="grp"><button type="button" class="row swrow" id="keepFlt" role="switch" aria-checked="false" aria-describedby="keepFltHint"><span data-i18n="set.keepFlt"></span><span class="sw" aria-hidden="true"></span></button></div>
+    <p class="gf" id="keepFltHint" data-i18n="set.keepFltHint"></p>
+    <div class="grp">
+      <button type="button" class="row nav" data-go="lang"><span class="ic" style="--ic:#007aff"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span><span class="lbl" data-i18n="set.lang"></span><span class="val" id="langVal"></span></button>
+    </div>
+    <p class="about"><span data-i18n="set.version"></span> <span id="appVersion"></span> ·
     <a href="https://github.com/KampfBallerina/Ninja-Cafe-Luxe-Pro-Settings-app" target="_blank" rel="noopener" data-i18n="set.source"></a></p>
+  </div>
+  <div data-page="sync" hidden><div id="syncBox"></div></div>
+  <div data-page="data" hidden>
+    <div class="grp">
+      <button type="button" class="row act" id="export"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><span class="lbl" data-i18n="data.export"></span></button>
+      <button type="button" class="row act" onclick="importFile.click()"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><span class="lbl" data-i18n="data.import"></span></button>
+    </div>
+    <p class="gf" data-i18n="set.dataHint"></p>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+  </div>
+  <div data-page="lang" hidden><div class="grp" id="langs" role="group" aria-labelledby="setTitle"></div></div>
 </dialog>
 <div id="toast" role="status"></div>
 <script>
-const APP_VERSION = '1.2.1'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
+const APP_VERSION = '1.2.2'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
 const KEY = 'ninja-kaffee-v1';
 const LANG_KEY = 'ninja-kaffee-lang';
 const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
@@ -403,6 +475,10 @@ const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Wert
 const ESPRESSO = ['Ristretto', 'Espresso', 'Lungo', 'Americano', 'Cold-Pressed'], COFFEE = ['Classic', 'Rich', 'Over Ice', 'Cold Brew'];
 const DRINKS = {Single: ['Espresso', 'Lungo', 'Americano'], Double: ESPRESSO, Quad: [...ESPRESSO, ...COFFEE]};
 const CUPS = {S: 175, 'S+': 235, M: 295, 'M+': 355, L: 415, 'L+': 475, XL: 530}; // ml, nur bei Coffee-Programmen
+// Was am Ende getrunken wurde (Pur = Getränk der Maschine); je Milchgetränk die vorbelegte Schaumstufe
+const FINALS = {Pur: '', Cappuccino: 'Dick', 'Flat White': 'Dünn', 'Caffè Latte': 'Aufgeschäumt', 'Latte Macchiato': 'Extradick', Cortado: 'Aufgeschäumt', Macchiato: 'Dick', 'Iced Latte': 'Kalt'};
+const FROTHS = ['Aufgeschäumt', 'Dünn', 'Dick', 'Extradick', 'Kalt'], MILKS = ['Tierisch', 'Pflanzlich'];
+const KEEP_KEY = 'ca-keep-filter', DFLT_KEY = 'ca-dash-filter'; // nur auf diesem Gerät, wird nicht synchronisiert
 const NUMS = ['grind', 'time', 'weight', 'sour', 'bitter', 'body', 'score'];
 
 // Gespeichert werden Einsatz/Stärkegrad/Temperatur weiter als deutsche Werte (Single, Leicht, Hoch …),
@@ -411,13 +487,14 @@ const I18N = {
   de: {
     'app.title': 'Caffeine Analytica',
     'tab.dash': 'Dashboard', 'tab.beans': 'Meine Bohnen',
-    'btn.add': 'Neuer Shot', 'btn.export': 'Export: alle Daten als Datei sichern',
-    'btn.import': 'Import: Datei laden und mit vorhandenen Daten zusammenführen', 'btn.settings': 'Einstellungen',
-    'set.title': 'Einstellungen', 'set.lang': 'Sprache', 'close': 'Schließen',
+    'btn.add': 'Neuer Shot', 'btn.settings': 'Einstellungen',
+    'set.data': 'Datensicherung', 'data.export': 'Exportieren', 'data.import': 'Importieren',
+    'set.dataHint': 'Exportieren speichert alle Shots als Datei – als Backup oder für den Umzug auf ein neues Gerät. Importieren führt eine solche Datei mit deinen Daten zusammen, pro Shot gilt die neuere Änderung.',
+    'set.title': 'Einstellungen', 'set.done': 'Fertig', 'set.lang': 'Sprache', 'close': 'Schließen',
     'set.version': 'Version', 'set.source': 'GitHub',
     'upd.ask': 'Eine neue Version der App ist da. Jetzt neu laden? Nicht gespeicherte Eingaben im Formular gehen dabei verloren.',
     'sync.title': 'Synchronisation', 'sync.intro': 'Gleiche deine Shots über deine eigene Dropbox zwischen deinen Geräten ab und teile sie auf Wunsch mit anderen. Die App arbeitet nur im Ordner „Caffeine Analytica“.',
-    'sync.connect': 'Mit Dropbox verbinden', 'sync.manual': 'Anmeldung klappt nicht? Code manuell eingeben',
+    'ptr.done': d => `Aktualisiert · ${d}`, 'sync.val.off': 'Aus', 'sync.val.on': 'Ein', 'sync.val.pending': 'Ausstehend', 'sync.val.error': 'Fehler', 'sync.val.auth': 'Neu verbinden', 'sync.connect': 'Mit Dropbox verbinden', 'sync.manual': 'Anmeldung klappt nicht? Code manuell eingeben',
     'sync.pasteCode': 'Melde dich im geöffneten Fenster bei Dropbox an, kopiere den angezeigten Code und füge ihn hier ein:',
     'sync.confirm': 'Code bestätigen', 'sync.back': 'Zurück',
     'sync.now': 'Jetzt synchronisieren', 'sync.offlineImgs': 'Bilder offline verfügbar machen', 'sync.reconnect': 'Neu verbinden',
@@ -443,7 +520,7 @@ const I18N = {
     'share.ended': 'Das Teilen wurde beendet. Du nutzt deinen Ordner jetzt wieder allein.',
     'share.use': n => `Daten von ${n} verwenden`, 'share.own': 'Meine eigenen Daten verwenden', 'share.later': 'Das kannst du später in den Einstellungen ändern.',
     'sync.missingImgs': n => `${n} Bilder liegen nur in der Dropbox und konnten nicht geladen werden (offline?). Sie fehlen danach auf diesem Gerät. Trotzdem fortfahren?`,
-    'sync.as': (n, e) => `Verbunden mit Dropbox: ${n}${e ? ` (${e})` : ''}`, 'sync.disconnect': 'Trennen',
+    'sync.disconnect': 'Trennen',
     'sync.connected': 'Mit Dropbox verbunden', 'sync.disconnected': 'Dropbox getrennt',
     'sync.denied': 'Dropbox-Anmeldung abgebrochen', 'sync.failed': 'Verbindung mit Dropbox fehlgeschlagen',
     'sort.title': 'Sortieren nach', 'sort.best': 'Beste Note', 'sort.avg': 'Ø Note', 'sort.recent': 'Zuletzt zubereitet',
@@ -459,6 +536,10 @@ const I18N = {
     'img.zoom': 'Bild vergrößert', 'img.inherited': 'Bild dieser Bohne – gilt für alle ihre Shots. Neuer Link oder Upload ersetzt es.',
     'f.size': 'Einsatz *', 'f.strength': 'Stärkegrad *', 'f.temp': 'Temperatur *', 'f.grind': 'Mahlgrad *',
     'f.drink': 'Getränk *', 'f.cup': 'Größe *', 'l.drink': 'Getränk', 'h.drink': 'Getränk',
+    'lg.final': 'Getränk am Ende', 'f.final': 'Getrunken als *', 'f.froth': 'Milchschaum *', 'f.milk': 'Milchart *',
+    'l.final': 'Getrunken als', 'l.froth': 'Milchschaum', 'l.milk': 'Milchart', 'set.keepFlt': 'Filter speichern', 'set.keepFltHint': 'Dein letzter Dashboard-Filter bleibt erhalten – nur auf diesem Gerät, nicht synchronisiert.',
+    'v.Pur': 'Pur', 'v.Aufgeschäumt': 'Aufgeschäumte Milch', 'v.Dünn': 'Dünner Schaum', 'v.Dick': 'Dicker Schaum',
+    'v.Extradick': 'Extradicker Schaum', 'v.Kalt': 'Kalter Schaum', 'v.Tierisch': 'Tierisch', 'v.Pflanzlich': 'Pflanzlich',
     'f.time': 'Dauer (s)', 'f.weight': 'Gewicht (g)',
     'f.sour': 'Sauer *', 'f.bitter': 'Bitter *', 'f.body': 'Stärke *', 'f.issues': 'Probleme', 'l.issues': 'Probleme',
     'is.cold': 'Zu kalt', 'is.hot': 'Zu heiß', 'is.crema': 'Wenig Crema', 'is.burnt': 'Schmeckt verbrannt',
@@ -483,7 +564,7 @@ const I18N = {
     'an.trendHint': 'Für den Verlauf braucht es mindestens 2 Shots.', 'an.last30': 'Gezeigt werden die letzten 30 Shots.',
     'star.add': 'Als Favorit markieren', 'star.remove': 'Favorit entfernen', 'star.has': 'Enthält Favoriten',
     'q.ph': 'Bohnen suchen …', 'q.label': 'Suche',
-    'flt.title': 'Filter', 'flt.fav': 'Nur Favoriten', 'flt.min': 'Mindestnote', 'flt.reset': 'Zurücksetzen', 'flt.apply': 'Anwenden',
+    'flt.title': 'Filter', 'flt.fav': 'Nur Favoriten', 'flt.min': 'Mindestnote', 'flt.reset': 'Zurücksetzen', 'flt.apply': 'Anwenden', 'flt.everyone': 'Alle', 'flt.me': 'Ich', 'flt.all': 'Alle',
     'nores': 'Keine Treffer.', 'n.of': (a, b) => `${a} von ${b} Shots`,
     'bean.top': n => `Top ${n}/10`, 'bean.shops': 'Gekauft bei: ', 'd.also': 'auch: ',
     'bi.count': n => `${n} ${n === 1 ? 'Shot' : 'Shots'} mit dieser Bohne`,
@@ -526,13 +607,14 @@ const I18N = {
   en: {
     'app.title': 'Caffeine Analytica',
     'tab.dash': 'Dashboard', 'tab.beans': 'My beans',
-    'btn.add': 'New shot', 'btn.export': 'Export: save all data as a file',
-    'btn.import': 'Import: load a file and merge it with existing data', 'btn.settings': 'Settings',
-    'set.title': 'Settings', 'set.lang': 'Language', 'close': 'Close',
+    'btn.add': 'New shot', 'btn.settings': 'Settings',
+    'set.data': 'Backup', 'data.export': 'Export', 'data.import': 'Import',
+    'set.dataHint': 'Export saves all shots as a file – as a backup or to move to a new device. Import merges such a file with your data, for each shot the newer change wins.',
+    'set.title': 'Settings', 'set.done': 'Done', 'set.lang': 'Language', 'close': 'Close',
     'set.version': 'Version', 'set.source': 'GitHub',
     'upd.ask': 'A new version of the app is available. Reload now? Unsaved input in the form will be lost.',
     'sync.title': 'Sync', 'sync.intro': 'Sync your shots between your devices through your own Dropbox and share them with others if you like. The app only works in the folder “Caffeine Analytica”.',
-    'sync.connect': 'Connect to Dropbox', 'sync.manual': 'Sign-in not working? Enter a code manually',
+    'ptr.done': d => `Updated · ${d}`, 'sync.val.off': 'Off', 'sync.val.on': 'On', 'sync.val.pending': 'Pending', 'sync.val.error': 'Error', 'sync.val.auth': 'Reconnect', 'sync.connect': 'Connect to Dropbox', 'sync.manual': 'Sign-in not working? Enter a code manually',
     'sync.pasteCode': 'Sign in to Dropbox in the window that opened, copy the code shown there and paste it here:',
     'sync.confirm': 'Confirm code', 'sync.back': 'Back',
     'sync.now': 'Sync now', 'sync.offlineImgs': 'Make images available offline', 'sync.reconnect': 'Reconnect',
@@ -558,7 +640,7 @@ const I18N = {
     'share.ended': 'Sharing has ended. You are using your folder on your own again.',
     'share.use': n => `Use ${n}'s data`, 'share.own': 'Use my own data', 'share.later': 'You can change this later in the settings.',
     'sync.missingImgs': n => `${n} images are only in Dropbox and could not be loaded (offline?). They will be missing on this device afterwards. Continue anyway?`,
-    'sync.as': (n, e) => `Connected to Dropbox: ${n}${e ? ` (${e})` : ''}`, 'sync.disconnect': 'Disconnect',
+    'sync.disconnect': 'Disconnect',
     'sync.connected': 'Connected to Dropbox', 'sync.disconnected': 'Dropbox disconnected',
     'sync.denied': 'Dropbox sign-in cancelled', 'sync.failed': 'Connecting to Dropbox failed',
     'sort.title': 'Sort by', 'sort.best': 'Top score', 'sort.avg': 'Ø score', 'sort.recent': 'Recently prepared',
@@ -574,6 +656,10 @@ const I18N = {
     'img.zoom': 'Enlarged image', 'img.inherited': 'This bean\'s image – used for all its shots. A new link or upload replaces it.',
     'f.size': 'Shot size *', 'f.strength': 'Strength setting *', 'f.temp': 'Temperature *', 'f.grind': 'Grind size *',
     'f.drink': 'Drink *', 'f.cup': 'Cup size *', 'l.drink': 'Drink', 'h.drink': 'Drink',
+    'lg.final': 'Final drink', 'f.final': 'Served as *', 'f.froth': 'Milk froth *', 'f.milk': 'Milk type *',
+    'l.final': 'Served as', 'l.froth': 'Milk froth', 'l.milk': 'Milk type', 'set.keepFlt': 'Save filter', 'set.keepFltHint': 'Keeps your last dashboard filter – on this device only, not synced.',
+    'v.Pur': 'Straight', 'v.Aufgeschäumt': 'Steamed milk', 'v.Dünn': 'Thin froth', 'v.Dick': 'Thick froth',
+    'v.Extradick': 'Extra-thick froth', 'v.Kalt': 'Cold foam', 'v.Tierisch': 'Dairy', 'v.Pflanzlich': 'Plant-based',
     'f.time': 'Time (s)', 'f.weight': 'Yield (g)',
     'f.sour': 'Sour *', 'f.bitter': 'Bitter *', 'f.body': 'Strength *', 'f.issues': 'Problems', 'l.issues': 'Problems',
     'is.cold': 'Too cold', 'is.hot': 'Too hot', 'is.crema': 'Little crema', 'is.burnt': 'Tastes burnt',
@@ -598,7 +684,7 @@ const I18N = {
     'an.trendHint': 'The progress chart needs at least 2 shots.', 'an.last30': 'Showing the last 30 shots.',
     'star.add': 'Mark as favorite', 'star.remove': 'Remove favorite', 'star.has': 'Contains favorites',
     'q.ph': 'Search beans …', 'q.label': 'Search',
-    'flt.title': 'Filter', 'flt.fav': 'Favorites only', 'flt.min': 'Minimum score', 'flt.reset': 'Reset', 'flt.apply': 'Apply',
+    'flt.title': 'Filter', 'flt.fav': 'Favorites only', 'flt.min': 'Minimum score', 'flt.reset': 'Reset', 'flt.apply': 'Apply', 'flt.everyone': 'Everyone', 'flt.me': 'Me', 'flt.all': 'All',
     'nores': 'No results.', 'n.of': (a, b) => `${a} of ${b} shots`,
     'bean.top': n => `Top ${n}/10`, 'bean.shops': 'Bought at: ', 'd.also': 'also: ',
     'bi.count': n => `${n} ${n === 1 ? 'shot' : 'shots'} with this bean`,
@@ -748,12 +834,14 @@ const beanName = s => s.brand + (s.variety ? ' ' + s.variety : '');
 const ratio = s => s.weight ? '1:' + (s.weight / DOSE[s.size]).toFixed(1) : '–';
 const drinkOf = s => s.drink || 'Espresso'; // Shots von vor der Getränkeauswahl waren Espressi
 // mit Luxe-Einsatz bezieht die Maschine alle Espresso-Getränke außer Americano als Quad
-const drinkLabel = s => { const d = drinkOf(s); return d + (s.size === 'Quad' && ESPRESSO.includes(d) && d !== 'Americano' ? ' Quad' : '') + (s.cup ? ` ${s.cup} (${CUPS[s.cup]} ml)` : ''); };
+const finalOf = s => s.final || 'Pur'; // Shots von vor der Auswahl wurden pur getrunken
+const drinkLabel = s => { const d = drinkOf(s); return d + (s.size === 'Quad' && ESPRESSO.includes(d) && d !== 'Americano' ? ' Quad' : '') + (s.cup ? ` ${s.cup} (${CUPS[s.cup]} ml)` : '')
+  + (finalOf(s) !== 'Pur' ? ' → ' + s.final : ''); };
 const fmtDate = d => new Date(d).toLocaleString(lang === 'de' ? 'de-DE' : 'en-GB', {dateStyle: 'short', timeStyle: 'short'});
 // identisch = diese Felder stimmen überein (Text ohne Groß/klein, leer = nicht angegeben)
-const SAME = ['brand', 'variety', 'beanType', 'size', 'cup', 'grind', 'strength', 'temp', 'time', 'weight'];
+const SAME = ['brand', 'variety', 'beanType', 'size', 'cup', 'grind', 'strength', 'temp', 'time', 'weight', 'froth', 'milk'];
 const norm = v => v == null || v === '' ? null : typeof v === 'string' ? v.trim().toLowerCase() : v;
-const isSame = (a, b) => SAME.every(k => norm(a[k]) === norm(b[k])) && drinkOf(a) === drinkOf(b);
+const isSame = (a, b) => SAME.every(k => norm(a[k]) === norm(b[k])) && drinkOf(a) === drinkOf(b) && finalOf(a) === finalOf(b);
 const splitShops = s => (s || '').split(',').map(t => t.trim()).filter(Boolean);
 // alle Kauforte einer Bohne, zuletzt genutzter zuerst, ohne Dopplungen (Groß-/Kleinschreibung egal)
 const beanShops = list => [...list].reverse().flatMap(s => splitShops(s.shop))
@@ -764,8 +852,9 @@ const byScore = (a, b) => b.score - a.score || b.date.localeCompare(a.date);
 
 function hints(s) {
   const h = [], x = I18N[lang].hints;
-  if (s.sour >= 2) h.push(x.sour);
-  if (s.bitter >= 2) h.push(x.bitter);
+  const pure = finalOf(s) === 'Pur'; // Milch überdeckt Säure und Bitterkeit, dann wären die Mahl-Tipps falsch
+  if (pure && s.sour >= 2) h.push(x.sour);
+  if (pure && s.bitter >= 2) h.push(x.bitter);
   if (s.body === 0) h.push(x.weak);
   if (s.body === 4) h.push(x.strong);
   if (s.time != null && s.time < 20) h.push(x.fast);
@@ -786,6 +875,9 @@ const SEGS = {
   temp: {vals: ['Niedrig', 'Mittel', 'Hoch'], def: 'Mittel', label: val},
   drink: {vals: [...ESPRESSO, ...COFFEE], def: 'Espresso', label: v => v},
   cup: {vals: Object.keys(CUPS), def: 'M', label: v => `${v} · ${CUPS[v]} ml`},
+  final: {vals: Object.keys(FINALS), def: 'Pur', label: v => v === 'Pur' ? val(v) : v},
+  froth: {vals: FROTHS, label: val}, // ohne def: syncDrink belegt sie vor, sobald ein Milchgetränk gewählt ist
+  milk: {vals: MILKS, label: val},
 };
 for (const [name, c] of Object.entries(SEGS))
   $('seg-' + name).innerHTML = c.vals.map(v => `<label class="opt"><input type="radio" name="${name}" value="${v}" required${v === c.def ? ' checked' : ''}><span></span></label>`).join('');
@@ -800,9 +892,18 @@ function syncDrink() {
   $('cupBox').hidden = !coffee;
   el.cup.forEach(r => r.disabled = !coffee);
   if (!el.cup.value) el.cup.value = 'M';
+  // Schaum und Milchart nur bei Milchgetränken
+  if (!el.final.value) el.final.value = 'Pur';
+  const milky = el.final.value !== 'Pur';
+  for (const k of ['froth', 'milk']) { $('seg-' + k).parentElement.hidden = !milky; el[k].forEach(r => r.disabled = !milky); }
+  if (milky && !el.froth.value) el.froth.value = FINALS[el.final.value];
+  if (milky && !el.milk.value) el.milk.value = shots.findLast(s => s.milk)?.milk || 'Tierisch'; // meist dieselbe Milch wie zuletzt
 }
 syncDrink();
-form.addEventListener('change', e => { if (e.target.name === 'size' || e.target.name === 'drink') { syncDrink(); beanInfo(); } });
+form.addEventListener('change', e => {
+  if (e.target.name === 'final') form.elements.froth.value = FINALS[e.target.value]; // Schaum passend zum neuen Getränk
+  if (['size', 'drink', 'final'].includes(e.target.name)) { syncDrink(); beanInfo(); }
+});
 // „zu kalt“ und „zu heiß“ schließen sich aus: Haken beim einen entfernt den anderen
 const OPPOSITE = {cold: 'hot', hot: 'cold'};
 form.addEventListener('change', e => {
@@ -863,7 +964,8 @@ const CHECKS = [
   ['time', d => (d.time ?? '') === '' || +d.time >= 0, 'val.num'],
   ['weight', d => (d.weight ?? '') === '' || +d.weight >= 0, 'val.num'],
   ['sour', d => d.sour != null, 'val.pick'], ['bitter', d => d.bitter != null, 'val.pick'],
-  ['body', d => d.body != null, 'val.pick'], ['score', d => d.score != null, 'val.pick']
+  ['body', d => d.body != null, 'val.pick'], ['score', d => d.score != null, 'val.pick'],
+  ['froth', d => finalOf(d) === 'Pur' || d.froth, 'val.pick'], ['milk', d => finalOf(d) === 'Pur' || d.milk, 'val.pick']
 ];
 const fieldBox = name => (form.elements[name].type ? form.elements[name] : $('seg-' + name)).closest('label,.field');
 function clearError(name) {
@@ -1004,14 +1106,16 @@ function beanInfo() {
   shopOpts();
   if (!list.length) return;
   const shops = beanShops(list);
-  // bester Shot fürs gewählte Getränk; gibt es keinen, der beste insgesamt
-  const sorted = [...list].sort(byScore), best = sorted.find(s => drinkOf(s) === form.elements.drink.value) || sorted[0];
+  // bester Shot für gleiches Getränk und gleiches Endgetränk, sonst nur gleiches Getränk, sonst der beste insgesamt
+  const el = form.elements, sorted = [...list].sort(byScore), same = s => drinkOf(s) === el.drink.value;
+  const best = sorted.find(s => same(s) && finalOf(s) === el.final.value) || sorted.find(same) || sorted[0];
   const last = list.at(-1), h = hints({...last, roast: beanProp(list, 'roast')});
   $('beanInfo').innerHTML = `<b>${t('bi.count', list.length)}</b><br>
     ${t('bi.best', best.score, val(best.size), esc(drinkLabel(best)), best.grind, val(best.strength), val(best.temp))}<br>
     ${last !== best ? t('bi.last', last.score, last.grind) + '<br>' : ''}${h.length ? t('bi.tip') + h.join(' ') + '<br>' : ''}${shops.length ? t('bean.shops') + esc(shops.join(' · ')) + '<br>' : ''}
     <button type="button" id="useBest">${t('bi.use')}</button>`;
-  $('useBest').onclick = () => fill({grind: best.grind, size: best.size, drink: drinkOf(best), cup: best.cup, strength: best.strength, temp: best.temp});
+  $('useBest').onclick = () => fill({grind: best.grind, size: best.size, drink: drinkOf(best), cup: best.cup, strength: best.strength, temp: best.temp,
+    ...finalOf(best) === el.final.value && {froth: best.froth, milk: best.milk}});
 }
 
 function show(view) {
@@ -1040,26 +1144,46 @@ const head = () => '<thead><tr>' + ['score', 'bean', 'size', 'drink', 'grind', '
 const table = (list, best, ns) => `<div class="wrap"><table>${head()}${list.map((s, i) => row(s, s === best, ns?.[i])).join('')}</table></div>`;
 
 // je Bohne alle Shots + der beste, beste Bohne zuerst
-function beanGroups() {
+function beanGroups(list = shots) {
   const groups = new Map();
-  for (const s of shots) { const k = beanKey(s); groups.set(k, [...(groups.get(k) || []), s]); }
+  for (const s of list) { const k = beanKey(s); groups.set(k, [...(groups.get(k) || []), s]); }
   return [...groups.values()].map(list => ({list, best: [...list].sort(byScore)[0]})).sort((a, b) => byScore(a.best, b.best));
 }
 
-// Suche und Filter gelten nur für „Meine Bohnen“; das Dashboard rechnet immer mit allen Shots
+// Suche und Filter (flt) gelten für „Meine Bohnen“; das Dashboard hat einen eigenen Filter (dflt), auf Wunsch gemerkt
 const lc = v => (v || '').toLowerCase();
-const flt0 = () => ({fav: false, size: [], drink: [], strength: [], temp: [], kind: [], type: [], roast: [], shop: [], min: 0});
+const flt0 = () => ({fav: false, by: [], size: [], drink: [], final: [], milk: [], strength: [], temp: [], kind: [], type: [], roast: [], shop: [], min: 0});
+const keepFlt = () => { try { return localStorage.getItem(KEEP_KEY) === '1'; } catch { return false; } };
 let flt = flt0(), q = '';
-const activeCount = f => (f.fav ? 1 : 0) + ['size', 'drink', 'strength', 'temp', 'kind', 'type', 'roast', 'shop'].filter(k => f[k].length).length + (f.min ? 1 : 0);
+let dflt = (() => { try { if (keepFlt()) return {...flt0(), ...JSON.parse(localStorage.getItem(DFLT_KEY))}; } catch {} return flt0(); })();
+function setDflt(f) {
+  dflt = f;
+  try { if (keepFlt()) localStorage.setItem(DFLT_KEY, JSON.stringify(f)); } catch {}
+  render();
+}
+const activeCount = f => (f.fav ? 1 : 0) + ['by', 'size', 'drink', 'final', 'milk', 'strength', 'temp', 'kind', 'type', 'roast', 'shop'].filter(k => f[k]?.length).length + (f.min ? 1 : 0);
+// Personen-Filter (Konto-IDs) wirkt nur, solange mehrere Personen Shots angelegt haben, sonst blendet er nichts Unsichtbares aus
+const byOk = (f, s) => !f.by.length || !shared() || f.by.includes(s.by?.id);
+// [{id, name, n}]: ich zuerst (als „Ich“), dann wer die meisten Shots hat, damit es auch bei vielen Personen übersichtlich bleibt
+function people() {
+  const m = new Map();
+  for (const s of shots) if (s.by) m.set(s.by.id, {id: s.by.id, name: s.by.id === me() ? t('flt.me') : s.by.name, n: (m.get(s.by.id)?.n || 0) + 1});
+  return [...m.values()].sort((a, b) => (b.id === me()) - (a.id === me()) || b.n - a.n || a.name.localeCompare(b.name, lang, {sensitivity: 'base'}));
+}
+const dashShots = () => {
+  const beans = new Set(beanGroups().filter(g => beanOk(dflt, g.list)).map(g => beanKey(g.best)));
+  return shots.filter(s => shotOk(dflt, s) && beans.has(beanKey(s)));
+};
 const ROASTS = ['Hell', 'Mittelhell', 'Mittel', 'Mitteldunkel', 'Dunkel'];
 const beanProp = (list, k) => list.findLast(s => s[k])?.[k] || '';
 const BEAN_FIELDS = ['beanKind', 'beanType', 'roast'];
 // Shot-Filter wirken auf einzelne Shots, Bohnenart/-typ auf die Bohne (der Wert steht nicht an jedem Shot)
-const shotOk = s => (!flt.fav || isFav(s)) && ['size', 'strength', 'temp'].every(k => !flt[k].length || flt[k].includes(s[k])) && (!flt.drink.length || flt.drink.includes(drinkOf(s))) && (!flt.min || s.score >= flt.min);
-const beanOk = list => (!flt.kind.length || flt.kind.some(k => lc(k) === lc(beanProp(list, 'beanKind'))))
-  && (!flt.type.length || flt.type.some(k => lc(k) === lc(beanProp(list, 'beanType'))))
-  && (!flt.roast.length || flt.roast.includes(beanProp(list, 'roast')))
-  && (!flt.shop.length || beanShops(list).some(o => flt.shop.some(k => lc(k) === lc(o))));
+const shotOk = (f, s) => (!f.fav || isFav(s)) && byOk(f, s) && ['size', 'strength', 'temp', 'milk'].every(k => !f[k].length || f[k].includes(s[k]))
+  && (!f.drink.length || f.drink.includes(drinkOf(s))) && (!f.final.length || f.final.includes(finalOf(s))) && (!f.min || s.score >= f.min);
+const beanOk = (f, list) => (!f.kind.length || f.kind.some(k => lc(k) === lc(beanProp(list, 'beanKind'))))
+  && (!f.type.length || f.type.some(k => lc(k) === lc(beanProp(list, 'beanType'))))
+  && (!f.roast.length || f.roast.includes(beanProp(list, 'roast')))
+  && (!f.shop.length || beanShops(list).some(o => f.shop.some(k => lc(k) === lc(o))));
 const beanText = list => [list[0].brand, list[0].variety, beanProp(list, 'beanType'), beanProp(list, 'beanKind'),
   beanProp(list, 'roast') && val(beanProp(list, 'roast')),
   list.flatMap(s => splitShops(s.shop)).join(' '), list.map(s => s.note || '').join(' ')].join(' ').toLowerCase();
@@ -1101,8 +1225,8 @@ function renderBeans() {
   if (!shots.length) { $('beansList').innerHTML = `<p class="empty">${t('empty')}</p>`; return; }
   const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const cards = beanGroups().map(({list}) => {
-    const shown = list.filter(shotOk);
-    if (!shown.length || !beanOk(list) || !terms.every(w => beanText(list).includes(w))) return null;
+    const shown = list.filter(s => shotOk(flt, s));
+    if (!shown.length || !beanOk(flt, list) || !terms.every(w => beanText(list).includes(w))) return null;
     return {list, shown, best: [...shown].sort(byScore)[0], avg: shown.reduce((a, s) => a + s.score, 0) / shown.length,
       last: shown.reduce((d, s) => s.date > d ? s.date : d, '')};
   }).filter(Boolean).sort(SORTS[sortBy]).map(({list, shown, best, avg}) => {
@@ -1117,8 +1241,14 @@ function renderBeans() {
 }
 
 function render() {
-  const empty = `<p class="empty">${t('empty')}</p>`;
-  $('best').innerHTML = shots.length ? dashboard([...shots].sort(byScore)) : empty;
+  const empty = `<p class="empty">${t('empty')}</p>`, ds = dashShots();
+  // nur Personen zählen, die es noch gibt (gewählte ohne Shots, z. B. nach einem Austritt, nicht mitrechnen)
+  const picked = shared() ? people().filter(p => dflt.by.includes(p.id)) : [], n = picked.length, active = activeCount(dflt);
+  // viele Gewählte: erster Name + Anzahl weiterer, wie bei den Kauforten
+  const bar = `<div class="dashbar"><span>${shared() ? `${t('l.by')}: ${!n ? t('flt.everyone') : esc(picked[0]?.name) + (n > 1 ? ` +${n - 1}` : '')}` : ''}</span>
+    <button id="dfltBtn" class="icon" aria-haspopup="dialog" title="${t('flt.title')}" aria-label="${t('flt.title')}">${FILTER_ICON}${active ? `<span class="badge">${active}</span>` : ''}</button></div>`;
+  $('best').innerHTML = !shots.length ? empty : bar + (ds.length ? dashboard([...ds].sort(byScore))
+    : `<div class="empty"><p>${t('nores')}</p><button type="button" id="dResetAll">${t('flt.reset')}</button></div>`);
   renderBeans();
 
   const opts = (vals) => [...new Set(vals.filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
@@ -1134,40 +1264,78 @@ function shopOpts() {
   $('shops').innerHTML = beanShops([...shots.filter(s => !mine.includes(s)), ...mine]).map(v => `<option value="${esc(v)}">`).join('');
 }
 
-// Filterfenster: Änderungen gehen in einen Entwurf und gelten erst nach „Anwenden“
-let draft = flt0();
+// Filterfenster: Änderungen gehen in einen Entwurf und gelten erst nach „Anwenden“.
+// fltFor = 'best': vom Dashboard geöffnet, dann gilt der Entwurf für dflt statt flt
+let draft = flt0(), fltFor = 'beans';
+const FILTER_ICON = '<svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>';
+// Jede Gruppe ist eine aufklappbare Zeile mit der aktuellen Auswahl rechts; aufgeklappte bleiben beim Neuzeichnen offen
+let fltOpen = new Set();
 function drawFilter() {
-  const keep = $('fltDlg').querySelector('.fltbody')?.scrollTop || 0;
-  const on = (k, v) => k === 'fav' ? draft.fav : k === 'min' ? draft.min === v : draft[k].includes(v);
+  const body = $('fltDlg').querySelector('.fltbody'), keep = body?.scrollTop || 0;
+  if (body) fltOpen = new Set([...body.querySelectorAll('details[open]')].map(d => d.dataset.g));
+  const on = (k, v) => k === 'fav' ? draft.fav : draft[k].includes(v);
   const chip = (k, v, label) => `<button type="button" class="toggle" data-f="${k}" data-v="${esc(v)}" aria-pressed="${on(k, v)}">${esc(label)}</button>`;
-  const group = (title, chips) => `<div class="fgroup">${title ? `<span class="flabel">${title}</span>` : ''}<div class="chipset">${chips}</div></div>`;
+  const row = (k, title, sum, body, open = fltOpen.has(k)) => `<details class="fgroup" data-g="${k}"${open ? ' open' : ''}><summary><span>${title}</span>
+      <span class="fsum${sum ? ' on' : ''}">${esc(sum || (k === 'by' ? t('flt.everyone') : t('flt.all')))}</span></summary>${body}</details>`;
+  // items = [[Wert, Beschriftung, Kurzform für die Zeile?], …]
+  const group = (k, title, items, open) => row(k, title, items.filter(([v]) => on(k, v)).map(([, l, s]) => s ?? l).join(', '),
+    `<div class="chipset">${items.map(([v, l]) => chip(k, v, l)).join('')}</div>`, open);
+  // Mindestnote als Schieberegler wie im Formular; ganz links (1) = kein Filter
+  const minSlider = `<div class="slider" style="--n:10"><input type="range" id="fltMin" min="1" max="10" step="1" value="${draft.min || 1}" aria-label="${t('flt.min')}">
+    <div class="ticks" aria-hidden="true">${steps(SLIDERS.score).map(v => `<span data-v="${v}">${v}</span>`).join('')}</div></div>`;
+  const same = vals => vals.map(v => [v, v]), shown = vals => vals.map(v => [v, val(v)]);
   const types = [...new Map(shots.filter(s => s.beanType).map(s => [lc(s.beanType), s.beanType])).values()];
   const shops = beanShops(shots).sort((a, b) => a.localeCompare(b, lang, {sensitivity: 'base'}));
+  const who = shared() ? group('by', t('l.by'), people().map(p => [p.id, `${p.name} (${p.n})`, p.name])) : '';
   $('fltDlg').innerHTML = `<h3 id="fltTitle">${t('flt.title')}</h3><div class="fltbody">
-    ${group('', chip('fav', 1, t('flt.fav')))}
-    ${group(t('l.size'), ['Single', 'Double', 'Quad'].map(v => chip('size', v, val(v))).join(''))}
-    ${group(t('l.drink'), [...ESPRESSO, ...COFFEE].map(v => chip('drink', v, v)).join(''))}
-    ${group(t('l.strength'), ['Leicht', 'Mittel', 'Stark'].map(v => chip('strength', v, val(v))).join(''))}
-    ${group(t('l.temp'), ['Niedrig', 'Mittel', 'Hoch'].map(v => chip('temp', v, val(v))).join(''))}
-    ${group(t('l.kind'), ['100 % Arabica', 'Arabica-Robusta-Blend', '100 % Robusta'].map(v => chip('kind', v, v)).join(''))}
-    ${types.length ? group(t('l.type'), types.map(v => chip('type', v, v)).join('')) : ''}
-    ${group(t('l.roast'), ROASTS.map(v => chip('roast', v, val(v))).join(''))}
-    ${shops.length ? group(t('l.shop'), shops.map(v => chip('shop', v, v)).join('')) : ''}
-    ${group(t('flt.min'), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => chip('min', v, v)).join(''))}
+    <div class="chipset favrow">${chip('fav', 1, t('flt.fav'))}</div>
+    ${who}
+    ${group('size', t('l.size'), shown(['Single', 'Double', 'Quad']))}
+    ${group('drink', t('l.drink'), same([...ESPRESSO, ...COFFEE]))}
+    ${group('final', t('l.final'), SEGS.final.vals.map(v => [v, SEGS.final.label(v)]))}
+    ${group('milk', t('l.milk'), shown(MILKS))}
+    ${group('strength', t('l.strength'), shown(['Leicht', 'Mittel', 'Stark']))}
+    ${group('temp', t('l.temp'), shown(['Niedrig', 'Mittel', 'Hoch']))}
+    ${group('kind', t('l.kind'), same(['100 % Arabica', 'Arabica-Robusta-Blend', '100 % Robusta']))}
+    ${types.length ? group('type', t('l.type'), same(types)) : ''}
+    ${group('roast', t('l.roast'), shown(ROASTS))}
+    ${shops.length ? group('shop', t('l.shop'), same(shops)) : ''}
+    ${row('min', t('flt.min'), '', minSlider)}
   </div><div class="fltfoot"><button type="button" id="fltReset">${t('flt.reset')}</button><button type="button" class="primary" id="fltApply">${t('flt.apply')}</button></div>`;
   $('fltDlg').querySelector('.fltbody').scrollTop = keep;
+  if ($('fltMin')) setMin(draft.min || 1);
 }
-$('fltBtn').onclick = () => { draft = JSON.parse(JSON.stringify(flt)); drawFilter(); openDlg($('fltDlg')); };
+// Regler, Skala und Zeile direkt anpassen statt neu zu zeichnen, sonst bricht das Ziehen ab
+function setMin(v) {
+  draft.min = v > 1 ? v : 0;
+  const inp = $('fltMin'), sum = $('fltDlg').querySelector('[data-g=min] .fsum');
+  inp.value = v;
+  inp.style.setProperty('--p', (v - 1) / 9 * 100 + '%');
+  inp.setAttribute('aria-valuetext', draft.min ? '≥ ' + v : t('flt.all'));
+  inp.nextElementSibling.querySelectorAll('span').forEach(sp => sp.classList.toggle('on', +sp.dataset.v === v));
+  sum.textContent = draft.min ? '≥ ' + v : t('flt.all');
+  sum.classList.toggle('on', !!draft.min);
+}
+$('fltDlg').addEventListener('input', e => { if (e.target.id === 'fltMin') setMin(+e.target.value); });
+const openFilter = (page, f) => { fltFor = page; fltOpen = new Set(); draft = JSON.parse(JSON.stringify(f)); $('fltDlg').innerHTML = ''; drawFilter(); openDlg($('fltDlg')); };
+$('fltBtn').onclick = () => openFilter('beans', flt);
+document.addEventListener('click', e => {
+  if (e.target.closest('#dfltBtn')) openFilter('best', dflt);
+  else if (e.target.id === 'dResetAll') setDflt(flt0());
+});
 $('fltDlg').addEventListener('click', e => {
-  const b = e.target.closest('[data-f]');
-  if (b) {
+  const b = e.target.closest('[data-f]'), tick = e.target.closest('.ticks span');
+  if (tick) setMin(+tick.dataset.v); // Tippen auf eine Zahl der Skala setzt den Wert direkt, wie im Formular
+  else if (b) {
     const k = b.dataset.f, v = b.dataset.v;
     if (k === 'fav') draft.fav = !draft.fav;
-    else if (k === 'min') draft.min = draft.min === +v ? 0 : +v;
     else draft[k] = draft[k].includes(v) ? draft[k].filter(x => x !== v) : [...draft[k], v];
     drawFilter();
   } else if (e.target.id === 'fltReset') { draft = flt0(); drawFilter(); }
-  else if (e.target.id === 'fltApply') { flt = draft; $('fltDlg').close(); renderBeans(); }
+  else if (e.target.id === 'fltApply') {
+    $('fltDlg').close();
+    if (fltFor === 'best') setDflt(draft); else { flt = draft; renderBeans(); }
+  }
 });
 $('q').oninput = e => { q = e.target.value; renderBeans(); };
 document.addEventListener('click', e => { if (e.target.id === 'resetAll') resetFilters(); });
@@ -1180,27 +1348,27 @@ const barRow = (s, lead) => `<div class="bar" data-id="${s.id}" tabindex="0"><sp
 function dashboard(sorted) {
   const top = sorted[0], pic = beanImage(top);
   const favs = sorted.filter(isFav).slice(0, 5); // sorted ist nach Note geordnet
-  const avg = (shots.reduce((n, s) => n + s.score, 0) / shots.length).toFixed(1);
+  const avg = (sorted.reduce((n, s) => n + s.score, 0) / sorted.length).toFixed(1);
   const tile = (v, l) => `<div class="card tile"><b>${v}</b><span>${l}</span></div>`;
   const roast = beanProp(shots.filter(s => beanKey(s) === beanKey(top)), 'roast');
   const chips = [roast && `${t('c.roast')} ${val(roast)}`, val(top.size), drinkLabel(top), `${t('c.grind')} ${top.grind}`, `${t('c.strength')} ${val(top.strength)}`, `${t('c.temp')} ${val(top.temp)}`,
     top.time != null ? top.time + ' s' : null, top.weight != null ? top.weight + ' g' : null, top.weight ? ratio(top) : null];
-  return `<div class="tiles">${tile(shots.length, t('tile.shots'))}${tile(new Set(shots.map(beanKey)).size, t('tile.beans'))}${tile(avg, t('tile.avg'))}${tile(top.score + '/10', t('tile.top'))}</div>
+  return `<div class="tiles">${tile(sorted.length, t('tile.shots'))}${tile(new Set(sorted.map(beanKey)).size, t('tile.beans'))}${tile(avg, t('tile.avg'))}${tile(top.score + '/10', t('tile.top'))}</div>
     <div class="card fav" data-id="${top.id}" tabindex="0">${pic ? `<img class="pic" src="${esc(pic)}" alt="">` : ''}
       <div><small>${t('dash.fav')}</small><h2>${esc(beanName(top))}</h2>
       <div class="chips">${chips.filter(Boolean).map(c => `<span>${esc(c)}</span>`).join('')}</div></div></div>
     ${favs.length ? `<h3>${t('dash.favs')}</h3><div class="card">${favs.map(s => barRow(s, STAR)).join('')}</div>` : ''}
     <h3>${t('dash.top10')}</h3><div class="card">${sorted.slice(0, 10).map((s, i) => barRow(s, i + 1)).join('')}</div>
     <h3>${t('an.title')}</h3><div class="card" id="analysis">${analysis()}</div>
-    <h3>${t('dash.perbean')}</h3>${(g => table(g.map(x => x.best), null, g.map(x => x.list.length)))(beanGroups())}`;
+    <h3>${t('dash.perbean')}</h3>${(g => table(g.map(x => x.best), null, g.map(x => x.list.length)))(beanGroups(sorted))}`;
 }
 
 // Auswertung: Geschmackskarte (sauer × bitter) und Notenverlauf, beide für alle Bohnen oder eine gewählte
 let anView = 'taste', anBean = '', anCell = '';
 function analysis() {
-  const groups = beanGroups();
+  const all = dashShots(), groups = beanGroups(all);
   if (anBean && !groups.some(g => beanKey(g.best) === anBean)) anBean = '';
-  const list = anBean ? groups.find(g => beanKey(g.best) === anBean).list : shots;
+  const list = anBean ? groups.find(g => beanKey(g.best) === anBean).list : all;
   return `<div class="switch">${['taste', 'trend'].map(v => `<button type="button" class="toggle" data-an="${v}" aria-pressed="${anView === v}">${t('an.' + v)}</button>`).join('')}</div>
     <select id="anBean" aria-label="${t('ch.choose')}"><option value="">${t('ch.all')}</option>
     ${groups.map(g => `<option value="${esc(beanKey(g.best))}"${beanKey(g.best) === anBean ? ' selected' : ''}>${esc(beanName(g.best))}</option>`).join('')}</select>
@@ -1254,7 +1422,7 @@ function openDetail(id) {
   const own = splitShops(s.shop).map(lc), more = beanShops(shots.filter(x => beanKey(x) === beanKey(s))).filter(o => !own.includes(lc(o)));
   const also = more.length ? `<small class="also">${t(own.length ? 'd.also' : 'bean.shops')}${esc(more.join(' · '))}</small>` : '';
   const rows = [['date', fmtDate(s.date)], ...(shared() ? [['by', s.by?.name]] : []), ['brand', s.brand], ['variety', s.variety], ['kind', b('beanKind')], ['type', b('beanType')], ['roast', b('roast') && val(b('roast'))], ['shop', s.shop, also],
-    ['size', t('d.size', val(s.size), DOSE[s.size])], ['drink', drinkLabel(s)], ['grind', s.grind], ['strength', val(s.strength)], ['temp', val(s.temp)],
+    ['size', t('d.size', val(s.size), DOSE[s.size])], ['drink', drinkLabel(s)], ...(s.froth ? [['froth', val(s.froth)], ['milk', s.milk && val(s.milk)]] : []), ['grind', s.grind], ['strength', val(s.strength)], ['temp', val(s.temp)],
     ['time', s.time != null ? s.time + ' s' : null], ['weight', s.weight != null ? s.weight + ' g' : null],
     ['ratio', ratio(s)], ['sour', SOUR(s.sour)], ['bitter', BITTER(s.bitter)], ['body', BODY(s.body)], ['issues', (s.issues || []).map(i => t('is.' + i)).join(', ')],
     ['score', s.score + '/10'], ['runs', (s.runs || 1) + '×'], ['note', s.note]];
@@ -1332,12 +1500,42 @@ function applyLang() {
   });
   labelSegs();
   setEditing(!!editId);
-  $('langs').innerHTML = Object.entries(LANGS).map(([c, n]) => `<button data-lang="${c}" class="${c === lang ? 'primary' : ''}" aria-pressed="${c === lang}" lang="${c}">${n}</button>`).join('');
+  $('langs').innerHTML = Object.entries(LANGS).map(([c, n]) => `<button type="button" class="row" data-lang="${c}" aria-pressed="${c === lang}" lang="${c}"><span class="lbl">${n}</span>${c === lang ? CHECK : ''}</button>`).join('');
+  $('langVal').textContent = LANGS[lang];
+  setPage($('setDlg').dataset.page || 'root');
   window.renderSync?.(); // aus sync.js
   render();
   beanInfo();
 }
-$('setBtn').onclick = () => openDlg($('setDlg'));
+// Einstellungen: Startseite und Unterseiten im selben Fenster, die Kopfzeile zeigt Titel und „Zurück“
+const PAGES = {root: 'set.title', sync: 'sync.title', data: 'set.data', lang: 'set.lang'};
+const CHECK = '<svg class="chk" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+function setPage(p) {
+  $('setDlg').dataset.page = p;
+  $('setDlg').querySelectorAll('[data-page]').forEach(el => el.hidden = el.dataset.page !== p);
+  $('setBack').hidden = p === 'root';
+  $('setTitle').textContent = t(PAGES[p]);
+}
+window.setPage = setPage; // sync.js öffnet nach der Dropbox-Anmeldung direkt die Sync-Seite
+$('setDlg').addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (!g) return;
+  const from = $('setDlg').dataset.page;
+  setPage(g.dataset.go);
+  $('setDlg').scrollTop = 0;
+  // Fokus nicht im Nichts lassen: auf „Zurück“ bzw. zurück auf die Zeile, von der man kam
+  (g.dataset.go === 'root' ? $('setDlg').querySelector(`.row[data-go="${from}"]`) : $('setBack')).focus({preventScroll: true});
+});
+$('setDone').onclick = () => $('setDlg').close();
+$('setBtn').onclick = () => { setPage('root'); openDlg($('setDlg')); };
+// Dashboard-Filter merken: an = aktuellen Filter sichern, aus = gesicherten verwerfen
+$('keepFlt').setAttribute('aria-checked', keepFlt());
+$('keepFlt').onclick = () => {
+  const on = !keepFlt();
+  try { localStorage.setItem(KEEP_KEY, on ? '1' : '0'); if (!on) localStorage.removeItem(DFLT_KEY); } catch {}
+  $('keepFlt').setAttribute('aria-checked', keepFlt());
+  setDflt(dflt);
+};
 $('appVersion').textContent = APP_VERSION;
 $('langs').onclick = e => {
   const b = e.target.closest('[data-lang]');
@@ -1360,6 +1558,7 @@ $('export').onclick = async () => {
   a.click();
 };
 $('importFile').onchange = async e => {
+  $('setDlg').close(); // Ergebnis-Hinweis und aktualisierte Listen sichtbar machen
   try {
     const data = parseData(JSON.parse(await e.target.files[0].text()));
     // zusammenführen statt ersetzen: pro Shot gewinnt die neuere Änderung, Löschungen werden übernommen
@@ -1372,7 +1571,11 @@ $('importFile').onchange = async e => {
 
 console.assert(ratio({size: 'Double', weight: 36}) === '1:2.0' && ratio({size: 'Quad'}) === '–', 'ratio');
 console.assert(drinkLabel({size: 'Quad', drink: 'Lungo'}) === 'Lungo Quad' && drinkLabel({size: 'Quad', drink: 'Americano'}) === 'Americano'
-  && drinkLabel({size: 'Quad', drink: 'Rich', cup: 'M'}) === 'Rich M (295 ml)' && drinkLabel({size: 'Single'}) === 'Espresso', 'drinkLabel');
+  && drinkLabel({size: 'Quad', drink: 'Rich', cup: 'M'}) === 'Rich M (295 ml)' && drinkLabel({size: 'Single'}) === 'Espresso'
+  && drinkLabel({size: 'Double', final: 'Cappuccino'}) === 'Espresso → Cappuccino' && drinkLabel({size: 'Double', final: 'Pur'}) === 'Espresso', 'drinkLabel');
+console.assert(isSame({brand: 'A'}, {brand: 'A', final: 'Pur'}) && !isSame({brand: 'A'}, {brand: 'A', final: 'Latte Macchiato', froth: 'Extradick'}), 'isSame final');
+console.assert(hints({sour: 3, bitter: 3, body: 2, final: 'Cappuccino'}).length === 0, 'hints milk');
+console.assert(shotOk({...flt0(), final: ['Pur'], milk: []}, {}) && !shotOk({...flt0(), milk: ['Pflanzlich']}, {final: 'Cortado', milk: 'Tierisch'}), 'shotOk final/milk');
 console.assert(beanShops([{shop: 'Rewe'}, {shop: 'Amazon, rewe'}, {}, {shop: 'Edeka'}]).join() === 'Edeka,Amazon,rewe', 'beanShops');
 console.assert(isSame({brand: 'A', size: 'Double'}, {brand: 'A', size: 'Double', drink: 'Espresso'}), 'isSame drink'); // alter Shot = Espresso
 console.assert(hints({sour: 3, bitter: 0, body: 2, time: 15}).length === 2, 'hints');
