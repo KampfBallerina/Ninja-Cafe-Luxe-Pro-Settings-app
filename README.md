@@ -67,10 +67,11 @@ Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell
 | **Doppelte Shots** | Gleiche Einstellungen werden zusammengefasst und als „2× zubereitet“ gezählt |
 | **Dashboard** | Kennzahlen, bester Shot, Favoriten, Top 10, Geschmackskarte (sauer × bitter), Notenverlauf und die beste Einstellung je Bohne |
 | **Meine Bohnen** | Alle Bohnen als Karten mit ihren Shots, der beste zuerst. Zugeklappt steht der letzte Kaufort („Rewe +2“), aufgeklappt alle. Mit Suche, Filter (u. a. Röstgrad und Kaufort) und Sortierung |
-| **Favoriten** | Einzelne Shots mit dem Stern markieren und gezielt filtern |
+| **Favoriten** | Einzelne Shots mit dem Stern markieren und gezielt filtern. Beim Teilen hat jede Person ihre eigenen |
 | **Bohnenbild** | Ein Bild pro Bohne, das bei allen ihren Shots erscheint. Als Link oder Upload (wird automatisch verkleinert) |
 | **Export / Import** | Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt statt ersetzt |
-| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App sieht nur ihren Ordner `Apps/Caffeine Analytica`. Bilder liegen dann standardmäßig nur in der Dropbox und sparen Platz auf dem Gerät. Mit „Bilder offline verfügbar machen“ werden sie zusätzlich auf dem Gerät gespeichert |
+| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App arbeitet nur im Ordner `Caffeine Analytica`. Bilder liegen dann standardmäßig nur in der Dropbox und sparen Platz auf dem Gerät. Mit „Bilder offline verfügbar machen“ werden sie zusätzlich auf dem Gerät gespeichert |
+| **Gemeinsam nutzen** | Optional, z. B. für einen Haushalt: Unter Einstellungen → „Gemeinsam nutzen“ lädst du andere per E-Mail ein (sie brauchen ein Dropbox-Konto). Wer eingeladen ist, wählt beim Verbinden „Daten von … verwenden“. Alle sehen und bearbeiten dieselben Shots, Favoriten bleiben pro Person, und in den Details steht, wer einen Shot angelegt hat. „Nicht mehr mitmachen“ bzw. „Teilen beenden“ löst das wieder, die Shots bleiben dabei auf jedem Gerät erhalten |
 
 Ein Tipp auf einen Shot öffnet die Details. Dort kannst du ihn **bearbeiten**, als **Vorlage** nutzen oder **löschen**.
 
@@ -84,7 +85,7 @@ Danach startet die App im Vollbild und funktioniert auch ohne Internet.
 
 ### Deine Daten
 
-- Alles bleibt **lokal auf deinem Gerät**. Es gibt kein Tracking. Nur wenn du Dropbox verbindest, landen die Daten zusätzlich in deiner eigenen Dropbox (die Bilder dann nur dort, außer du schaltest „Bilder offline verfügbar machen“ ein).
+- Alles bleibt **lokal auf deinem Gerät**. Es gibt kein Tracking. Nur wenn du Dropbox verbindest, landen die Daten zusätzlich in deiner eigenen Dropbox (die Bilder dann nur dort, außer du schaltest „Bilder offline verfügbar machen“ ein). Teilst du deine Daten, liegen sie in deiner Dropbox, und alle Eingeladenen können sie sehen und bearbeiten. Wer beitritt, bekommt die Bilder automatisch auch aufs Gerät, damit sie nach einem Austritt nicht fehlen.
 - Die App bittet den Browser, die Daten dauerhaft zu speichern, damit er sie nicht bei Speicherknappheit löscht.
 - Löschungen und Änderungen werden beim Import berücksichtigt: Pro Shot gewinnt die neuere Änderung, gelöschte Shots tauchen nicht wieder auf.
 - Die Daten gehören zu diesem Browser. Auf dem iPhone können Homescreen-App und Safari getrennte Speicher haben.
@@ -132,10 +133,11 @@ No account, no server · works offline · installs to your home screen · light 
 | **Duplicate shots** | Identical settings are merged and counted as “prepared 2×” |
 | **Dashboard** | Key figures, best shot, favorites, top 10, taste map (sour × bitter), score progress and the best setting per bean |
 | **My beans** | All beans as cards with their shots, best first. Collapsed cards show the last shop (“Rewe +2”), expanded ones all of them. With search, filters (incl. roast and shop) and sorting |
-| **Favorites** | Mark individual shots with the star and filter for them |
+| **Favorites** | Mark individual shots with the star and filter for them. When sharing, everyone has their own |
 | **Bean image** | One image per bean, shown for all of its shots. As a link or upload (resized automatically) |
 | **Export / import** | Back up as a JSON file. Importing merges the data instead of replacing it |
-| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only sees its folder `Apps/Caffeine Analytica`. By default, images are then kept only in Dropbox to save space on the device. Turn on “Make images available offline” to also store them on the device |
+| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only works in the folder `Caffeine Analytica`. By default, images are then kept only in Dropbox to save space on the device. Turn on “Make images available offline” to also store them on the device |
+| **Share** | Optional, e.g. for a household: under Settings → “Share” you invite others by email (they need a Dropbox account). Whoever is invited picks “Use …'s data” when connecting. Everyone sees and edits the same shots, favorites stay personal, and the details show who created a shot. “Stop using shared data” or “Stop sharing” ends it again, and every device keeps its shots |
 
 Tap a shot to open its details. From there you can **edit** it, use it as a **template** or **delete** it.
 
@@ -149,7 +151,7 @@ The app then opens full screen and also works without internet.
 
 ### Your data
 
-- Everything stays **on your device**. There is no tracking. Only if you connect Dropbox is the data also stored in your own Dropbox (the images then only there, unless you turn on “Make images available offline”).
+- Everything stays **on your device**. There is no tracking. Only if you connect Dropbox is the data also stored in your own Dropbox (the images then only there, unless you turn on “Make images available offline”). If you share your data, it lives in your Dropbox and everyone invited can see and edit it. Whoever joins also gets the images on their device automatically, so they aren't missing after leaving.
 - The app asks the browser to store the data persistently, so it isn't cleared when storage runs low.
 - Imports respect changes and deletions: for each shot the newer change wins, and deleted shots don't come back.
 - The data belongs to this browser. On an iPhone, the home screen app and Safari may have separate storage.
@@ -166,8 +168,10 @@ The app then opens full screen and also works without internet.
   · `index.html` (HTML, CSS, JavaScript) plus `sync.js` for Dropbox, with no frameworks and no build step.
 - Daten liegen in IndexedDB (Rückfall: localStorage). Jeder Shot trägt einen Änderungszeitpunkt (`updated`), gelöschte Shots bleiben als Löschmarke (`deleted`) erhalten. Der Export hat das Format `{version: 2, shots, deleted}`, alte Exporte (nur die Liste) lassen sich weiter importieren.
   · Data lives in IndexedDB (fallback: localStorage). Each shot carries a change time (`updated`), deleted shots are kept as tombstones (`deleted`). Exports use `{version: 2, shots, deleted}`; old exports (just the list) can still be imported.
-- **Dropbox-Sync** (`sync.js`, ohne Bibliotheken): Login per OAuth mit PKCE direkt aus dem Browser, ohne Server. Im App-Ordner liegen `data.json` (Shots + Löschmarken, Bilder als Verweis `img:<sha256>`) und `images/`. Ein Abgleich lädt `data.json`, führt pro Shot zusammen (neuere Änderung gewinnt) und lädt nur hoch, wenn sich die Datei seitdem nicht geändert hat, sonst beginnt er von vorn.
-  · **Dropbox sync** (`sync.js`, no libraries): OAuth with PKCE straight from the browser, no server. The app folder holds `data.json` (shots + tombstones, images as `img:<sha256>` references) and `images/`. A sync downloads `data.json`, merges per shot (newer change wins) and only uploads if the file hasn't changed in the meantime, otherwise it starts over.
+- **Dropbox-Sync** (`sync.js`, ohne Bibliotheken): Login per OAuth mit PKCE direkt aus dem Browser, ohne Server. Die Dropbox-App hat Zugriff „Full Dropbox“, weil App-Ordner nicht geteilt werden können. Im Ordner `Caffeine Analytica` liegen `data.json` (Shots + Löschmarken, Bilder als Verweis `img:<sha256>`) und `images/`. Ein Abgleich lädt `data.json`, führt pro Shot zusammen (neuere Änderung gewinnt) und lädt nur hoch, wenn sich die Datei seitdem nicht geändert hat, sonst beginnt er von vorn.
+  · **Dropbox sync** (`sync.js`, no libraries): OAuth with PKCE straight from the browser, no server. The Dropbox app has “Full Dropbox” access because app folders can't be shared. The folder `Caffeine Analytica` holds `data.json` (shots + tombstones, images as `img:<sha256>` references) and `images/`. A sync downloads `data.json`, merges per shot (newer change wins) and only uploads if the file hasn't changed in the meantime, otherwise it starts over.
+- **Teilen:** Der Ordner wird über die Dropbox-API geteilt (`sharing/share_folder`, Mitglieder mit Bearbeitungsrecht). Weil er bei jedem Mitglied anders heißen und liegen kann, spricht die App ihn über seine ID an (Kopfzeile `Dropbox-API-Path-Root`). Jeder Shot trägt `by: {id, name}` (Dropbox-Konto des Erstellers) und `favs` (Konto-IDs; ohne Dropbox `local`). Fällt der Zugriff weg, wechselt die App automatisch zum eigenen Ordner. Bilder aus dem früheren App-Ordner `Apps/Caffeine Analytica` übernimmt sie beim Abgleich.
+  · **Sharing:** the folder is shared through the Dropbox API (`sharing/share_folder`, members can edit). Since it can have a different name and place for each member, the app addresses it by its ID (header `Dropbox-API-Path-Root`). Each shot carries `by: {id, name}` (creator's Dropbox account) and `favs` (account IDs; `local` without Dropbox). If access is lost, the app switches to the own folder automatically. Images from the former app folder `Apps/Caffeine Analytica` are taken over during sync.
 - `manifest.webmanifest` und `sw.js` (Service Worker) sorgen für Installation und Offline-Betrieb. Gehostet wird über GitHub Pages.
   · `manifest.webmanifest` and `sw.js` (service worker) handle installation and offline use. Hosted on GitHub Pages.
 - **Lokal starten / Run locally:** `index.html` im Browser öffnen. Der Service Worker läuft nur über `https` oder `localhost`, z. B. mit `npx serve`.
