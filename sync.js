@@ -3,8 +3,8 @@
 // Nutzt aus index.html: $, t, esc, toast, openDlg, fmtDate, render, save, merge, parseData, ts, shots, graves, dataReady.
 const DBX_KEY = 'r5cm8btj0otythh'; // App-Schlüssel aus der Dropbox-Konsole; leer = Sync-Bereich ausgeblendet
 const DBX_STORE = 'ca-dropbox'; // pro Gerät: Schlüssel, Konto, ob schon einmal abgeglichen, letzter Abgleich
-const OPT_IMG = 'ca-offline-images'; // pro Gerät: Bilder vorhalten (Standard) oder nur bei Bedarf laden
-const offlineImages = () => localStorage.getItem(OPT_IMG) !== '0';
+const OPT_IMG = 'ca-offline-images'; // pro Gerät: Bilder nur bei Bedarf aus der Dropbox laden (Standard) oder vorhalten
+const offlineImages = () => localStorage.getItem(OPT_IMG) === '1';
 
 const dbx = {
   get() { try { return JSON.parse(localStorage.getItem(DBX_STORE)) || {}; } catch { return {}; } },

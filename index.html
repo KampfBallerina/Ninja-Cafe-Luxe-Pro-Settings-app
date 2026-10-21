@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Caffeine">
+<meta name="apple-mobile-web-app-title" content="Caffeine Analytica">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18202a" media="(prefers-color-scheme: dark)">
 <style>
@@ -404,7 +404,7 @@ const I18N = {
     'sync.connect': 'Mit Dropbox verbinden', 'sync.manual': 'Anmeldung klappt nicht? Code manuell eingeben',
     'sync.pasteCode': 'Melde dich im geöffneten Fenster bei Dropbox an, kopiere den angezeigten Code und füge ihn hier ein:',
     'sync.confirm': 'Code bestätigen', 'sync.back': 'Zurück',
-    'sync.now': 'Jetzt synchronisieren', 'sync.offlineImgs': 'Bilder offline verfügbar', 'sync.reconnect': 'Neu verbinden',
+    'sync.now': 'Jetzt synchronisieren', 'sync.offlineImgs': 'Bilder offline verfügbar machen', 'sync.reconnect': 'Neu verbinden',
     'sync.st.running': 'Wird synchronisiert …', 'sync.st.pending': 'Ausstehend – wird synchronisiert, sobald Internet da ist',
     'sync.st.idle': d => `Synchronisiert · ${d}`, 'sync.st.error': m => `Fehler beim Synchronisieren: ${m}`,
     'sync.st.auth': 'Zugriff abgelaufen, widerrufen oder ohne nötige Berechtigung – bitte neu verbinden', 'sync.full': 'Deine Dropbox ist voll',
@@ -498,7 +498,7 @@ const I18N = {
     'sync.connect': 'Connect to Dropbox', 'sync.manual': 'Sign-in not working? Enter a code manually',
     'sync.pasteCode': 'Sign in to Dropbox in the window that opened, copy the code shown there and paste it here:',
     'sync.confirm': 'Confirm code', 'sync.back': 'Back',
-    'sync.now': 'Sync now', 'sync.offlineImgs': 'Images available offline', 'sync.reconnect': 'Reconnect',
+    'sync.now': 'Sync now', 'sync.offlineImgs': 'Make images available offline', 'sync.reconnect': 'Reconnect',
     'sync.st.running': 'Syncing …', 'sync.st.pending': 'Pending – will sync as soon as you are online',
     'sync.st.idle': d => `Synced · ${d}`, 'sync.st.error': m => `Sync failed: ${m}`,
     'sync.st.auth': 'Access expired, revoked or missing a permission – please reconnect', 'sync.full': 'Your Dropbox is full',
@@ -834,7 +834,7 @@ function fill(s) {
 }
 // Ein Bild je Bohne, gespeichert an einem ihrer Shots; alle Shots zeigen es (ältere Daten mit mehreren: das neueste)
 const beanImage = s => imgSrc(shots.findLast(x => beanKey(x) === beanKey(s) && x.image)?.image);
-// „img:<name>“ = Bild liegt nur in der Dropbox (Option „Bilder offline verfügbar“ aus); sync.js lädt es bei Bedarf
+// „img:<name>“ = Bild liegt nur in der Dropbox (Option „Bilder offline verfügbar machen“ aus, Standard); sync.js lädt es bei Bedarf
 const IMG_PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>');
 const imgSrc = v => v?.startsWith('img:') ? window.imgUrl?.(v) || IMG_PH : v;
 let imgRemoved = false; // „Bild entfernen“ gedrückt: beim Speichern verliert die ganze Bohne ihr Bild

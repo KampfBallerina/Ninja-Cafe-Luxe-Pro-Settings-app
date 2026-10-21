@@ -46,7 +46,7 @@ Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell
 | **Favoriten** | Einzelne Shots mit dem Stern markieren und gezielt filtern |
 | **Bohnenbild** | Ein Bild pro Bohne, das bei allen ihren Shots erscheint. Als Link oder Upload (wird automatisch verkleinert) |
 | **Export / Import** | Sicherung als JSON-Datei. Beim Import werden die Daten zusammengeführt statt ersetzt |
-| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App sieht nur ihren Ordner `Apps/Caffeine Analytica`. Mit „Bilder offline verfügbar“ aus liegen die Bilder nur in der Dropbox und sparen Platz auf dem Gerät |
+| **Dropbox-Sync** | Optional: gleicht deine Shots über deine eigene Dropbox zwischen Handy und PC ab (Einstellungen → „Mit Dropbox verbinden“). Die App sieht nur ihren Ordner `Apps/Caffeine Analytica`. Bilder liegen dann standardmäßig nur in der Dropbox und sparen Platz auf dem Gerät. Mit „Bilder offline verfügbar machen“ werden sie zusätzlich auf dem Gerät gespeichert |
 
 Ein Tipp auf einen Shot öffnet die Details. Dort kannst du ihn **bearbeiten**, als **Vorlage** nutzen oder **löschen**.
 
@@ -60,7 +60,7 @@ Danach startet die App im Vollbild und funktioniert auch ohne Internet.
 
 ### Deine Daten
 
-- Alles bleibt **lokal auf deinem Gerät**. Es gibt kein Tracking. Nur wenn du Dropbox verbindest, landen die Daten zusätzlich in deiner eigenen Dropbox (und bei ausgeschalteter Option „Bilder offline verfügbar“ die Bilder nur dort).
+- Alles bleibt **lokal auf deinem Gerät**. Es gibt kein Tracking. Nur wenn du Dropbox verbindest, landen die Daten zusätzlich in deiner eigenen Dropbox (die Bilder dann nur dort, außer du schaltest „Bilder offline verfügbar machen“ ein).
 - Die App bittet den Browser, die Daten dauerhaft zu speichern, damit er sie nicht bei Speicherknappheit löscht.
 - Löschungen und Änderungen werden beim Import berücksichtigt: Pro Shot gewinnt die neuere Änderung, gelöschte Shots tauchen nicht wieder auf.
 - Die Daten gehören zu diesem Browser. Auf dem iPhone können Homescreen-App und Safari getrennte Speicher haben.
@@ -87,7 +87,7 @@ No account, no server · works offline · installs to your home screen · light 
 | **Favorites** | Mark individual shots with the star and filter for them |
 | **Bean image** | One image per bean, shown for all of its shots. As a link or upload (resized automatically) |
 | **Export / import** | Back up as a JSON file. Importing merges the data instead of replacing it |
-| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only sees its folder `Apps/Caffeine Analytica`. With “Images available offline” turned off, images are kept only in Dropbox to save space on the device |
+| **Dropbox sync** | Optional: syncs your shots between phone and computer through your own Dropbox (Settings → “Connect to Dropbox”). The app only sees its folder `Apps/Caffeine Analytica`. By default, images are then kept only in Dropbox to save space on the device. Turn on “Make images available offline” to also store them on the device |
 
 Tap a shot to open its details. From there you can **edit** it, use it as a **template** or **delete** it.
 
@@ -101,7 +101,7 @@ The app then opens full screen and also works without internet.
 
 ### Your data
 
-- Everything stays **on your device**. There is no tracking. Only if you connect Dropbox is the data also stored in your own Dropbox (and with “Images available offline” turned off, the images only there).
+- Everything stays **on your device**. There is no tracking. Only if you connect Dropbox is the data also stored in your own Dropbox (the images then only there, unless you turn on “Make images available offline”).
 - The app asks the browser to store the data persistently, so it isn't cleared when storage runs low.
 - Imports respect changes and deletions: for each shot the newer change wins, and deleted shots don't come back.
 - The data belongs to this browser. On an iPhone, the home screen app and Safari may have separate storage.
