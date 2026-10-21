@@ -39,6 +39,7 @@ Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell
 - **Eigener Filter fürs Dashboard** mit allen Gruppen, auch nach Endgetränk und Milchart. Auf Wunsch merkt sich die App den letzten Filter (nur auf diesem Gerät)
 - **Neue Einstellungen** im Stil von iOS: Gruppen, Unterseiten und „Fertig“. Export und Import sind von der Kopfzeile unter Einstellungen → „Datensicherung“ gewandert
 - **Ziehen zum Aktualisieren:** In der installierten App gleicht Herunterziehen auf Dashboard und „Meine Bohnen“ mit der Dropbox ab
+- **Kein Zoom mehr auf dem iPhone:** Beim Antippen eines Eingabefelds vergrößert sich die Ansicht nicht mehr
 
 <details>
 <summary>Frühere Versionen</summary>
@@ -115,6 +116,7 @@ No account, no server · works offline · installs to your home screen · light 
 - **Dashboard filter of its own** with all groups, including final drink and milk type. If you like, the app remembers your last filter (on this device only)
 - **New settings** in iOS style: groups, sub-pages and “Done”. Export and import moved from the header to Settings → “Backup”
 - **Pull to refresh:** in the installed app, pulling down on the dashboard or “My beans” syncs with Dropbox
+- **No more zoom on iPhone:** tapping an input field no longer zooms the view in
 
 <details>
 <summary>Earlier versions</summary>
