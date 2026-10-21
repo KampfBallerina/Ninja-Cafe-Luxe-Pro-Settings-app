@@ -17,7 +17,8 @@ self.addEventListener('activate', e => e.waitUntil(
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return; // fremde Bild-Links normal laden
-  e.respondWith(fetch(e.request).then(r => {
+  // no-cache: beim Server nachfragen statt bis zu 10 min aus dem Browser-Cache (GitHub Pages), sonst lädt ein Neuladen die alte Version
+  e.respondWith(fetch(e.request, {cache: 'no-cache'}).then(r => {
     if (r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
     return r;
   }).catch(() => caches.match(e.request, {ignoreSearch: true}).then(hit => hit || Response.error())));
