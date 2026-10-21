@@ -54,7 +54,7 @@ Ein Tipp auf einen Shot öffnet die Details. Dort kannst du ihn **bearbeiten**, 
 
 | iPhone / iPad (Safari) | Android (Chrome) | PC (Chrome / Edge) |
 |---|---|---|
-| 1. [App](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Safari** öffnen<br>2. **Teilen** antippen (□↑, ggf. im ⋯-Menü)<br>3. **„Zum Home-Bildschirm“**<br>4. **„Hinzufügen“** | 1. [App](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Chrome** öffnen<br>2. **⋮-Menü** oben rechts<br>3. **„App installieren“** oder **„Zum Startbildschirm hinzufügen“**<br>4. Bestätigen | **Installieren-Symbol** in der Adressleiste klicken oder im Menü **„App installieren“** wählen |
+| 1. [App](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Safari** öffnen<br>2. **Teilen** antippen (↑, ggf. im ⋯ -Menü)<br>3. **„Zum Home-Bildschirm“**<br>4. **„Hinzufügen“** | 1. [App](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Chrome** öffnen<br>2. **⋮-Menü** oben rechts<br>3. **„App installieren“** oder **„Zum Startbildschirm hinzufügen“**<br>4. Bestätigen | **Installieren-Symbol** in der Adressleiste klicken oder im Menü **„App installieren“** wählen |
 
 Danach startet die App im Vollbild und funktioniert auch ohne Internet.
 
@@ -95,7 +95,7 @@ Tap a shot to open its details. From there you can **edit** it, use it as a **te
 
 | iPhone / iPad (Safari) | Android (Chrome) | Computer (Chrome / Edge) |
 |---|---|---|
-| 1. Open the [app](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Safari**<br>2. Tap **Share** (□↑, maybe inside the ⋯ menu)<br>3. **“Add to Home Screen”**<br>4. **“Add”** | 1. Open the [app](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Chrome**<br>2. **⋮ menu** in the top right<br>3. **“Install app”** or **“Add to Home screen”**<br>4. Confirm | Click the **install icon** in the address bar, or choose **“Install app”** from the menu |
+| 1. Open the [app](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Safari**<br>2. Tap **Share** (↑, maybe inside the ⋯ menu)<br>3. **“Add to Home Screen”**<br>4. **“Add”** | 1. Open the [app](https://kampfballerina.github.io/Ninja-Cafe-Luxe-Pro-Settings-app/) in **Chrome**<br>2. **⋮ menu** in the top right<br>3. **“Install app”** or **“Add to Home screen”**<br>4. Confirm | Click the **install icon** in the address bar, or choose **“Install app”** from the menu |
 
 The app then opens full screen and also works without internet.
 
