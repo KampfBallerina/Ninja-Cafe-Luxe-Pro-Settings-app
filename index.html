@@ -468,7 +468,7 @@ button.link{height:auto;padding:var(--s2) 0;border:0;background:none;color:var(-
 </dialog>
 <div id="toast" role="status"></div>
 <script>
-const APP_VERSION = '1.2.21'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
+const APP_VERSION = '1.2.22'; // bei jeder Veröffentlichung hochzählen (steht in den Einstellungen)
 const KEY = 'ninja-kaffee-v1';
 const LANG_KEY = 'ninja-kaffee-lang';
 const DOSE = {Single: 9, Double: 18, Quad: 36}; // Maschine dosiert selbst, Werte laut Hersteller ca.
@@ -809,10 +809,19 @@ function merge(a, b) {
 // Daten von außen (Import-Datei, Dropbox) prüfen und vereinheitlichen; alte Exporte sind nur die Liste ohne Löschmarken
 function parseData(raw) {
   const list = Array.isArray(raw) ? raw : raw?.shots;
-  if (!Array.isArray(list) || !list.every(s => s && s.id && s.brand && s.date)) throw new Error('invalid data');
+  if (!Array.isArray(list) || !list.every(s => s && /^[\w-]+$/.test(s.id) && s.brand && s.date)) throw new Error('invalid data');
   const deleted = {};
   for (const [id, v] of Object.entries(Array.isArray(raw) ? {} : raw.deleted || {})) if (+v > 0) deleted[id] = +v;
-  list.forEach(s => s.updated = ts(s));
+  // Diese Felder landen ohne esc() im HTML bzw. als Dropbox-Pfad: fremde Daten (geteilter Ordner, Import) dürfen dort nur harmlose Werte haben
+  const ENUMS = {size: Object.keys(DOSE), strength: ['Leicht', 'Mittel', 'Stark'], temp: ['Niedrig', 'Mittel', 'Hoch'],
+    froth: FROTHS, milk: MILKS, roast: ROASTS};
+  for (const s of list) {
+    for (const k of [...NUMS, 'runs']) if (s[k] != null) s[k] = Number.isFinite(+s[k]) ? +s[k] : null;
+    for (const [k, vals] of Object.entries(ENUMS)) if (s[k] != null && !vals.includes(s[k])) delete s[k];
+    if (s.issues != null) s.issues = Array.isArray(s.issues) ? s.issues.filter(i => ['cold', 'hot', 'crema', 'burnt'].includes(i)) : [];
+    if (s.image != null && (typeof s.image !== 'string' || s.image.startsWith('img:') && !/^img:[0-9a-f]{40}\.[a-z0-9]+$/.test(s.image))) delete s.image;
+    s.updated = ts(s);
+  }
   return {shots: list, deleted};
 }
 
@@ -1589,6 +1598,9 @@ console.assert((([a, b, c]) => removeShot([a, b, c], a).map(x => x.image).join()
 console.assert((m => m.shots.map(s => s.id + s.v).join() === 'a2,c1' && m.deleted.b === 5)(merge(
   {shots: [{id: 'a', v: 1, updated: 1}, {id: 'b', v: 1, updated: 4}], deleted: {}},
   {shots: [{id: 'a', v: 2, updated: 2}, {id: 'c', v: 1, updated: 1}], deleted: {b: 5}})), 'merge'); // neuer gewinnt, Löschmarke löscht
+console.assert((() => { try { parseData([{id: '"><img src=x onerror=alert(1)>', brand: 'A', date: '2026-01-01'}]); return false; } catch { return true; } })(), 'parseData id');
+console.assert((([s]) => s.score === null && s.grind === 5 && !('size' in s) && s.temp === 'Hoch' && s.issues.join() === 'hot' && !('image' in s))(parseData([{id: 'a',
+  brand: 'A', date: '2026-01-01', score: '<b>', grind: '5', size: '<b>', temp: 'Hoch', issues: ['hot', '<b>'], image: 'img:../../x'}]).shots), 'parseData fields');
 
 load().catch(() => { loadFailed = true; toast(t('err.load'), true); return {shots: [], deleted: {}}; }).then(d => {
   shots = d.shots; graves = d.deleted || {};

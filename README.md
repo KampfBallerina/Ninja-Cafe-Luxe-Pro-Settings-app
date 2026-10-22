@@ -40,6 +40,7 @@ Kein Konto, kein Server · offline nutzbar · als App auf dem Homescreen · Hell
 - **Neue Einstellungen** im Stil von iOS: Gruppen, Unterseiten und „Fertig“. Export und Import sind von der Kopfzeile unter Einstellungen → „Datensicherung“ gewandert
 - **Ziehen zum Aktualisieren:** In der installierten App gleicht Herunterziehen auf Dashboard und „Meine Bohnen“ mit der Dropbox ab
 - **Kein Zoom mehr auf dem iPhone:** Beim Antippen eines Eingabefelds vergrößert sich die Ansicht nicht mehr
+- **Mehr Sicherheit:** Importierte und geteilte Daten werden geprüft, bevor die App sie anzeigt oder abgleicht. Manipulierte Daten können so keinen Code einschleusen und keine fremden Dateien aus deiner Dropbox anfassen
 
 <details>
 <summary>Frühere Versionen</summary>
@@ -117,6 +118,7 @@ No account, no server · works offline · installs to your home screen · light 
 - **New settings** in iOS style: groups, sub-pages and “Done”. Export and import moved from the header to Settings → “Backup”
 - **Pull to refresh:** in the installed app, pulling down on the dashboard or “My beans” syncs with Dropbox
 - **No more zoom on iPhone:** tapping an input field no longer zooms the view in
+- **More security:** imported and shared data is checked before the app shows or syncs it, so tampered data can't inject code or touch other files in your Dropbox
 
 <details>
 <summary>Earlier versions</summary>
@@ -190,6 +192,8 @@ The app then opens full screen and also works without internet.
   · `index.html` (HTML, CSS, JavaScript) plus `sync.js` for Dropbox, with no frameworks and no build step.
 - Daten liegen in IndexedDB (Rückfall: localStorage). Jeder Shot trägt einen Änderungszeitpunkt (`updated`), gelöschte Shots bleiben als Löschmarke (`deleted`) erhalten. Das Endgetränk steht in `final` (fehlt = pur), bei Milchgetränken dazu `froth` und `milk`. Der Export hat das Format `{version: 2, shots, deleted}`, alte Exporte (nur die Liste) lassen sich weiter importieren.
   · Data lives in IndexedDB (fallback: localStorage). Each shot carries a change time (`updated`), deleted shots are kept as tombstones (`deleted`). The final drink is stored in `final` (missing = straight), milk drinks add `froth` and `milk`. Exports use `{version: 2, shots, deleted}`; old exports (just the list) can still be imported.
+- **Daten von außen** (Import, `data.json` aus der Dropbox) laufen durch `parseData`: IDs nur aus Buchstaben, Ziffern, `_` und `-` (sonst wird die Datei abgelehnt), Zahlen werden zu Zahlen, Auswahlfelder behalten nur bekannte Werte, Bildverweise nur im Format `img:<sha256>.<endung>`. Neue Felder, die ohne `esc()` ins HTML kommen, gehören dort mit hinein.
+  · **External data** (import, `data.json` from Dropbox) goes through `parseData`: IDs only letters, digits, `_` and `-` (otherwise the file is rejected), numbers become numbers, choice fields keep only known values, image references only as `img:<sha256>.<ext>`. New fields rendered without `esc()` must be added there too.
 - **Dropbox-Sync** (`sync.js`, ohne Bibliotheken): Login per OAuth mit PKCE direkt aus dem Browser, ohne Server. Die Dropbox-App hat Zugriff „Full Dropbox“, weil App-Ordner nicht geteilt werden können. Im Ordner `Caffeine Analytica` liegen `data.json` (Shots + Löschmarken, Bilder als Verweis `img:<sha256>`) und `images/`. Ein Abgleich lädt `data.json`, führt pro Shot zusammen (neuere Änderung gewinnt) und lädt nur hoch, wenn sich die Datei seitdem nicht geändert hat, sonst beginnt er von vorn.
   · **Dropbox sync** (`sync.js`, no libraries): OAuth with PKCE straight from the browser, no server. The Dropbox app has “Full Dropbox” access because app folders can't be shared. The folder `Caffeine Analytica` holds `data.json` (shots + tombstones, images as `img:<sha256>` references) and `images/`. A sync downloads `data.json`, merges per shot (newer change wins) and only uploads if the file hasn't changed in the meantime, otherwise it starts over.
 - **Teilen:** Der Ordner wird über die Dropbox-API geteilt (`sharing/share_folder`, Mitglieder mit Bearbeitungsrecht). Weil er bei jedem Mitglied anders heißen und liegen kann, spricht die App ihn über seine ID an (Kopfzeile `Dropbox-API-Path-Root`). Jeder Shot trägt `by: {id, name}` (Dropbox-Konto des Erstellers) und `favs` (Konto-IDs; ohne Dropbox `local`). Fällt der Zugriff weg, wechselt die App automatisch zum eigenen Ordner. Bilder aus dem früheren App-Ordner `Apps/Caffeine Analytica` übernimmt sie beim Abgleich.
